@@ -11,6 +11,7 @@ import logRoutes from './routes/logRoutes.js'
 import cookieParser from 'cookie-parser'
 import config from './utils/config.js'
 import { logger } from './utils/logger.js'
+import statsRoutes from './routes/statsRoutes.js'
 
 //Whatsapp
 import qrcode from 'qrcode-terminal'
@@ -48,6 +49,7 @@ app.use('/api/client', clientRoutes)
 app.use('/api/service', serviceRoutes)
 app.use('/api/logs', logRoutes)
 app.use('/api/conversations', conversationRoutes)
+app.use('/api/stats', statsRoutes)
 
 // MongoDB Connection
 await connectDB()

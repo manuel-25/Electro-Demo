@@ -6,7 +6,7 @@ class ServiceManagerDao {
   }
 
   async getAll() {
-    return await this.serviceModel.find().populate('createdBy', 'email')
+    return await this.serviceModel.find({ deleted: { $ne: true } }).populate('createdBy', 'email')
   }
 
   async getById(id) {

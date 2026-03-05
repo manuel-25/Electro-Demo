@@ -35,6 +35,7 @@ import EditarServicio from './components/EditarServicio/EditarServicio.jsx'
 import ServiceDetail from './components/ServiceDetail/ServiceDetail.jsx'
 import WorkOrderViewer from './components/WorkOrderViewer/WorkOrderViewer.jsx'
 import WhatsAppDashboard from './components/WhatsAppDashboard/WhatsAppDashboard.jsx'
+import Estadisticas from './components/Estadisticas/Estadisticas.jsx'
 import { NotificationProvider } from './Context/NotificationContext.jsx'
 
 // Otros
@@ -155,6 +156,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <DashboardLayout><WorkOrderViewer /></DashboardLayout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/estadisticas"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout><Estadisticas /></DashboardLayout>
                 </ProtectedRoute>
               }
             />

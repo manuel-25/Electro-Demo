@@ -1,0 +1,202 @@
+/* =========================
+CONTENEDOR GENERAL
+========================= */
+
+.estadisticas-page {
+  padding: 30px;
+  max-width: 1400px;
+  margin: auto;
+}
+
+.estadisticas-page h2 {
+  font-size: 26px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.estadisticas-page p {
+  color: #6b7280;
+  margin-bottom: 25px;
+}
+
+
+/* =========================
+CARDS
+========================= */
+
+.estadisticas-page .card-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.estadisticas-page .info-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 6px 30px rgba(70,96,120,0.08);
+  flex: 1 1 220px;
+  padding: 26px;
+  text-align: center;
+  transition: all 0.2s ease;
+  border-top: 4px solid #e5e7eb;
+}
+
+.estadisticas-page .info-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 40px rgba(70,96,120,0.13);
+}
+
+.estadisticas-page .info-card p {
+  font-size: 13px;
+  letter-spacing: 1px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.estadisticas-page .info-card h3 {
+  font-size: 28px;
+  font-weight: 600;
+  color: #111827;
+}
+
+
+/* =========================
+COLORES CARDS
+========================= */
+
+.estadisticas-page .blue {
+  border-top: 4px solid #1976d2;
+}
+
+.estadisticas-page .red {
+  border-top: 4px solid #e53935;
+}
+
+.estadisticas-page .green {
+  border-top: 4px solid #43a047;
+}
+
+.estadisticas-page .orange {
+  border-top: 4px solid #fb8c00;
+}
+
+.estadisticas-page .teal {
+  border-top: 4px solid #009688;
+}
+
+.estadisticas-page .purple {
+  border-top: 4px solid #8e24aa;
+}
+
+
+/* =========================
+GRAFICO
+========================= */
+
+.estadisticas-page .chart-box {
+  background: #ffffff;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 6px 30px rgba(70,96,120,0.08);
+  margin-bottom: 40px;
+}
+
+.estadisticas-page .chart-header {
+  margin-bottom: 20px;
+}
+
+.estadisticas-page .chart-header h3 {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.estadisticas-page .chart-placeholder {
+  text-align: center;
+  padding: 40px;
+  color: #9ca3af;
+}
+
+
+/* =========================
+TABLA
+========================= */
+
+.estadisticas-page .stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.estadisticas-page .stats-table thead {
+  background: #f9fafb;
+}
+
+.estadisticas-page .stats-table th {
+  text-align: left;
+  padding: 12px;
+  font-size: 13px;
+  color: #374151;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.estadisticas-page .stats-table td {
+  padding: 12px;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f1f1;
+}
+
+.estadisticas-page .stats-table tr:hover {
+  background: #fafafa;
+}
+
+
+/* =========================
+SECCION TABLA
+========================= */
+
+.estadisticas-page .section-box {
+  background: white;
+  padding: 25px;
+  border-radius: 18px;
+  box-shadow: 0 6px 30px rgba(70,96,120,0.08);
+}
+
+.estadisticas-page .section-box h3 {
+  margin-bottom: 15px;
+}
+
+.estadisticas-page canvas{
+  max-height:350px;
+}
+
+@media (max-width:768px){
+
+.estadisticas-page{
+  padding:15px;
+}
+
+.estadisticas-page .chart-box{
+  padding:18px;
+}
+
+.estadisticas-page .stats-table th,
+.estadisticas-page .stats-table td{
+  font-size:13px;
+  padding:8px;
+}
+
+}
+
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+  .estadisticas-page .card-container {
+    flex-direction: column;
+  }
+
+}
