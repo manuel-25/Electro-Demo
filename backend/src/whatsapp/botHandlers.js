@@ -16,11 +16,11 @@ import {
   thanksMessage,
   frustrationMessage,
   fallbackMessage,
-  technicalReportMessage
+  technicalReportMessage,
 } from './botMenus.js';
 
 const DEV_PHONES = [
-  //'5491121842237@c.us',
+  '5491121842237@c.us',
   '5491136106124@c.us'
 ];
 
@@ -81,20 +81,20 @@ function wantsLocation(text) {
 }
 
 function wantsTechnicalReport(text) {
-  return ['informe','seguro','informe tecnico','aseguradora'].some(t => text.includes(t));
+  return ['informe','seguro','informe tecnico'].some(t => text.includes(t));
 }
 
 function wantsToClose(text) {
-  const closing = ['no gracias','ninguna','nada','esta bien','ok','listo','chau','adios'];
+  const closing = ['no gracias','ninguna','nada','esta bien','listo','chau','adios'];
   return closing.includes(text.trim());
 }
 
 function detectFrustration(text) {
-  return ['no entiendo','no me entendiste','esto no funciona','que pasa'].some(t => text.includes(t));
+  return ['no entiendo','no me entendiste','esto no funciona','que pasa', '?'].some(t => text.includes(t));
 }
 
 function isThanks(text) {
-  return ['gracias','muchas gracias','mil gracias'].includes(text.trim());
+  return ['gracias','muchas gracias','mil gracias', 'gracias!', 'gracias!!', 'gracias!!!', 'mil gracias!', 'mil graciaqs!!', 'muchisimas gracias'].includes(text.trim());
 }
 
 // ================================
@@ -160,7 +160,7 @@ async function checkRepairStatus(client, chatId, text, originalText) {
   }
 
   // Validación de código
-  const publicId = originalText.trim(); // <<< usar el texto original SIN normalizar
+  const publicId = originalText.trim();   // evitamos normalizar
   if (!/^[a-zA-Z0-9]{6,10}$/.test(publicId)) {
     await botSend(client, chatId, invalidRepairCodeMessage);
     return true;
@@ -188,7 +188,6 @@ export default function botHandlers(client) {
 
   client.on('message', async (message) => {
     try {
-      //console.log('📩 Mensaje detectado:', message.from, message.body);
       if (!DEV_PHONES.includes(message.from)) return;
       if (message.fromMe) return;
       if (!message.body) return;

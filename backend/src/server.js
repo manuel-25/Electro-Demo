@@ -95,13 +95,14 @@ process.on('SIGTERM', async () => {
 app.listen(port, async () => {
   logger.info(`Server is running on port: ${port}`);
 
-  // Inicializamos WhatsApp solo una vez
   if (!global.clientInitialized) {
     client.initialize();
-    botHandlers(client);
-    global.clientInitialized = true; // marca que ya inicializamos
+    global.clientInitialized = true;
   }
 })
+
+// 🔥 HANDLERS DE MENSAJES
+botHandlers(client);
 
 
 // ====== WHATSAPP BOT ======
@@ -127,9 +128,6 @@ client.on('disconnected', async (reason) => {
     logger.fatal(`Reinicio fallido: ${err.message}`)
   }
 })
-
-// 🔥 HANDLERS DE MENSAJES
-botHandlers(client);
 
 // 🛡 WATCHDOG PRODUCCIÓN
 let lastConnectedState = 'CONNECTED'
@@ -158,4 +156,4 @@ setInterval(async () => {
     await client.destroy()
     await client.initialize()
   }
-}, 60000)
+}, 600000)

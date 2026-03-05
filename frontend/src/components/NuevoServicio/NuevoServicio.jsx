@@ -20,7 +20,7 @@ const NuevoServicio = () => {
   const [formData, setFormData] = useState({
     customerNumber: '',
     quoteReference: '',
-    codePrefix: '',
+    codePrefix: 'Q',
     code: '',
     equipmentType: '',
     brand: '',
@@ -33,7 +33,7 @@ const NuevoServicio = () => {
     notes: '',
     userDescription: '',
     description: '',
-    receivedAtBranch: '',
+    receivedAtBranch: 'Quilmes',
     deliveryMethod: 'Presencial'
   })
 
@@ -114,7 +114,41 @@ const NuevoServicio = () => {
     e.preventDefault()
     setError(null)
 
-    const selectedClient = clientes.find(c => c.customerNumber === Number(formData.customerNumber))
+    // VALIDACIONES
+    if (!formData.customerNumber) {
+      setError('Debe seleccionar un cliente.')
+      return
+    }
+
+    if (!formData.equipmentType) {
+      setError('Debe seleccionar el tipo de equipo.')
+      return
+    }
+
+    if (!formData.brand.trim()) {
+      setError('Debe ingresar la marca del equipo.')
+      return
+    }
+
+    if (!formData.userDescription.trim()) {
+      setError('Debe ingresar la descripción del problema.')
+      return
+    }
+
+    if (!formData.codePrefix) {
+      setError('Debe seleccionar un prefijo.')
+      return
+    }
+
+    if (!formData.deliveryMethod) {
+      setError('Debe seleccionar el método de envío.')
+      return
+    }
+
+    const selectedClient = clientes.find(
+      c => c.customerNumber === Number(formData.customerNumber)
+    )
+
     if (!selectedClient) {
       setError('Cliente no encontrado.')
       return
@@ -159,6 +193,12 @@ const NuevoServicio = () => {
     }
   }
 
+  useEffect(() => {
+    if (formData.codePrefix) {
+      handleCodePrefixChange(formData.codePrefix)
+    }
+  }, [])
+
   return (
     <DashboardLayout>
       <div className="dashboard-wrapper">
@@ -175,7 +215,6 @@ const NuevoServicio = () => {
               onChange={e => handleCodePrefixChange(e.target.value)}
               required
             >
-              <option value="">Seleccionar prefijo</option>
               <option value="Q">Q (Quilmes)</option>
               <option value="B">B (Barracas)</option>
               <option value="W">W (Web)</option>
@@ -227,8 +266,8 @@ const NuevoServicio = () => {
           </div>
 
           <div className="form-section">
-            <label>Marca</label>
-            <input name="brand" value={formData.brand} onChange={handleChange} />
+            <label>Marca*</label>
+            <input name="brand" value={formData.brand} onChange={handleChange} required/>
           </div>
 
           <div className="form-section">
@@ -297,9 +336,9 @@ const NuevoServicio = () => {
           <div className="form-section">
             <label>Recibido En</label>
             <select name="receivedAtBranch" value={formData.receivedAtBranch} onChange={handleChange}>
-              <option value="">No recibido</option>
               <option value="Quilmes">Quilmes</option>
               <option value="Barracas">Barracas</option>
+              <option value="">No recibido</option>
             </select>
           </div>
 
