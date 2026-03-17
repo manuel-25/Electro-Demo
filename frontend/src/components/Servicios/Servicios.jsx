@@ -197,87 +197,6 @@ const handleWorkOrderChange = async (id, newStatus) => {
     alert(msg)
   }
 }
-/*
-const handleSendWorkOrder = async (id) => {
-  const service = services.find(s => s._id === id)
-
-  if (!service) return
-
-  if (service.workOrderStatus !== 'Lista para enviar') {
-    alert('La orden debe estar marcada como "Lista para enviar" antes de enviarla.')
-    return
-  }
-
-  try {
-    const res = await axios.post(
-      `${getApiUrl()}/api/service/${id}/workorder-send`,
-      {},
-      { withCredentials: true }
-    )
-
-    setServices(prev =>
-      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
-    )
-
-  } catch (err) {
-    const msg = err.response?.data?.error || 'Error enviando la orden'
-    alert(msg)
-  }
-}
-
-const handleAcceptWorkOrder = async (id) => {
-  try {
-    const res = await axios.patch(
-      `${getApiUrl()}/api/service/${id}/workorder-accept`,
-      {},
-      { withCredentials: true }
-    )
-
-    setServices(prev =>
-      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
-    )
-
-  } catch (err) {
-    const msg = err.response?.data?.error || 'Error aceptando la orden'
-    alert(msg)
-  }
-}
-
-const handleRejectWorkOrder = async (id) => {
-  try {
-    const res = await axios.patch(
-      `${getApiUrl()}/api/service/${id}/workorder-reject`,
-      {},
-      { withCredentials: true }
-    )
-
-    setServices(prev =>
-      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
-    )
-
-  } catch (err) {
-    const msg = err.response?.data?.error || 'Error rechazando la orden'
-    alert(msg)
-  }
-}
-
-const handleNoRepair = async (id) => {
-  try {
-    const res = await axios.patch(
-      `${getApiUrl()}/api/service/${id}/workorder-norepair`,
-      {},
-      { withCredentials: true }
-    )
-
-    setServices(prev =>
-      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
-    )
-
-  } catch (err) {
-    const msg = err.response?.data?.error || 'Error marcando sin reparación'
-    alert(msg)
-  }
-}*/
 
   // === Persistencia de filtros, búsqueda y paginación ===
   useEffect(() => {
@@ -368,7 +287,7 @@ const handleNoRepair = async (id) => {
                     <th>Descripción</th>
                     <th>Cliente</th>
                     <th>Estado</th>
-                    <th>Orden</th>
+                    <th>Orden de Trabajo</th>
                     <th>Notas</th>
                     <th>Recibido En</th>
                     <th onClick={() => handleSort('createdBy')}>Creado por {renderSortIcon('createdBy')}</th>
