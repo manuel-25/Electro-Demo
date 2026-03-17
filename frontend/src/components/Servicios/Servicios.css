@@ -1,4 +1,3 @@
-/* === ESTRUCTURA GENERAL === */
 .dashboard-wrapper {
   margin-left: 60px;
   padding: 16px;
@@ -6,6 +5,7 @@
   max-width: 100%;
   background-color: #f8f9fa;
 }
+
 .dashboard-title {
   font-size: 20px;
   font-weight: 600;
@@ -13,19 +13,23 @@
   color: #333;
   text-align: center;
 }
+
 .loading-container {
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 32px 0;
 }
+
 .error-message {
   color: #b00020;
   margin-bottom: 10px;
   text-align: center;
 }
 
+
 /* === BUSCADOR === */
+
 .search-wrapper {
   position: relative;
   display: flex;
@@ -35,9 +39,9 @@
 }
 
 .search-input {
-  width: 300px; /* 🔹 tamaño más chico y equilibrado */
+  width: 300px;
   max-width: 90%;
-  padding: 5px 28px 5px 8px; /* espacio para la X */
+  padding: 5px 28px 5px 8px;
   font-size: 13px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -52,7 +56,7 @@
 
 .clear-search-btn {
   position: absolute;
-  right: calc(50% - 140px); /* 🔹 centrada según ancho */
+  right: calc(50% - 140px);
   top: 50%;
   transform: translateY(-50%);
   border: none;
@@ -68,7 +72,9 @@
   color: #333;
 }
 
+
 /* === CONTROLES SUPERIORES === */
+
 .items-per-page {
   margin: 10px 0 12px;
   font-size: 13px;
@@ -78,15 +84,18 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
 .items-per-page select {
   padding: 4px 6px;
   font-size: 13px;
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
 .right-controls {
   margin-left: auto;
 }
+
 .btn-new-service {
   padding: 6px 10px;
   font-size: 13px;
@@ -97,70 +106,51 @@
   text-decoration: none;
   transition: background-color 0.2s ease;
 }
+
 .btn-new-service:hover {
   background-color: #0b5ed7;
 }
 
+
 /* === TABLA === */
+
 .table-wrapper {
   overflow-x: auto;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
   background-color: white;
 }
+
 .styled-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
   color: #333;
 }
+
 .styled-table th,
 .styled-table td {
   padding: 8px 10px;
   text-align: left;
+  border: 1px solid #dee2e6;
 }
 
-/* Descripción */
-.styled-table td:nth-child(5),
-.styled-table th:nth-child(5) {
-  width: auto;
-  max-width: none;
-  white-space: normal;
-  word-break: normal;
-  line-height: 1.4;
+.styled-table tr:hover {
+  background-color: #f1f3f5;
 }
 
-/* Estado */
-.styled-table td:nth-child(7),
-.styled-table th:nth-child(7) {
-  width: 150px;
-  max-width: 160px;
-  text-align: center;
-}
-
-/* Notas */
-.styled-table td:nth-child(8),
-.styled-table th:nth-child(8) {
-  width: 250px;
-  max-width: 300px;
-  max-height: auto;
-}
-
-/* Cliente, Recibido En, Creado Por */
-.styled-table td:nth-child(6),
-.styled-table th:nth-child(6),
-.styled-table td:nth-child(9),
-.styled-table th:nth-child(9),
-.styled-table td:nth-child(10),
-.styled-table th:nth-child(10) {
-  width: 120px;
-  max-width: 140px;
+.table-head th {
+  font-size: 13px;
+  font-weight: 600;
+  background-color: #e9ecef;
+  color: #212529;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  cursor: pointer;
 }
 
-/* Código, Cliente, Fecha, Equipo */
+
+/* === ANCHOS DE COLUMNAS === */
+
 .styled-table td:nth-child(1),
 .styled-table th:nth-child(1),
 .styled-table td:nth-child(2),
@@ -174,52 +164,67 @@
   white-space: nowrap;
 }
 
-.styled-table td:nth-child(4),
-.styled-table th:nth-child(4) {
-  width: 100px;
-  max-width: 120px;
+.styled-table td:nth-child(5),
+.styled-table th:nth-child(5) {
+  width: auto;
   white-space: normal;
-  word-break: break-word;
-  line-height: 1.3;
+  line-height: 1.4;
 }
 
-/* Acciones */
+.styled-table td:nth-child(6),
+.styled-table th:nth-child(6) {
+  width: 120px;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.styled-table td:nth-child(7),
+.styled-table th:nth-child(7) {
+  width: 150px;
+  max-width: 160px;
+  text-align: center;
+}
+
+.styled-table td:nth-child(8),
+.styled-table th:nth-child(8) {
+  width: 250px;
+  max-width: 300px;
+}
+
+.styled-table td:nth-child(9),
+.styled-table th:nth-child(9),
+.styled-table td:nth-child(10),
+.styled-table th:nth-child(10) {
+  width: 120px;
+  max-width: 140px;
+}
+
 .styled-table td:nth-child(11),
 .styled-table th:nth-child(11) {
   width: 100px;
   text-align: center;
 }
 
-.table-head th {
-  font-size: 13px;
-  font-weight: 600;
-  background-color: #e9ecef;
-  color: #212529;
-  border: 1px solid #dee2e6;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.styled-table td {
-  border: 1px solid #dee2e6;
-  vertical-align: top;
-}
-.styled-table tr:hover {
-  background-color: #f1f3f5;
-}
 
-/* === ENLACE DE SERVICIO === */
+/* === ENLACES === */
+
 .service-link {
-  color: var(--main-color, #1a73e8);
+  color: #1a73e8;
   font-weight: 600;
   text-decoration: none;
   transition: color 0.2s;
 }
+
 .service-link:hover {
   color: #1251a1;
   text-decoration: underline;
 }
 
-/* === SELECT DE ESTADO === */
+
+/* === SELECT ESTADO === */
+
 .status-select {
   width: 100%;
   padding: 4px;
@@ -228,66 +233,58 @@
   border: 1px solid #ccc;
 }
 
+
 /* === ESTADOS DE SERVICIO === */
 
-/* Pendiente: Amarillo brillante */
 select.status-select.cell-pendiente {
   background-color: #faf096 !important;
   color: #7a6000 !important;
   border-color: #fae758 !important;
 }
 
-/* En Reparación: Azul fuerte */
 select.status-select.cell-reparacion {
   background-color: #007bff !important;
   color: #ffffff !important;
   border-color: #0069d9 !important;
 }
 
-/* Revisión: Azul grisáceo intermedio */
 select.status-select.cell-revision {
   background-color: #d0e2f2 !important;
   color: #004080 !important;
   border-color: #b0cfe2 !important;
 }
 
-/* Recibido: Celeste claro */
 select.status-select.cell-recibido {
   background-color: #e2f0ff !important;
   color: #004085 !important;
   border-color: #b8daff !important;
 }
 
-/* Pruebas: Verde claro */
 select.status-select.cell-pruebas {
   background-color: #d4edda !important;
   color: #155724 !important;
   border-color: #c3e6cb !important;
 }
 
-/* Listo: Verde pastel */
 select.status-select.cell-listo {
   background-color: #d4edda !important;
   color: #155724 !important;
   border-color: #c3e6cb !important;
 }
 
-/* Entregado: Gris muy claro */
 select.status-select.cell-entregado {
   background-color: #f8f9fa !important;
   color: #6c757d !important;
   border-color: #dee2e6 !important;
 }
 
-/* Garantía: Naranja intenso */
 select.status-select.cell-garantía,
 select.status-select.cell-garantia {
-  background-color: #ffbe5b !important; 
-  color: #663c00 !important;          
-  border-color: #ffa31a !important;    
+  background-color: #ffbe5b !important;
+  color: #663c00 !important;
+  border-color: #ffa31a !important;
 }
 
-/* Devolución: Rojo claro */
 select.status-select.cell-devolución,
 select.status-select.cell-devolucion {
   background-color: #f8d7da !important;
@@ -296,30 +293,29 @@ select.status-select.cell-devolucion {
 }
 
 
-
 /* === NOTAS === */
-.styled-table td:nth-child(8) { padding: 0; }
+
 .notes-textarea {
   width: 100%;
-  height: auto;
   min-height: 40px;
   max-height: 80px;
   font-size: 13px;
   padding: 8px;
-  border: none !important;
+  border: none;
   border-left: 1px solid #ccc;
   border-right: 1px solid #ccc;
-  border-radius: 0 !important;
   resize: vertical;
   box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 .notes-textarea:focus {
   outline: none;
   box-shadow: inset 0 0 0 2px rgba(0,123,255,0.3);
 }
 
-/* === ACCIONES === */
+
+/* === BOTONES ACCIÓN === */
+
 .action-btn {
   display: inline-flex;
   align-items: center;
@@ -331,22 +327,75 @@ select.status-select.cell-devolucion {
   font-size: 13px;
   color: #fff;
   border: none;
-  transition: transform 0.2s ease;
   cursor: pointer;
+  transition: transform 0.2s ease;
 }
-.action-btn:hover { transform: scale(1.05); }
+
+.action-btn:hover {
+  transform: scale(1.05);
+}
+
 .action-btn.edit { background-color: #ff7b00; }
-.action-btn.edit:hover { background-color: #e66900; }
 .action-btn.print { background-color: #0d6efd; }
-.action-btn.print:hover { background-color: #0b5ed7; }
 .action-btn.wa { background-color: #25D366; }
+.action-btn.orden { background-color: #6c757d; }
+
+.action-btn.edit:hover { background-color: #e66900; }
+.action-btn.print:hover { background-color: #0b5ed7; }
 .action-btn.wa:hover { background-color: #1da851; }
+.action-btn.orden:hover { background-color: #5a6268; }
+
+
+/* === ORDEN DE TRABAJO === */
+
+.workorder-cell {
+  width: 120px;
+  min-width: 120px;
+  text-align: center;
+}
+
+.wo-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.wo-btn {
+  border: none;
+  padding: 3px 7px;
+  font-size: 11px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.wo-btn.send { background:#0d6efd; color:white; }
+.wo-btn.accept { background:#28a745; color:white; }
+.wo-btn.reject { background:#dc3545; color:white; }
+.wo-btn.norepair { background:#6c757d; color:white; }
+
+.wo-status-box {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  font-size:12px;
+  font-weight:600;
+}
+
+.wo-status-box.aceptada { color:#28a745; }
+.wo-status-box.rechazada { color:#dc3545; }
+.wo-status-box.enviada { color:#ff8c00; }
+
 
 /* === PAGINACIÓN === */
+
 .pagination {
   margin-top: 12px;
   text-align: center;
 }
+
 .page-btn {
   margin: 0 3px;
   padding: 4px 9px;
@@ -355,203 +404,157 @@ select.status-select.cell-devolucion {
   background-color: white;
   cursor: pointer;
 }
+
 .page-btn.active {
   background-color: #007bff;
   color: white;
   font-weight: bold;
 }
+
 .page-dots {
   margin: 0 3px;
   font-size: 13px;
   color: #888;
 }
 
-/* ==== AISLAMIENTO DE SERVICIOS ==== */
-.servicios-page .styled-table td,
-.servicios-page .styled-table th {
-  padding: 8px 10px;
-  font-size: 13px;
+/* contenedor de orden enviada */
+.wo-sent-container{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
 }
 
-.action-btn.orden {
-  background-color: #6c757d;
-  color: #fff;
+/* texto orden enviada */
+.wo-sent-label{
+  font-size:11px;
+  font-weight:600;
+  color:#0d6efd;
+  background:#e7f1ff;
+  padding:2px 6px;
+  border-radius:4px;
 }
 
-.action-btn.orden:hover {
-  background-color: #5a6268;
+/* botones */
+.wo-action-buttons{
+  display:flex;
+  gap:4px;
 }
+
+.wo-date{
+  font-size:11px;
+  color:#555;
+  margin-top:2px;
+}
+
+.wo-waiting{
+  font-size:11px;
+  color:#d97706;
+  font-weight:600;
+}
+
+/* SELECT ORDEN DE TRABAJO */
+
+.wo-select{
+  width:100%;
+  font-size:11px;
+  padding:3px 4px;
+  border-radius:4px;
+  border:1px solid #ccc;
+  background:white;
+  cursor:pointer;
+  transition:all .15s ease;
+}
+
+.wo-select:hover{
+  border-color:#888;
+}
+
+.wo-select:focus{
+  outline:none;
+  border-color:#0d6efd;
+  box-shadow:0 0 2px rgba(13,110,253,0.4);
+}
+
+.wo-select[value="Sin presupuesto"]{
+  background:#f1f3f5;
+}
+
+.wo-select[value="Lista para enviar"]{
+  background:#fff3cd;
+}
+
+.wo-select[value="Sin reparación"]{
+  background:#e9ecef;
+}
+
 
 /* === RESPONSIVE === */
-@media (max-width: 1280px) {
-  .styled-table {
-    font-size: 12px;
-  }
 
-  .styled-table th,
-  .styled-table td {
-    padding: 4px 6px;
-  }
+@media (max-width:1280px){
 
-  .styled-table td:nth-child(5),
-  .styled-table th:nth-child(5) {
-    width: 240px;
-    max-width: 240px;
-    word-break: break-word;
-  }
-
-  .styled-table td:nth-child(6),
-  .styled-table th:nth-child(6) { /* Cliente */
-    max-width: 100px;
-    min-width: 60px;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.2;
-    font-size: 11.5px;
-    padding: 6px;
-  }
-
-  .styled-table td:nth-child(7),
-  .styled-table th:nth-child(7) { /* Estado */
-    max-width: 180px;
-  }
-
-  .status-select {
-    font-size: 11px;
-    padding: 3px;
-  }
-
-  .styled-table td:nth-child(8),
-  .styled-table th:nth-child(8) { /* Notas */
-    width: 230px;
-    max-width: 230px;
-    padding: 0;
-  }
-
-  .notes-textarea {
-    height: auto !important;
-    min-height: 40px;
-    max-height: 80px;
-    overflow-y: auto;
-    padding: 6px;
-    font-size: 13px;
-    line-height: 1.3;
-  }
-
-  .action-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-  }
+.styled-table{
+font-size:12px;
 }
 
-@media (max-width: 1024px) {
-  .table-wrapper {
-    overflow-x: auto;
-  }
+.styled-table th,
+.styled-table td{
+padding:4px 6px;
+}
 
-  .servicios-page .styled-table td,
-  .servicios-page .styled-table th {
-    padding: 2px 4px !important;
-    font-size: 11px !important;
-  }
+.notes-textarea{
+font-size:12px;
+}
 
-  .servicios-page .notes-textarea {
-    font-size: 11px !important;
-    padding: 4px !important;
-  }
+}
 
-  .servicios-page .status-select {
-    font-size: 11px !important;
-    padding: 3px !important;
-  }
+@media (max-width:1024px){
 
-  .servicios-page .action-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-  }
+.styled-table th,
+.styled-table td{
+padding:3px 5px;
+font-size:11px;
+}
 
-  .action-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 11px;
-  }
+.notes-textarea{
+font-size:11px;
+}
 
-  /* === OPTIMIZACIÓN RESPONSIVA Y PRIORIZACIÓN === */
-  @media (max-width: 768px) {
-    /* Ocultar columnas menos prioritarias */
-    .styled-table td:nth-child(6),  /* Cliente */
-    .styled-table th:nth-child(6),
-    .styled-table td:nth-child(9),  /* Recibido En */
-    .styled-table th:nth-child(9),
-    .styled-table td:nth-child(10), /* Creado por */
-    .styled-table th:nth-child(10) {
-      display: none;
-    }
+.action-btn{
+width:22px;
+height:22px;
+font-size:11px;
+}
 
-    /* Ajustes en columnas clave */
-    .styled-table td:nth-child(5),
-    .styled-table th:nth-child(5) { /* Descripción */
-      max-width: 200px;
-      font-size: 11px;
-      word-break: break-word;
-      line-height: 1.3;
-    }
+}
 
-    .styled-table td:nth-child(8),
-    .styled-table th:nth-child(8) { /* Notas */
-      max-width: 220px;
-    }
+@media (max-width:768px){
 
-    .notes-textarea {
-      font-size: 11px;
-      padding: 4px;
-      min-height: 60px;
-    }
+.styled-table td:nth-child(6),
+.styled-table th:nth-child(6),
+.styled-table td:nth-child(9),
+.styled-table th:nth-child(9),
+.styled-table td:nth-child(10),
+.styled-table th:nth-child(10){
+display:none;
+}
 
-    .status-select {
-      font-size: 11px;
-      padding: 3px;
-    }
+.styled-table td:nth-child(5),
+.styled-table th:nth-child(5){
+max-width:200px;
+font-size:11px;
+}
 
-    .action-btn {
-      width: 20px;
-      height: 20px;
-      font-size: 11px;
-    }
-  }
+.notes-textarea{
+font-size:11px;
+padding:4px;
+min-height:60px;
+}
 
-  /* === PRIORIZACIÓN VISUAL GENERAL === */
-  .styled-table td:nth-child(6),
-  .styled-table th:nth-child(6) { /* Cliente */
-    width: 100px;
-    max-width: 120px;
-    font-weight: 400;
-    color: #444;
-  }
+.action-btn{
+width:20px;
+height:20px;
+font-size:11px;
+}
 
-  .styled-table td:nth-child(9),
-  .styled-table th:nth-child(9), /* Recibido En */
-  .styled-table td:nth-child(10),
-  .styled-table th:nth-child(10) { /* Creado por */
-    width: 90px;
-    max-width: 100px;
-    font-size: 12px;
-    color: #666;
-  }
-
-  .styled-table td:nth-child(5),
-  .styled-table th:nth-child(5) {
-    word-break: break-word;
-    line-height: 1.4;
-  }
-
-  /* Asegurar envoltura y altura correcta de notas */
-  .notes-textarea {
-    box-sizing: border-box;
-    overflow-y: auto;
-    resize: vertical;
-    min-height: 60px;
-  }
 }

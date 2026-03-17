@@ -17,23 +17,36 @@ export const SERVICE_STATUS = [
   'Rechazado',
   'Repuestos'
 ]
+
+export const WORKORDER_STATUS = [
+  'Sin presupuesto',
+  'Lista para enviar',
+  'Enviada',
+  'Aceptada',
+  'Rechazada',
+  'Sin reparación'
+]
+
 export const SERVICE_BRANCHES = ['Quilmes', 'Barracas', 'No recibido']
 export const DELIVERY_METHODS = ['Presencial', 'Envío Correo', 'Retiro y Entrega', 'UberFlash']
 
 // ─── Subschemas ───────────────────────────────────────────────────────────────
 const StatusHistorySchema = new Schema(
-  {
-    status: { type: String, enum: SERVICE_STATUS, required: true },
-    note: { type: String, default: '' },
-    changedAt: { type: Date, default: Date.now },
-    changedBy: { type: String },
+{
+  status: { type: String, enum: SERVICE_STATUS, required: true },
 
-    receivedBy: { type: String },
-    receivedAtBranch: { type: String, enum: SERVICE_BRANCHES, default: null },
-    deliveredAt: { type: Date, default: null },
-    isSatisfied: { type: Boolean, default: null }
-  },
-  { _id: false }
+  note: { type: String, default: '' },
+
+  changedAt: { type: Date, default: Date.now },
+  changedBy: { type: String },
+
+  receivedBy: { type: String },
+  receivedAtBranch: { type: String, enum: SERVICE_BRANCHES, default: null },
+
+  deliveredAt: { type: Date, default: null },
+  isSatisfied: { type: Boolean, default: null }
+},
+{ _id: false }
 )
 
 // ─── Schema principal ─────────────────────────────────────────────────────────
@@ -69,6 +82,37 @@ const ServiceSchema = new Schema(
     serviceType: { type: String, enum: SERVICE_TYPES, default: 'Reparación' },
     approximateValue: { type: String, default: '0' }, // rango/nota libre
     finalValue: { type: Number, default: 0 },
+    // Estado de la orden de trabajo
+    workOrderStatus: {
+      type: String,
+      enum: WORKORDER_STATUS,
+      default: 'Sin presupuesto',
+      index: true
+    },
+
+    // Fecha en que se envió la OT
+    workOrderSentAt: {
+      type: Date,
+      default: null
+    },
+
+    // Quién envió el presupuesto
+    workOrderSentBy: {
+      type: String,
+      default: null
+    },
+
+    // Fecha en que el cliente respondió
+    workOrderAnsweredAt: {
+      type: Date,
+      default: null
+    },
+
+    workOrderAnsweredBy: {
+      type: String,
+      default: null
+    },
+
     repuestos: { type: Number, default: 0 },
 
     // Estado actual + historial
@@ -140,6 +184,7 @@ function generatePublicId(length = 8) {
 
 // ─── Índices útiles ───────────────────────────────────────────────────────────
 ServiceSchema.index({ customerNumber: 1, createdAt: -1 })
+ServiceSchema.index({ workOrderStatus: 1 })
 
 const ServiceModel = model('Service', ServiceSchema)
 

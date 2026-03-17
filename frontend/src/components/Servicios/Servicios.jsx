@@ -12,6 +12,7 @@ import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { faFileLines } from '@fortawesome/free-solid-svg-icons'
 import ServiceFilters from '../ServiceFilters/ServiceFilters'
 import { formatDate } from '../../utils/formatDate.js'
+import { timeSince } from '../../utils/formatDate.js'
 import isDev from '../../utils/isDev.js'
 import { getStatusClass } from '../../utils/productsData.jsx'
 import './Servicios.css'
@@ -90,7 +91,7 @@ const Servicios = () => {
 
     const intervalId = setInterval(() => {
       fetchLatest()
-    }, 15000) // cada 15 segundos
+    }, 30000) // cada 30 segundos
 
     return () => clearInterval(intervalId)
   }, [auth])
@@ -170,6 +171,113 @@ const Servicios = () => {
     const cellHeight = td.offsetHeight
     textarea.style.height = `${cellHeight}px`
   }
+
+// ========================== HANDLERS ==========================
+const handleWorkOrderChange = async (id, newStatus) => {
+  const service = services.find(s => s._id === id)
+
+  if (!service || service.workOrderStatus === undefined) {
+    alert('Este servicio no tiene orden de trabajo.')
+    return
+  }
+
+  try {
+    const res = await axios.patch(
+      `${getApiUrl()}/api/service/${id}/workorder`,
+      { newStatus },
+      { withCredentials: true }
+    )
+
+    setServices(prev =>
+      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
+    )
+
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Error actualizando la orden de trabajo'
+    alert(msg)
+  }
+}
+/*
+const handleSendWorkOrder = async (id) => {
+  const service = services.find(s => s._id === id)
+
+  if (!service) return
+
+  if (service.workOrderStatus !== 'Lista para enviar') {
+    alert('La orden debe estar marcada como "Lista para enviar" antes de enviarla.')
+    return
+  }
+
+  try {
+    const res = await axios.post(
+      `${getApiUrl()}/api/service/${id}/workorder-send`,
+      {},
+      { withCredentials: true }
+    )
+
+    setServices(prev =>
+      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
+    )
+
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Error enviando la orden'
+    alert(msg)
+  }
+}
+
+const handleAcceptWorkOrder = async (id) => {
+  try {
+    const res = await axios.patch(
+      `${getApiUrl()}/api/service/${id}/workorder-accept`,
+      {},
+      { withCredentials: true }
+    )
+
+    setServices(prev =>
+      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
+    )
+
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Error aceptando la orden'
+    alert(msg)
+  }
+}
+
+const handleRejectWorkOrder = async (id) => {
+  try {
+    const res = await axios.patch(
+      `${getApiUrl()}/api/service/${id}/workorder-reject`,
+      {},
+      { withCredentials: true }
+    )
+
+    setServices(prev =>
+      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
+    )
+
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Error rechazando la orden'
+    alert(msg)
+  }
+}
+
+const handleNoRepair = async (id) => {
+  try {
+    const res = await axios.patch(
+      `${getApiUrl()}/api/service/${id}/workorder-norepair`,
+      {},
+      { withCredentials: true }
+    )
+
+    setServices(prev =>
+      prev.map(s => (s._id === id ? { ...s, ...res.data } : s))
+    )
+
+  } catch (err) {
+    const msg = err.response?.data?.error || 'Error marcando sin reparación'
+    alert(msg)
+  }
+}*/
 
   // === Persistencia de filtros, búsqueda y paginación ===
   useEffect(() => {
@@ -260,6 +368,7 @@ const Servicios = () => {
                     <th>Descripción</th>
                     <th>Cliente</th>
                     <th>Estado</th>
+                    <th>Orden</th>
                     <th>Notas</th>
                     <th>Recibido En</th>
                     <th onClick={() => handleSort('createdBy')}>Creado por {renderSortIcon('createdBy')}</th>
@@ -267,8 +376,11 @@ const Servicios = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {pageData.map(s => (
-                    <tr key={s._id}>
+                  {pageData.map(s => {
+                    const hasWorkOrder = s.workOrderStatus !== undefined
+
+                    return (
+                      <tr key={s._id}>
                       <td><Link to={`/servicios/${s.code}`} className="service-link">{s.code}</Link></td>
                       <td>
                         <Link to={`/clientes/${s.customerNumber}`} className="service-link">
@@ -294,6 +406,109 @@ const Servicios = () => {
                           }}
                           onError={() => alert('Error al actualizar estado')}
                         />
+                      </td>
+                      <td className="workorder-cell">
+                        {/* estados editables */}
+                        {["Sin presupuesto","Lista para enviar", "Sin reparación"].includes(s.workOrderStatus) && (
+                          <select
+                            className="wo-select"
+                            value={s.workOrderStatus}
+                            onChange={e => handleWorkOrderChange(s._id, e.target.value)}
+                          >
+                            <option>Sin presupuesto</option>
+                            <option>Lista para enviar</option>
+                            <option>Sin reparación</option>
+                          </select>
+                        )}
+
+                        {/* boton enviar */}
+                        {s.workOrderStatus === "Lista para enviar" && (
+                          <button
+                            className="wo-btn send"
+                            onClick={() => handleWorkOrderChange(s._id,"Enviada")}
+                          >
+                            Enviar
+                          </button>
+                        )}
+
+                        {/* enviada */}
+                          {s.workOrderStatus === "Enviada" && (
+                            <div className="wo-sent-container">
+
+                              <div className="wo-sent-label">
+                                📤 Enviado {formatDate(s.workOrderSentAt, true)}
+                              </div>
+
+                              {s.workOrderSentAt && (
+                                <div className="wo-waiting">
+                                  ⏱ Esperando respuesta {timeSince(s.workOrderSentAt)}
+                                </div>
+                              )}
+
+                              <div className="wo-action-buttons">
+                                <button
+                                  className="wo-btn accept"
+                                  onClick={() => handleWorkOrderChange(s._id,"Aceptada")}
+                                >
+                                  Autoriza ✔
+                                </button>
+
+                                <button
+                                  className="wo-btn reject"
+                                  onClick={() => handleWorkOrderChange(s._id,"Rechazada")}
+                                >
+                                  Rechaza ✖
+                                </button>
+                              </div>
+
+                            </div>
+                          )}
+                        {/* aceptada */}
+                        {s.workOrderStatus === "Aceptada" && (
+                          <div className="wo-status-box aceptada">
+
+                            <div className="wo-status-info">
+                              <div>✅ Autorizado</div>
+
+                              {s.workOrderAnsweredAt && (
+                                <div className="wo-date">
+                                  {formatDate(s.workOrderAnsweredAt, true)}
+                                </div>
+                              )}
+                            </div>
+
+                            <button
+                              className="wo-btn reject"
+                              onClick={() => handleWorkOrderChange(s._id,"Rechazada")}
+                            >
+                              Cambiar
+                            </button>
+
+                          </div>
+                        )}
+                        {/* rechazada */}
+                        {s.workOrderStatus === "Rechazada" && (
+                        <div className="wo-status-box rechazada">
+
+                          <div className="wo-status-info">
+                            <div>❌ Rechazada</div>
+
+                            {s.workOrderAnsweredAt && (
+                              <div className="wo-date">
+                                {formatDate(s.workOrderAnsweredAt, true)}
+                              </div>
+                            )}
+                          </div>
+
+                          <button
+                            className="wo-btn accept"
+                            onClick={() => handleWorkOrderChange(s._id,"Aceptada")}
+                          >
+                            Autorizar
+                          </button>
+
+                        </div>
+                      )}
                       </td>
                       <td>
                         <textarea
@@ -342,7 +557,8 @@ const Servicios = () => {
                         )}
                       </td>
                     </tr>
-                  ))}
+                  )
+                })}
                 </tbody>
               </table>
             </div>

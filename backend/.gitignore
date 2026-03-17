@@ -14,3 +14,5 @@ dist/
 build/
 
 whatsapp-session/
+
+.wwebjs_cache/

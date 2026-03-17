@@ -41,6 +41,6 @@ router.get('/public/:publicId/print-ticket', TicketController.printByPublicId)
 
 // ================== Orden de trabajo ==================
 router.get('/public/:publicId', WorkOrderController.getPublicService)
-
+router.patch('/:id/workorder', authenticateJWT, ServiceController.updateWorkOrderStatus)
 
 export default router

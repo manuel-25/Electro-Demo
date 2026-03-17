@@ -2,7 +2,7 @@ import ServiceModel from "../Mongo/models/service.model.js"
 
 class StatsController {
 
-  static async getStats(req, res) {
+  static async getGeneralStats(req, res) {
     try {
 
       const deliveredStatus = "Entregado"

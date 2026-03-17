@@ -5,6 +5,44 @@ import { logger } from '../utils/logger.js'
 
 const VALID_PREFIX = ['Q','B','W']
 
+const WORKORDER_TRANSITIONS = {
+  'Sin presupuesto': ['Lista para enviar', 'Sin reparación'],
+
+  'Lista para enviar': [
+    'Sin presupuesto',
+    'Sin reparación',
+    'Enviada'
+  ],
+
+  'Enviada': [
+    'Aceptada',
+    'Rechazada'
+  ],
+
+  'Aceptada': [
+    'Rechazada'
+  ],
+
+  'Rechazada': [
+    'Aceptada'
+  ],
+
+  'Sin reparación': [
+    'Sin presupuesto'
+  ]
+}
+
+const WORKORDER_RULES = {
+  requireBudget: ['Lista para enviar'],
+  requireSent: ['Aceptada', 'Rechazada']
+}
+
+function isValidWorkOrderTransition(current, next) {
+  if (!current) return true
+  const allowed = WORKORDER_TRANSITIONS[current] || []
+  return allowed.includes(next)
+}
+
 class ServiceController {
   // ✅ getAllServices
   static async getAllServices(req, res) {
@@ -330,6 +368,110 @@ class ServiceController {
       res.json(updated)
     } catch (err) {
       res.status(500).json({ error: 'Error al actualizar servicio', details: err.message })
+    }
+  }
+
+  // ✅ updateWorkOrderStatus
+  static async updateWorkOrderStatus(req, res) {
+    try {
+      const { id } = req.params
+      const { newStatus } = req.body
+      const now = new Date()
+
+      const service = await ServiceModel.findById(id)
+
+      if (!service) {
+        return res.status(404).json({ error: 'Servicio no encontrado' })
+      }
+
+      const currentStatus = service.workOrderStatus || 'Sin presupuesto'
+
+      // =============================
+      // VALIDACIONES DE REGLAS
+      // =============================
+
+      // 1️⃣ Debe existir presupuesto
+      if (WORKORDER_RULES.requireBudget.includes(newStatus)) {
+
+        if (!service.budgetItems || service.budgetItems.length === 0) {
+          return res.status(400).json({
+            error: 'No se puede marcar como "Lista para enviar". Debe agregar al menos un item al presupuesto.'
+          })
+        }
+
+      }
+
+      // 2️⃣ No permitir lista para enviar si no ingresó el equipo
+      if (newStatus === 'Lista para enviar') {
+
+        if (['Pendiente', 'Recibido'].includes(service.status)) {
+          return res.status(400).json({
+            error: 'No se puede enviar presupuesto. El equipo aún no fue revisado.'
+          })
+        }
+
+      }
+
+      // 3️⃣ Aceptar o rechazar solo si fue enviada
+      if (
+        WORKORDER_RULES.requireSent.includes(newStatus) &&
+        !['Enviada', 'Aceptada', 'Rechazada'].includes(service.workOrderStatus)
+      ) {
+        return res.status(400).json({
+          error: 'La orden debe haber sido enviada antes de poder aceptarla o rechazarla.'
+        })
+      }
+
+      // validar transición
+      if (!isValidWorkOrderTransition(currentStatus, newStatus)) {
+        return res.status(400).json({
+          error: `No se puede cambiar la orden de "${currentStatus}" a "${newStatus}".`
+        })
+      }
+
+      const updateFields = {
+        workOrderStatus: newStatus,
+        lastModifiedBy: req.user?.email || 'Sistema',
+        lastModifiedAt: now
+      }
+
+      // timestamps automáticos
+        // enviada
+      if (newStatus === 'Enviada') {
+      updateFields.workOrderSentAt = now
+        updateFields.workOrderSentBy = req.user?.email || 'Sistema'
+      }
+
+      // respuesta general (aceptada o rechazada)
+      if (['Aceptada', 'Rechazada'].includes(newStatus)) {
+        updateFields.workOrderAnsweredAt = now
+        updateFields.workOrderAnsweredBy = req.user?.email || 'Sistema'
+      }
+
+      const updated = await ServiceModel.findByIdAndUpdate(
+        id,
+        {
+          $set: updateFields,
+          $push: {
+            statusHistory: {
+              status: service.status,
+              note: `Orden de trabajo → ${newStatus}`,
+              changedBy: req.user?.email || 'Sistema',
+              changedAt: now
+            }
+          }
+        },
+        { new: true }
+      )
+
+      res.json(updated)
+
+    } catch (err) {
+      console.error('❌ updateWorkOrderStatus error:', err)
+      res.status(500).json({
+        error: 'Error actualizando orden de trabajo',
+        details: err.message
+      })
     }
   }
 

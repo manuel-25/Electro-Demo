@@ -66,6 +66,14 @@ class ServiceManagerDao {
       .skip((page - 1) * limit)
       .limit(limit)
   }
+
+  async pushStatusHistory(id, entry) {
+    return await this.serviceModel.findByIdAndUpdate(
+      id,
+      { $push: { statusHistory: entry } },
+      { new: true }
+    )
+  }
 }
 
 const ServiceManager = new ServiceManagerDao()
