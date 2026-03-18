@@ -126,7 +126,6 @@
   border-collapse: collapse;
   font-size: 13px;
   color: #333;
-  table-layout: fixed;
 }
 
 .styled-table th,
