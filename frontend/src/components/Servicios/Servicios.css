@@ -1,120 +1,5 @@
-.dashboard-wrapper {
-  margin-left: 60px;
-  padding: 16px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  max-width: 100%;
-  background-color: #f8f9fa;
-}
-
-.dashboard-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #333;
-  text-align: center;
-}
-
-.loading-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 32px 0;
-}
-
-.error-message {
-  color: #b00020;
-  margin-bottom: 10px;
-  text-align: center;
-}
-
-
-/* === BUSCADOR === */
-
-.search-wrapper {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin: 10px 0 14px 0;
-}
-
-.search-input {
-  width: 300px;
-  max-width: 90%;
-  padding: 5px 28px 5px 8px;
-  font-size: 13px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  transition: all 0.2s ease;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #555;
-  box-shadow: 0 0 3px rgba(0,0,0,0.1);
-}
-
-.clear-search-btn {
-  position: absolute;
-  right: calc(50% - 140px);
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-size: 15px;
-  color: #999;
-  padding: 0;
-  line-height: 1;
-}
-
-.clear-search-btn:hover {
-  color: #333;
-}
-
-
-/* === CONTROLES SUPERIORES === */
-
-.items-per-page {
-  margin: 10px 0 12px;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.items-per-page select {
-  padding: 4px 6px;
-  font-size: 13px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.right-controls {
-  margin-left: auto;
-}
-
-.btn-new-service {
-  padding: 6px 10px;
-  font-size: 13px;
-  font-weight: 600;
-  background-color: #0d6efd;
-  color: #fff;
-  border-radius: 4px;
-  text-decoration: none;
-  transition: background-color 0.2s ease;
-}
-
-.btn-new-service:hover {
-  background-color: #0b5ed7;
-}
-
-
-/* === TABLA === */
-
 .table-wrapper {
+  width: 100%;
   overflow-x: auto;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
@@ -123,205 +8,58 @@
 
 .styled-table {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
   font-size: 13px;
-  color: #333;
 }
 
 .styled-table th,
 .styled-table td {
-  padding: 8px 10px;
-  text-align: left;
+  padding: 6px 8px;
   border: 1px solid #dee2e6;
-  overflow: hidden;
   text-overflow: ellipsis;
+  white-space: normal;
 }
 
-.styled-table tr:hover {
-  background-color: #f1f3f5;
-}
 
 .table-head th {
-  font-size: 13px;
-  font-weight: 600;
   background-color: #e9ecef;
-  color: #212529;
-  white-space: nowrap;
+  font-weight: 600;
   cursor: pointer;
 }
 
-
-/* === ANCHOS DE COLUMNAS === */
-
-.styled-table td:nth-child(1),
-.styled-table th:nth-child(1),
-.styled-table td:nth-child(2),
-.styled-table th:nth-child(2),
-.styled-table td:nth-child(3),
-.styled-table th:nth-child(3) {
-  width: 90px;
-  max-width: 100px;
-  white-space: nowrap;
+#searchInputServices {
+  width: 150%;
+  margin-left: -25%;
 }
 
-.styled-table td:nth-child(4),
-.styled-table th:nth-child(4) {
-  width: 140px;
-  max-width: 160px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+/* Distribución de columnas corregida */
+.col-code { width: 6%; }          /* Código, pequeño pero visible */
+.col-date { width: 6%; }          /* Fecha, compacta */
 
-.styled-table td:nth-child(5),
-.styled-table th:nth-child(5) {
-  width: 300px;
-  max-width: 350px;
-  white-space: normal;
-  line-height: 1.4;
-  word-break: break-word;
-}
+.col-client { width: 8%; }        /* Cliente, más espacio para el número */
+.col-device { width: 8%; }        /* Equipo */
 
-.styled-table td:nth-child(6),
-.styled-table th:nth-child(6) {
-  width: 120px;
-  max-width: 140px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.col-description { width: 18%; overflow: hidden; white-space: normal; } /* Texto largo */
+.col-notes { width: 20%; white-space: normal; }                           /* Notas largas */
 
-.styled-table td:nth-child(7),
-.styled-table th:nth-child(7) {
-  width: 150px;
-  max-width: 160px;
-  text-align: center;
-}
+.col-status { width: 10%; }       /* Estado */
+.col-workorder { width: 10%; }    /* Orden de trabajo */
 
-.styled-table td:nth-child(8),
-.styled-table th:nth-child(8) {
-  width: 160px;
-  max-width: 180px;
-}
+.col-created { width: 6%; }       /* Creado por */
+.col-received { width: 6%; }      /* Recibido */
 
-.styled-table td:nth-child(9),
-.styled-table th:nth-child(9) {
-  width: 220px;
-  max-width: 260px;
-}
+.col-actions { width: 6%; text-align: center; } /* Acciones */
 
-.styled-table td:nth-child(10),
-.styled-table th:nth-child(10) {
-  width: 100px;
-  max-width: 120px;
-}
-
-.styled-table td:nth-child(11),
-.styled-table th:nth-child(11) {
-  width: 150px;
-  max-width: 180px;
-  text-align: center;
-}
-
-
-/* === ENLACES === */
-
-.service-link {
-  color: #1a73e8;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-.service-link:hover {
-  color: #1251a1;
-  text-decoration: underline;
-}
-
-
-/* === SELECT ESTADO === */
-
-.status-select {
-  width: 100%;
-  padding: 4px;
-  font-size: 12px;
-  border-radius: 3px;
-  border: 1px solid #ccc;
-}
-
-
-/* === ESTADOS DE SERVICIO === */
-
-select.status-select.cell-pendiente {
-  background-color: #faf096 !important;
-  color: #7a6000 !important;
-  border-color: #fae758 !important;
-}
-
-select.status-select.cell-reparacion {
-  background-color: #007bff !important;
-  color: #ffffff !important;
-  border-color: #0069d9 !important;
-}
-
-select.status-select.cell-revision {
-  background-color: #d0e2f2 !important;
-  color: #004080 !important;
-  border-color: #b0cfe2 !important;
-}
-
-select.status-select.cell-recibido {
-  background-color: #e2f0ff !important;
-  color: #004085 !important;
-  border-color: #b8daff !important;
-}
-
-select.status-select.cell-pruebas {
-  background-color: #d4edda !important;
-  color: #155724 !important;
-  border-color: #c3e6cb !important;
-}
-
-select.status-select.cell-listo {
-  background-color: #d4edda !important;
-  color: #155724 !important;
-  border-color: #c3e6cb !important;
-}
-
-select.status-select.cell-entregado {
-  background-color: #f8f9fa !important;
-  color: #6c757d !important;
-  border-color: #dee2e6 !important;
-}
-
-select.status-select.cell-garantía,
-select.status-select.cell-garantia {
-  background-color: #ffbe5b !important;
-  color: #663c00 !important;
-  border-color: #ffa31a !important;
-}
-
-select.status-select.cell-devolución,
-select.status-select.cell-devolucion {
-  background-color: #f8d7da !important;
-  color: #721c24 !important;
-  border-color: #f5c6cb !important;
-}
-
-
-/* === NOTAS === */
+/* TEXT AREA */
 
 .notes-textarea {
-  width: 100%;
-  min-height: 50px;
-  max-height: 70px;
+  min-height: 25px;
+  max-height: 75px;
   font-size: 13px;
-  padding: 8px;
+  padding: 6px;
   border: none;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
   resize: vertical;
-  box-sizing: border-box;
 }
 
 .notes-textarea:focus {
@@ -329,9 +67,101 @@ select.status-select.cell-devolucion {
   box-shadow: inset 0 0 0 2px rgba(0,123,255,0.3);
 }
 
+/* STATUS */
+.status-select.cell-pendiente {
+  background:#faf096;
+  color:#7a6000;
+}
 
-/* === BOTONES ACCIÓN === */
+.status-select.cell-reparacion {
+  background:#007bff;
+  color:#fff;
+}
 
+.status-select.cell-revision {
+  background:#d0e2f2;
+  color:#004080;
+}
+
+.status-select.cell-recibido {
+  background:#e2f0ff;
+  color:#004085;
+}
+
+.status-select.cell-pruebas {
+  background:#d4edda;
+  color:#155724;
+}
+
+.status-select.cell-listo {
+  background:#d4edda;
+  color:#155724;
+}
+
+.status-select.cell-entregado {
+  background:#f8f9fa;
+  color:#6c757d;
+}
+
+.status-select.cell-garantia {
+  background:#ffbe5b;
+  color:#663c00;
+}
+
+.status-select.cell-devolucion {
+  background:#f8d7da;
+  color:#721c24;
+}
+
+/* SELECT WORK ORDER*/
+.status-select,
+.wo-select {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 5px 28px 5px 8px; /* espacio a la derecha para flecha */
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #fff;
+  transition: all 0.15s ease;
+}
+
+/* === ESTADO ESPERANDO RESPUESTA (WORK ORDER) === */
+.wo-waiting {
+  font-size: 11px;
+  color: #d97706;
+  font-weight: 600;
+}
+
+/* contenedor de orden enviada */
+.wo-sent-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* texto orden enviada */
+.wo-sent-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0d6efd;
+  background: #e7f1ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* estados visuales */
+.wo-select.sin-presupuesto { background: #e9ecef; }
+.wo-select.enviada { background: #fff3cd; }
+.wo-select.autorizada { background: #d4edda; }
+.wo-select.rechazada { background: #f8d7da; }
+
+/* BOTONES */
 .action-btn {
   display: inline-flex;
   align-items: center;
@@ -340,34 +170,82 @@ select.status-select.cell-devolucion {
   height: 24px;
   margin: 1px;
   border-radius: 4px;
-  font-size: 13px;
+  font-size: 12px;
   color: #fff;
   border: none;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.15s ease;
 }
 
 .action-btn:hover {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
-.action-btn.edit { background-color: #ff7b00; }
-.action-btn.print { background-color: #0d6efd; }
-.action-btn.wa { background-color: #25D366; }
-.action-btn.orden { background-color: #6c757d; }
+.action-btn.edit { background:#ff7b00; }
+.action-btn.print { background:#0d6efd; }
+.action-btn.wa { background:#25D366; }
+.action-btn.orden { background:#6c757d; }
 
-.action-btn.edit:hover { background-color: #e66900; }
-.action-btn.print:hover { background-color: #0b5ed7; }
-.action-btn.wa:hover { background-color: #1da851; }
-.action-btn.orden:hover { background-color: #5a6268; }
+.action-btn.edit:hover { background:#e66900; }
+.action-btn.print:hover { background:#0b5ed7; }
+.action-btn.wa:hover { background:#1da851; }
+.action-btn.orden:hover { background:#5a6268; }
 
+/* ITEMS PER PAGE IZQ. */
+.items-per-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px 0;
+  gap: 10px;
+}
 
-/* === ORDEN DE TRABAJO === */
+.items-per-page label {
+  font-size: 13px;
+  color: #495057;
+}
 
+.items-per-page select {
+  margin: 0 5px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.right-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+/* BOTON NUEVO SERVICIO */
+.btn-new-service {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #0d6efd;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-new-service:hover {
+  background: #0b5ed7;
+  transform: translateY(-1px);
+}
+
+/* WORK ORDER*/
 .workorder-cell {
-  width: 120px;
-  min-width: 120px;
   text-align: center;
+  white-space: normal;
 }
 
 .wo-action-buttons {
@@ -379,9 +257,9 @@ select.status-select.cell-devolucion {
 
 .wo-btn {
   border: none;
-  padding: 3px 7px;
-  font-size: 11px;
-  border-radius: 4px;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 3px;
   cursor: pointer;
   font-weight: 600;
 }
@@ -395,182 +273,46 @@ select.status-select.cell-devolucion {
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:6px;
-  font-size:12px;
+  gap:5px;
+  font-size:11px;
   font-weight:600;
 }
 
 .wo-status-box.aceptada { color:#28a745; }
 .wo-status-box.rechazada { color:#dc3545; }
-.wo-status-box.enviada { color:#ff8c00; }
+.wo-status-box.enviada { color:#ff8c00; } 
 
+@media (max-width: 1024px) {
 
-/* === PAGINACIÓN === */
+  .col-received {
+    display: none;
+  }
 
-.pagination {
-  margin-top: 12px;
-  text-align: center;
+  .col-description { width: 24%; }
+  .col-notes { width: 26%; }
 }
 
-.page-btn {
-  margin: 0 3px;
-  padding: 4px 9px;
-  font-size: 12px;
-  border: 1px solid #ccc;
-  background-color: white;
-  cursor: pointer;
-}
+@media (max-width: 768px) {
 
-.page-btn.active {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-}
+  .col-created,
+  .col-device {
+    display: none;
+  }
 
-.page-dots {
-  margin: 0 3px;
-  font-size: 13px;
-  color: #888;
-}
+  .col-description { width: 30%; }
+  .col-notes { width: 35%; }
 
-/* contenedor de orden enviada */
-.wo-sent-container{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-}
+  .styled-table {
+    font-size: 11px;
+  }
 
-/* texto orden enviada */
-.wo-sent-label{
-  font-size:11px;
-  font-weight:600;
-  color:#0d6efd;
-  background:#e7f1ff;
-  padding:2px 6px;
-  border-radius:4px;
-}
+  .styled-table th,
+  .styled-table td {
+    padding: 4px;
+  }
 
-/* botones */
-.wo-action-buttons{
-  display:flex;
-  gap:4px;
-}
-
-.wo-date{
-  font-size:11px;
-  color:#555;
-  margin-top:2px;
-}
-
-.wo-waiting{
-  font-size:11px;
-  color:#d97706;
-  font-weight:600;
-}
-
-/* SELECT ORDEN DE TRABAJO */
-
-.wo-select{
-  width:100%;
-  font-size:11px;
-  padding:3px 4px;
-  border-radius:4px;
-  border:1px solid #ccc;
-  background:white;
-  cursor:pointer;
-  transition:all .15s ease;
-}
-
-.wo-select:hover{
-  border-color:#888;
-}
-
-.wo-select:focus{
-  outline:none;
-  border-color:#0d6efd;
-  box-shadow:0 0 2px rgba(13,110,253,0.4);
-}
-
-.wo-select[value="Sin presupuesto"]{
-  background:#f1f3f5;
-}
-
-.wo-select[value="Lista para enviar"]{
-  background:#fff3cd;
-}
-
-.wo-select[value="Sin reparación"]{
-  background:#e9ecef;
-}
-
-
-/* === RESPONSIVE === */
-
-@media (max-width:1280px){
-
-.styled-table{
-font-size:12px;
-}
-
-.styled-table th,
-.styled-table td{
-padding:4px 6px;
-}
-
-.notes-textarea{
-font-size:12px;
-}
-
-}
-
-@media (max-width:1024px){
-
-.styled-table th,
-.styled-table td{
-padding:3px 5px;
-font-size:11px;
-}
-
-.notes-textarea{
-font-size:11px;
-}
-
-.action-btn{
-width:22px;
-height:22px;
-font-size:11px;
-}
-
-}
-
-@media (max-width:768px){
-
-.styled-table td:nth-child(6),
-.styled-table th:nth-child(6),
-.styled-table td:nth-child(9),
-.styled-table th:nth-child(9),
-.styled-table td:nth-child(10),
-.styled-table th:nth-child(10){
-display:none;
-}
-
-.styled-table td:nth-child(5),
-.styled-table th:nth-child(5){
-max-width:200px;
-font-size:11px;
-}
-
-.notes-textarea{
-font-size:11px;
-padding:4px;
-min-height:60px;
-}
-
-.action-btn{
-width:20px;
-height:20px;
-font-size:11px;
-}
-
+  .action-btn {
+    width: 20px;
+    height: 20px;
+  }
 }

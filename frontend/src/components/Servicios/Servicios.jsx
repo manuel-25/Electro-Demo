@@ -243,6 +243,7 @@ const handleWorkOrderChange = async (id, newStatus) => {
                 type="text"
                 placeholder="Buscar por Código, Cliente, Equipo..."
                 className="search-input"
+                id="searchInputServices"
                 value={search}
                 onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
               />
@@ -280,18 +281,18 @@ const handleWorkOrderChange = async (id, newStatus) => {
               <table className="styled-table">
                 <thead className="table-head">
                   <tr>
-                    <th onClick={() => handleSort('code')}>Código {renderSortIcon('code')}</th>
-                    <th onClick={() => handleSort('customerNumber')}>Cliente {renderSortIcon('customerNumber')}</th>
-                    <th onClick={() => handleSort('createdAt')}>Fecha {renderSortIcon('createdAt')}</th>
-                    <th onClick={() => handleSort('equipmentType')}>Equipo {renderSortIcon('equipmentType')}</th>
-                    <th>Descripción</th>
-                    <th>Cliente</th>
-                    <th>Estado</th>
-                    <th>Orden de Trabajo</th>
-                    <th>Notas</th>
-                    <th>Recibido En</th>
-                    <th onClick={() => handleSort('createdBy')}>Creado por {renderSortIcon('createdBy')}</th>
-                    <th>Acciones</th>
+                    <th className="col-code" onClick={() => handleSort('code')}>Código {renderSortIcon('code')}</th>
+                    <th className="col-client" onClick={() => handleSort('customerNumber')}>Cliente {renderSortIcon('customerNumber')}</th>
+                    <th className="col-date" onClick={() => handleSort('createdAt')}>Fecha {renderSortIcon('createdAt')}</th>
+                    <th className="col-device" onClick={() => handleSort('equipmentType')}>Equipo {renderSortIcon('equipmentType')}</th>
+                    <th className="col-description">Descripción</th>
+                    <th className="col-client2">Cliente</th>
+                    <th className="col-status">Estado</th>
+                    <th className="col-workorder">Orden de Trabajo</th>
+                    <th className="col-notes">Notas</th>
+                    <th className="col-received">Recibido</th>
+                    <th className="col-created" onClick={() => handleSort('createdBy')}>Creado por {renderSortIcon('createdBy')}</th>
+                    <th className="col-actions">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -387,7 +388,7 @@ const handleWorkOrderChange = async (id, newStatus) => {
                           <div className="wo-status-box aceptada">
 
                             <div className="wo-status-info">
-                              <div>✅ Autorizado</div>
+                              <div>Autorizado</div>
 
                               {s.workOrderAnsweredAt && (
                                 <div className="wo-date">
@@ -410,7 +411,7 @@ const handleWorkOrderChange = async (id, newStatus) => {
                         <div className="wo-status-box rechazada">
 
                           <div className="wo-status-info">
-                            <div>❌ Rechazada</div>
+                            <div>Rechazada</div>
 
                             {s.workOrderAnsweredAt && (
                               <div className="wo-date">

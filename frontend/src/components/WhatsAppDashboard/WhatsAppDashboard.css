@@ -162,7 +162,7 @@
 /* =========================
    COLUMNA DE ACCIONES
 ========================= */
-.col-actions {
+.wa-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

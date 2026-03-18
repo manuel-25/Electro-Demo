@@ -199,7 +199,7 @@ function WhatsAppDashboard() {
 
                   <td>{assignedDisplay}</td>
 
-                  <td className="col-actions">
+                  <td className="wa-actions">
                     {(conv.status === 'waiting' || conv.status === 'priority') && (
                       <button className="icon-btn assign-btn" title="Tomar conversación" onClick={() => takeConversation(conv.phone)}>
                         <FontAwesomeIcon icon={faHandPaper} />
