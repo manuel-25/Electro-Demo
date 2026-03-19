@@ -33,23 +33,23 @@
   margin-left: -25%;
 }
 
-/* Distribución de columnas corregida */
-.col-code { width: 6%; }          /* Código, pequeño pero visible */
-.col-date { width: 6%; }          /* Fecha, compacta */
+/* Distribución de columnas */
+.col-code { width: 6%; }
+.col-date { width: 6%; }
 
-.col-client { width: 8%; }        /* Cliente, más espacio para el número */
-.col-device { width: 8%; }        /* Equipo */
+.col-client { width: 6%; }
+.col-device { width: 8%; } 
 
-.col-description { width: 18%; overflow: hidden; white-space: normal; } /* Texto largo */
-.col-notes { width: 20%; white-space: normal; }                           /* Notas largas */
+.col-description { width: 18%; overflow: hidden; white-space: normal; }
+.col-notes { width: 20%; white-space: normal; }             
 
-.col-status { width: 10%; }       /* Estado */
-.col-workorder { width: 10%; }    /* Orden de trabajo */
+.col-status { width: 10%; }  
+.col-workorder { width: 10%; } 
 
-.col-created { width: 6%; }       /* Creado por */
-.col-received { width: 6%; }      /* Recibido */
+.col-created { width: 6%; } 
+.col-received { width: 6%; } 
 
-.col-actions { width: 6%; text-align: center; } /* Acciones */
+.col-actions { width: 6%; text-align: center; }
 
 /* TEXT AREA */
 
@@ -282,9 +282,9 @@
 .wo-status-box.rechazada { color:#dc3545; }
 .wo-status-box.enviada { color:#ff8c00; } 
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
 
-  .col-received {
+  .col-received, .col-created {
     display: none;
   }
 
@@ -294,7 +294,6 @@
 
 @media (max-width: 768px) {
 
-  .col-created,
   .col-device {
     display: none;
   }

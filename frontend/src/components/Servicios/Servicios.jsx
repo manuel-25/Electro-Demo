@@ -308,7 +308,7 @@ const handleWorkOrderChange = async (id, newStatus) => {
                         </Link>
                       </td>
                       <td>{formatDate(s.createdAt)}</td>
-                      <td>{s.equipmentType || '—'}</td>
+                      <td className="col-device">{s.equipmentType || '—'}</td>
                       <td>{s.description || '—'}</td>
                       <td>{s.userData.firstName + ' ' + s.userData.lastName || '—'}</td>
                       <td>
@@ -438,8 +438,8 @@ const handleWorkOrderChange = async (id, newStatus) => {
                           onKeyDown={(e) => handleNoteKeyDown(s, e)}
                         />
                       </td>
-                      <td>{s.receivedAtBranch || 'No recibido'}</td>
-                      <td>{s.createdByEmail || '—'}</td>
+                      <td className="col-received">{s.receivedAtBranch || 'No recibido'}</td>
+                      <td className="col-created">{s.createdByEmail || '—'}</td>
                       <td className="acciones-cell">
                         <Link to={`/servicios/${s.code}/editar`} className="action-btn edit" title="Editar">
                           <FontAwesomeIcon icon={faPen} />
