@@ -206,7 +206,6 @@ async function buildAndSendTicket(service, res) {
     kv(doc, 'Codigo publico', svc.publicId, { valueBold: true })
   }
   kv(doc, 'Cliente', fullName)
-  kv(doc, 'Cliente', fullName)
   kv(doc, 'Tel', u.phone || '—')
   if (u.dniOrCuit) kv(doc, 'DNI / CUIT', u.dniOrCuit)
   kv(doc, 'N° Cliente', svc.customerNumber ?? '—')
