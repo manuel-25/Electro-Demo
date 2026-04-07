@@ -667,59 +667,174 @@ export const equipoOptions = [
   { value: 'Otro/s', label: 'Otro'}
 ]
 
+//Accesorios por equipos
+export const equipmentAccessories = [
+  {
+    id: 1, // Air Fryer
+    name: "Air Fryer",
+    accessories: ["Baneja", "Recipiente para goteo"]
+  },
+  {
+    id: 2, // Aspiradora
+    name: "Aspiradora",
+    accessories: ["Bolsa", "Manguera", "Cepillo"]
+  },
+  {
+    id: 3, // Aspiradora Robot
+    name: "Aspiradora Robot",
+    accessories: ["Base de carga", "Cepillos"]
+  },
+  {
+    id: 4, // Cafetera
+    name: "Cafetera",
+    accessories: ["Recipiente de agua", "Bandeja"]
+  },
+  {
+    id: 5, // Cava de Vino
+    name: "Cava de Vino",
+    accessories: ["Estantes"]
+  },
+  {
+    id: 7, // Estufa eléctrica
+    name: "Estufa eléctrica",
+    accessories: ["Cable de alimentación"]
+  },
+  {
+    id: 8, // Freidora industrial
+    name: "Freidora industrial",
+    accessories: ["Cesta", "Recipiente para aceite"]
+  },
+  {
+    id: 9, // Horno eléctrico
+    name: "Horno eléctrico",
+    accessories: ["Rejilla", "Bandeja"]
+  },
+  {
+    id: 10, // Microondas
+    name: "Microondas",
+    accessories: ["Plato"]
+  },
+  {
+    id: 13, // Televisor
+    name: "Televisor",
+    accessories: ["Control remoto", "Cable de alimentación"]
+  },
+  {
+    id: 14, // Ventilador
+    name: "Ventilador",
+    accessories: ["Cable de alimentación"]
+  },
+  {
+    id: 15, // Horno empotrable
+    name: "Horno empotrable",
+    accessories: ["Rejilla", "Bandeja"]
+  },
+  {
+    id: 16, // Anafe eléctrico
+    name: "Anafe eléctrico",
+    accessories: []
+  },
+  {
+    id: 17, // Anafe a inducción
+    name: "Anafe a inducción",
+    accessories: ["Cable de alimentación"]
+  },
+  {
+    id: 18, // Cocina eléctrica
+    name: "Cocina eléctrica",
+    accessories: ["Bandeja", "Rejilla"]
+  },
+  {
+    id: 19, // Heladera
+    name: "Heladera",
+    accessories: ["Bandeja", "Estantes"]
+  },
+  {
+    id: 20, // Freezer
+    name: "Freezer",
+    accessories: ["Bandeja", "Estantes", "Cajones"]
+  }
+];
 
-// ====== ESTADOS DE SERVICIOS =======
-// Lista de estados con key interno, etiqueta visible y clase CSS
+
+// =========================
+// ESTADOS DE SERVICIO - fuente única
+// =========================
 export const ESTADOS_SERVICIO = [
-    { value: 'Pendiente', key: 'pendiente', class: 'status-pendiente', label: 'Pendiente' },
-    { value: 'Recibido', key: 'recibido', class: 'status-recibido', label: 'Recibido' },
-    { value: 'En Revisión', key: 'revision', class: 'status-revision', label: 'En Revisión' },
-    { value: 'En Reparación', key: 'reparacion', class: 'status-reparacion', label: 'En Reparación' },
-    { value: 'En Pruebas', key: 'pruebas', class: 'status-pruebas', label: 'En Pruebas' },
-    { value: 'Listo para retirar', key: 'listo', class: 'status-listo', label: 'Listo para retirar' },
-    { value: 'Entregado', key: 'entregado', class: 'status-entregado', label: 'Entregado' },
-    { value: 'Garantía', key: 'garantia', class: 'status-garantia', label: 'Garantía' },
-    { value: 'Rechazado', key: 'rechazado', class: 'status-rechazado', label: 'Rechazado' },
-    { value: 'Repuestos', key: 'repuestos', class: 'status-repuestos', label: 'Repuestos' },
+  // 🔴 VIEJOS (temporales)
+  { key: 'pendiente', label: 'Pendiente', class: 'status-pendiente' },
+  { key: 'recibido', label: 'Recibido', class: 'status-recibido' },
+  { key: 'revision', label: 'En Revisión', class: 'status-revision' },
+  { key: 'reparacion', label: 'En Reparación', class: 'status-reparacion' },
+  { key: 'pruebas', label: 'En Pruebas', class: 'status-pruebas' },
+  { key: 'listo', label: 'Listo para retirar', class: 'status-listo' },
+  { key: 'entregado', label: 'Entregado', class: 'status-entregado' },
+  { key: 'garantia', label: 'Garantía', class: 'status-garantia' },
+  { key: 'rechazado', label: 'Rechazado', class: 'status-rechazado' },
+  { key: 'repuestos', label: 'Repuestos', class: 'status-repuestos' },
+
+  // 🟢 NUEVOS
+    { key: 'reparacion', label: 'Reparación', class: 'status-reparacion' },
+    { key: 'en-gestion', label: 'En Gestión', class: 'status-en-gestion' },
+    { key: 'armado-sr', label: 'Armado S/R', class: 'status-armado-sr' },
+    { key: 'listo-sr', label: 'Listo para retiro S/R', class: 'status-listo-sr' },
+    { key: 'retirado-bodega', label: 'Retirado a bodega', class: 'status-retirado-bodega' },
+    { key: 'sin-respuesta', label: 'Sin respuesta', class: 'status-sin-respuesta' },
 ]
 
-export const normalizeStatus = (raw = '') => {
-    const s = raw?.toString().trim().toLowerCase()
-        .normalize('NFD').replace(/\p{Diacritic}/gu, '')
-        .replace(/\s+/g, '-')
+// =========================
+// NORMALIZACIÓN
+// Convierte texto arbitrario a formato consistente
+// =========================
+export const normalizeStatus = (raw = '') =>
+  raw
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\//g, '')
+    .replace(/\s+/g, '-')
 
-    if (s.includes('devolucion')) return 'rechazado'
-    if (s.includes('listo-para-retirar')) return 'listo'
-
-    const match = ESTADOS_SERVICIO.find(e => {
-        const normalizedLabel = e.label?.toString().trim().toLowerCase()
-            .normalize('NFD').replace(/\p{Diacritic}/gu, '')
-            .replace(/\s+/g, '-')
-        return e.key === s || normalizedLabel === s
-    })
-    return match?.key || s
-}
-
-export const esTransicionValida = (estadoActual, nuevoEstado, historial = []) => {
-    const idxActual = ESTADOS_SERVICIO.findIndex(e => e.label === estadoActual)
-    const idxNuevo = ESTADOS_SERVICIO.findIndex(e => e.label === nuevoEstado)
-
-    if (nuevoEstado === 'Garantía') {
-        return historial.includes('Entregado') // solo si ya fue entregado
-    }
-
-    if (nuevoEstado === 'Repuestos') {
-        return historial.includes('Listo para retirar') || historial.includes('En Pruebas')
-    }
-
-    // General: permitir si el nuevo estado no se saltea más de un paso
-    return idxNuevo <= idxActual + 1
-}
-
-// Obtiene la clase CSS de un estado textual
+// =========================
+// OBTENER CLASE CSS
+// =========================
 export const getStatusClass = (status) => {
-  const key = normalizeStatus(status)
-  return `cell-${key}`
+  const found = ESTADOS_SERVICIO.find(
+    (s) => normalizeStatus(s.label) === normalizeStatus(status)
+  )
+  return found?.class || 'status-default'
+}
+
+// =========================
+// OBTENER LABEL "OFICIAL"
+// =========================
+export const getStatusLabel = (status) => {
+  const found = ESTADOS_SERVICIO.find(
+    (s) => normalizeStatus(s.label) === normalizeStatus(status)
+  )
+  return found?.label || status
+}
+
+// =========================
+// VALIDACIÓN DE TRANSICIONES
+// =========================
+export const esTransicionValida = (estadoActual, nuevoEstado, historial = []) => {
+  const idxActual = ESTADOS_SERVICIO.findIndex((e) => normalizeStatus(e.label) === normalizeStatus(estadoActual))
+  const idxNuevo = ESTADOS_SERVICIO.findIndex((e) => normalizeStatus(e.label) === normalizeStatus(nuevoEstado))
+
+  // Casos especiales
+  if (normalizeStatus(nuevoEstado) === 'garantia') {
+    return historial.some((h) => normalizeStatus(h) === 'entregado')
+  }
+  if (normalizeStatus(nuevoEstado) === 'repuestos') {
+    return historial.some(
+      (h) => ['listo', 'pruebas'].includes(normalizeStatus(h))
+    )
+  }
+
+  // Validación general: no saltar más de un estado
+  return idxNuevo <= idxActual + 1
 }
 
 export const branchMap = { W: 'Web', Q: 'Quilmes', B: 'Barracas' }

@@ -43,6 +43,45 @@ function isValidWorkOrderTransition(current, next) {
   return allowed.includes(next)
 }
 
+function validateStatusTransition(service, nextStatus, incomingChecklist) {
+
+  const isNewFlow = service.flowVersion === 2
+  if (!isNewFlow) return null
+
+  // 🔥 EN GESTIÓN requiere checklist
+  if (nextStatus === 'En Gestión') {
+    if (
+      !service.receptionChecklist?.completedAt &&
+      !incomingChecklist?.completedAt
+    ) {
+      return 'Debe completar el checklist'
+    }
+  }
+
+  // REPARACIÓN requiere aceptación
+  if (nextStatus === 'Reparación') {
+    if (service.workOrderStatus !== 'Aceptada') {
+      return 'Debe aceptar la orden de trabajo'
+    }
+  }
+
+  // ARMADO S/R requiere rechazo
+  if (nextStatus === 'Armado S/R') {
+    if (!['Rechazada', 'Sin reparación'].includes(service.workOrderStatus)) {
+      return 'La orden debe estar rechazada'
+    }
+  }
+
+  // LISTO requiere foto
+  if (nextStatus === 'Listo para retirar') {
+    /*if (!service.photos?.length) {
+      return 'Debe subir una foto'
+    } comentado por ahora  */
+  }
+
+  return null
+}
+
 class ServiceController {
   // ✅ getAllServices
   static async getAllServices(req, res) {
@@ -147,6 +186,8 @@ class ServiceController {
         customerNumber: existingClient.customerNumber,
         quoteReference,
         code,
+
+        flowVersion: 2,
 
         userData: {
           ...userData,
@@ -321,12 +362,32 @@ class ServiceController {
       note,
       receivedAtBranch,
       deliveredAt,
-      isSatisfied
+      isSatisfied,
+      receptionChecklist
     } = req.body
 
     try {
+      console.log('BODY:', req.body)
       const now = new Date()
 
+      const service = await ServiceModel.findById(id)
+      if (!service) {
+        return res.status(404).json({ error: 'Servicio no encontrado' })
+      }
+
+      // 1. aplicar datos de checklist antes de validar
+      if (receptionChecklist) {
+        service.receptionChecklist = receptionChecklist
+        console.log('service.receptionChecklist', receptionChecklist)
+      }
+
+      // 2. VALIDACIÓN DE FLUJO
+      const error = validateStatusTransition(service, status, receptionChecklist)
+      if (error) {
+        return res.status(400).json({ error })
+      }
+
+      //Payload antes de actualizar
       const updatePayload = {
         status,
         lastModifiedBy: req.user.email,
@@ -336,6 +397,8 @@ class ServiceController {
 
         ...(status === 'Recibido' && receivedAtBranch && { receivedAtBranch }),
         ...(status === 'Recibido' && { receivedAt: now }),
+
+         ...(receptionChecklist && { receptionChecklist }),
 
         ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
         ...(status === 'Entregado' && typeof isSatisfied === 'boolean' && { isSatisfied })
@@ -351,6 +414,7 @@ class ServiceController {
         ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
         ...(typeof isSatisfied === 'boolean' && { isSatisfied })
       }
+      console.log('updatedPayload: ', updatePayload)
 
       const updated = await ServiceModel.findByIdAndUpdate(
         id,
@@ -361,11 +425,8 @@ class ServiceController {
         { new: true, runValidators: true }
       )
 
-      if (!updated) {
-        return res.status(404).json({ error: 'Servicio no encontrado' })
-      }
-
       res.json(updated)
+
     } catch (err) {
       res.status(500).json({ error: 'Error al actualizar servicio', details: err.message })
     }
@@ -387,47 +448,43 @@ class ServiceController {
       const currentStatus = service.workOrderStatus || 'Sin presupuesto'
 
       // =============================
-      // VALIDACIONES DE REGLAS
+      // VALIDACIONES
       // =============================
 
-      // 1️⃣ Debe existir presupuesto
       if (WORKORDER_RULES.requireBudget.includes(newStatus)) {
-
         if (!service.budgetItems || service.budgetItems.length === 0) {
           return res.status(400).json({
-            error: 'No se puede marcar como "Lista para enviar". Debe agregar al menos un item al presupuesto.'
+            error: 'Debe agregar al menos un item al presupuesto.'
           })
         }
-
       }
 
-      // 2️⃣ No permitir lista para enviar si no ingresó el equipo
       if (newStatus === 'Lista para enviar') {
-
         if (['Pendiente', 'Recibido'].includes(service.status)) {
           return res.status(400).json({
-            error: 'No se puede enviar presupuesto. El equipo aún no fue revisado.'
+            error: 'El equipo aún no fue revisado.'
           })
         }
-
       }
 
-      // 3️⃣ Aceptar o rechazar solo si fue enviada
       if (
         WORKORDER_RULES.requireSent.includes(newStatus) &&
         !['Enviada', 'Aceptada', 'Rechazada'].includes(service.workOrderStatus)
       ) {
         return res.status(400).json({
-          error: 'La orden debe haber sido enviada antes de poder aceptarla o rechazarla.'
+          error: 'Debe haber sido enviada antes.'
         })
       }
 
-      // validar transición
       if (!isValidWorkOrderTransition(currentStatus, newStatus)) {
         return res.status(400).json({
-          error: `No se puede cambiar la orden de "${currentStatus}" a "${newStatus}".`
+          error: `No se puede cambiar de "${currentStatus}" a "${newStatus}".`
         })
       }
+
+      // =============================
+      // UPDATE
+      // =============================
 
       const updateFields = {
         workOrderStatus: newStatus,
@@ -435,31 +492,43 @@ class ServiceController {
         lastModifiedAt: now
       }
 
-      // timestamps automáticos
-        // enviada
+      // 🔥 SINCRONIZACIÓN DE ESTADOS
+      if (newStatus === 'Aceptada') {
+        updateFields.status = 'Reparación'
+      }
+
+      if (['Rechazada', 'Sin reparación'].includes(newStatus)) {
+        updateFields.status = 'Armado S/R'
+      }
+
+      // timestamps
       if (newStatus === 'Enviada') {
-      updateFields.workOrderSentAt = now
+        updateFields.workOrderSentAt = now
         updateFields.workOrderSentBy = req.user?.email || 'Sistema'
       }
 
-      // respuesta general (aceptada o rechazada)
       if (['Aceptada', 'Rechazada'].includes(newStatus)) {
         updateFields.workOrderAnsweredAt = now
         updateFields.workOrderAnsweredBy = req.user?.email || 'Sistema'
+      }
+
+      const newServiceStatus = updateFields.status || service.status
+
+      //  HISTORIAL
+      const historyEntry = {
+        status: newServiceStatus,
+        note: updateFields.status
+          ? `Orden de trabajo → ${newStatus} | Estado → ${newServiceStatus}`
+          : `Orden de trabajo → ${newStatus}`,
+        changedBy: req.user?.email || 'Sistema',
+        changedAt: now
       }
 
       const updated = await ServiceModel.findByIdAndUpdate(
         id,
         {
           $set: updateFields,
-          $push: {
-            statusHistory: {
-              status: service.status,
-              note: `Orden de trabajo → ${newStatus}`,
-              changedBy: req.user?.email || 'Sistema',
-              changedAt: now
-            }
-          }
+          $push: { statusHistory: historyEntry }
         },
         { new: true }
       )

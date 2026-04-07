@@ -6,6 +6,7 @@ const { Schema, model } = mongoose
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const SERVICE_TYPES = ['Reparación', 'Garantía', 'Mantenimiento']
 export const SERVICE_STATUS = [
+  // 🔴 VIEJOS (se mantienen temporalmente)
   'Pendiente',
   'Recibido',
   'En Revisión',
@@ -15,7 +16,16 @@ export const SERVICE_STATUS = [
   'Entregado',
   'Garantía',
   'Rechazado',
-  'Repuestos'
+  'Repuestos',
+
+  // 🟢 NUEVOS
+  'En Gestión',
+  'Reparación',            // reemplaza "En Reparación"
+  'Armado S/R',
+  'Listo para retiro S/R',
+  'Entregado S/R',
+  'Retirado a bodega',
+  'Sin respuesta'
 ]
 
 export const WORKORDER_STATUS = [
@@ -160,12 +170,50 @@ const ServiceSchema = new Schema(
     // Texto adicional para incluir notas importantes en la orden
     workOrderNotes: { type: String, default: '' },
 
+    // EN GESTION CHECKLIST 
+    receptionChecklist: {
+      wasRepairedBefore: { type: Boolean, default: null },
+      isClean: { type: Boolean, default: null },
+      hasAccessories: { type: Boolean, default: null },
+
+      accessories: {
+        cable: { type: Boolean, default: false },
+        controlRemoto: { type: Boolean, default: false },
+        bandejas: { type: Boolean, default: false },
+        jarra: { type: Boolean, default: false },
+        plato: { type: Boolean, default: false },
+        tapa: { type: Boolean, default: false },
+        manguera: { type: Boolean, default: false },
+        bateria: { type: Boolean, default: false },
+        base: { type: Boolean, default: false }
+      },
+
+      accessoriesOther: {
+        type: String,
+        default: '',
+      },
+
+      accessoriesNotes: {
+        type: String,
+        default: '',
+      },
+
+      completedAt: { type: Date, default: null },
+      completedBy: {
+        type: String,
+        default: null
+      }
+  },
+
+  //Permite diferenciar estados viejos de los nuevos STATUS
+  flowVersion: { type: Number, default: 2 },
+
     // ID pública para compartir externamente
     publicId: { type: String, unique: true }
   },
   {
     timestamps: true
-  }
+  },
 )
 
 // ─── Hooks ────────────────────────────────────────────────────────────────────
@@ -186,6 +234,6 @@ function generatePublicId(length = 8) {
 ServiceSchema.index({ customerNumber: 1, createdAt: -1 })
 ServiceSchema.index({ workOrderStatus: 1 })
 
-const ServiceModel = model('Service', ServiceSchema)
+const ServiceModel = mongoose.model('Service', ServiceSchema/*, 'services_backup'*/)
 
 export default ServiceModel

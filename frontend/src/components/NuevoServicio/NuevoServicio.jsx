@@ -17,6 +17,10 @@ const NuevoServicio = () => {
   const [cotizaciones, setCotizaciones] = useState([])
   const [showClienteModal, setShowClienteModal] = useState(false)
 
+  const [showChecklistModal, setShowChecklistModal] = useState(false)
+  const [checklistData, setChecklistData] = useState(null)
+  const [pendingFinalData, setPendingFinalData] = useState(null)
+
   const [formData, setFormData] = useState({
     customerNumber: '',
     quoteReference: '',
@@ -111,50 +115,20 @@ const NuevoServicio = () => {
   }
 
   const handleSubmit = async e => {
-    e.preventDefault()
-    setError(null)
+  e.preventDefault()
+  setError(null)
 
-    // VALIDACIONES
-    if (!formData.customerNumber) {
-      setError('Debe seleccionar un cliente.')
-      return
-    }
+  // VALIDACIONES
+    if (!formData.customerNumber) return setError('Debe seleccionar un cliente.')
+    if (!formData.equipmentType) return setError('Debe seleccionar el tipo de equipo.')
+    if (!formData.brand.trim()) return setError('Debe ingresar la marca del equipo.')
+    if (!formData.userDescription.trim()) return setError('Debe ingresar la descripción del problema.')
+    if (!formData.codePrefix) return setError('Debe seleccionar un prefijo.')
+    if (!formData.deliveryMethod) return setError('Debe seleccionar el método de envío.')
 
-    if (!formData.equipmentType) {
-      setError('Debe seleccionar el tipo de equipo.')
-      return
-    }
+    const selectedClient = clientes.find(c => c.customerNumber === Number(formData.customerNumber))
+    if (!selectedClient) return setError('Cliente no encontrado.')
 
-    if (!formData.brand.trim()) {
-      setError('Debe ingresar la marca del equipo.')
-      return
-    }
-
-    if (!formData.userDescription.trim()) {
-      setError('Debe ingresar la descripción del problema.')
-      return
-    }
-
-    if (!formData.codePrefix) {
-      setError('Debe seleccionar un prefijo.')
-      return
-    }
-
-    if (!formData.deliveryMethod) {
-      setError('Debe seleccionar el método de envío.')
-      return
-    }
-
-    const selectedClient = clientes.find(
-      c => c.customerNumber === Number(formData.customerNumber)
-    )
-
-    if (!selectedClient) {
-      setError('Cliente no encontrado.')
-      return
-    }
-
-    // recepción opcional: si hay sucursal, el backend esperará receivedBy (lo calcula desde req.user)
     const receivedAtBranch = formData.receivedAtBranch || null
 
     const finalData = {
@@ -184,6 +158,14 @@ const NuevoServicio = () => {
       deliveryMethod: formData.deliveryMethod
     }
 
+    // SI YA TIENE SUCURSAL, abrimos modal en vez de enviar directo
+    if (receivedAtBranch) {
+      setPendingFinalData(finalData) // guardamos los datos pendientes
+      setShowChecklistModal(true)    // abrimos modal
+      return
+    }
+
+    // si no, enviamos directo
     try {
       await axios.post(`${getApiUrl()}/api/service`, finalData, { withCredentials: true })
       navigate(`/servicios`)

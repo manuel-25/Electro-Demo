@@ -331,7 +331,13 @@ const handleWorkOrderChange = async (id, newStatus) => {
                         {/* estados editables */}
                         {["Sin presupuesto","Lista para enviar", "Sin reparación"].includes(s.workOrderStatus) && (
                           <select
-                            className="wo-select"
+                            className={`wo-select ${
+                              s.workOrderStatus
+                                ?.toLowerCase()
+                                .replace(/\s+/g, '-')
+                                .normalize('NFD')
+                                .replace(/[\u0300-\u036f]/g, '')
+                            }`}
                             value={s.workOrderStatus}
                             onChange={e => handleWorkOrderChange(s._id, e.target.value)}
                           >
@@ -438,7 +444,9 @@ const handleWorkOrderChange = async (id, newStatus) => {
                           onKeyDown={(e) => handleNoteKeyDown(s, e)}
                         />
                       </td>
-                      <td className="col-received">{s.receivedAtBranch || 'No recibido'}</td>
+                      <td className="col-received">
+                        {s.receivedAt ? (s.receivedAtBranch || 'Quilmes') : 'No recibido'}
+                      </td>
                       <td className="col-created">{s.createdByEmail || '—'}</td>
                       <td className="acciones-cell">
                         <Link to={`/servicios/${s.code}/editar`} className="action-btn edit" title="Editar">

@@ -1,0 +1,126 @@
+/* === CHECKLIST MODAL === */
+
+.checklist-modal {
+  padding: 12px 8px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Bloques */
+.checklist-group {
+  margin-bottom: 20px;
+}
+
+.checklist-group p {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+/* Radios */
+.radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.radio-group input[type="radio"] {
+  margin: 0;
+  transform: translateY(1px);
+}
+
+/* === ACCESORIOS BOX === */
+.accessories-box {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #e2e2e2;
+}
+
+/* título accesorios */
+.accessories-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+/* subtitulo equipo */
+.accessories-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+/* Checkboxes grid */
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+/* Checkbox item */
+.checkbox-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.checkbox-item input[type="checkbox"] {
+  margin: 0;
+  transform: translateY(1px); /* 🔥 FIX CLAVE */
+}
+
+/* Input otro */
+.otro-input {
+  margin-top: 12px;
+}
+
+.otro-input label {
+  font-size: 13px;
+  color: #444;
+}
+
+.otro-input input {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 4px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Botones */
+.checklist-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn-cancelar {
+  background: #e0e0e0;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-submit {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-submit:hover {
+  background: #0056b3;
+}

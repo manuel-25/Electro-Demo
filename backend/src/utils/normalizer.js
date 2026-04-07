@@ -17,7 +17,7 @@ export const normalizeEmail = (email = '') => {
 // Normaliza teléfono → ej: +54 9 11 2184-2265 → 1121842265
 export const normalizePhone = (phone = '') => {
   return phone
-    .replace(/\D/g, '')          // dejar solo números
+    .replace(/\D/g, '')          // deja solo números
 }
 
 // Normaliza provincia/municipio (mismo criterio que nombre)
@@ -33,4 +33,9 @@ export const normalizeAddress = (address = '') => {
     .split(' ')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ')
+}
+
+export function normalizeText(value) {
+  if (typeof value !== 'string') return value
+  return value.trim().toLowerCase()
 }

@@ -130,44 +130,92 @@
   line-height: 1.4;
 }
 
-/* === COLORES DE ESTADOS EN HISTORIAL === */
-.history-item .status-pill.cell-pendiente {
-  background: var(--status-amber-bg);
-  color: var(--status-amber-text);
-  border-color: var(--status-amber-border);
+/* ===========================
+   PILLS GLOBALES
+=========================== */
+.status-pill {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: capitalize;
+  border: 1px solid transparent;
 }
 
-.history-item .status-pill.cell-recibido,
-.history-item .status-pill.cell-revision {
-  background: var(--status-blue-bg);
-  color: var(--status-blue-text);
-  border-color: var(--status-blue-border);
+/* Colores pastel */
+.status-pendiente { background: #faf096; color: #7a6000; border-color: #fce588; }
+.status-recibido, .status-revision { background: #d0e2f2; color: #004080; border-color: #a9c8e6; }
+.status-reparacion { background: #cfd8dc; color: #37474f; border-color: #b0bec5; }
+.status-pruebas, .status-listo { background: #d4edda; color: #155724; border-color: #a3d9a5; }
+.status-entregado { background: #f8f9fa; color: #6c757d; border-color: #e9ecef; }
+.status-garantia { background: #fff3cd; color: #856404; border-color: #ffe69c; }
+.status-rechazado { background: #f8d7da; color: #721c24; border-color: #f5a4ab; }
+.status-desconocido { background: #e0e0e0; color: #424242; border-color: #bdbdbd; }
+
+/* Estados nuevos y S/R */
+.status-en-gestion { background: #d0e2f2; color: #004080; border-color: #a9c8e6; }
+.status-armado-sr, .status-listo-sr, .status-entregado-sr { background: #f8d7da; color: #721c24; border-color: #f5a4ab; } /* S/R rojo pastel */
+.status-retirado-bodega { background: #d4edda; color: #155724; border-color: #a3d9a5; }
+.status-sin-respuesta { background: #e2e3e5; color: #495057; border-color: #d6d8db; }
+
+/* ===========================
+   SELECT CON COLORES
+=========================== */
+.status-select {
+  width: 100%;
+  max-width: 150px;
+  padding: 6px 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: all 0.15s ease;
 }
 
-.history-item .status-pill.cell-reparacion {
-  background: var(--status-grey-bg);
-  color: var(--status-grey-text);
-  border-color: var(--status-grey-border);
+/* Colores pastel para select */
+.status-select.cell-pendiente { background: #faf096; color: #7a6000; border-color: #fce588; }
+.status-select.cell-reparacion { background: #cfd8dc; color: #37474f; border-color: #b0bec5; }
+.status-select.cell-revision, .status-select.cell-en-gestion { background: #d0e2f2; color: #004080; border-color: #a9c8e6; }
+.status-select.cell-recibido { background: #d0e2f2; color: #004080; border-color: #a9c8e6; }
+.status-select.cell-pruebas, .status-select.cell-listo { background: #d4edda; color: #155724; border-color: #a3d9a5; }
+.status-select.cell-entregado { background: #f8f9fa; color: #6c757d; border-color: #e9ecef; }
+.status-select.cell-garantia { background: #fff3cd; color: #856404; border-color: #ffe69c; }
+.status-select.cell-rechazado { background: #f8d7da; color: #721c24; border-color: #f5a4ab; }
+
+/* Estados nuevos y S/R en select */
+.status-select.cell-en-gestion { background: #d0e2f2; color: #004080; border-color: #a9c8e6; }
+.status-select.cell-armado-sr, .status-select.cell-listo-sr, .status-select.cell-entregado-sr { background: #f8d7da; color: #721c24; border-color: #f5a4ab; }
+.status-select.cell-retirado-bodega { background: #d4edda; color: #155724; border-color: #a3d9a5; }
+.status-select.cell-sin-respuesta { background: #e2e3e5; color: #495057; border-color: #d6d8db; }
+
+/* ===========================
+   NOTAS
+=========================== */
+.notes-textarea {
+  width: 100%;
+  min-height: 60px;
+  resize: vertical;
+  font-size: 14px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
-.history-item .status-pill.cell-pruebas,
-.history-item .status-pill.cell-listo,
-.history-item .status-pill.cell-entregado {
-  background: var(--status-green-bg);
-  color: var(--status-green-text);
-  border-color: var(--status-green-border);
+.notes-textarea:focus {
+  border-color: #007bff;
+  box-shadow: none;
+  outline: none;
 }
 
-.history-item .status-pill.cell-garantia {
-  background: var(--status-warn-bg);
-  color: var(--status-warn-text);
-  border-color: var(--status-warn-border);
-}
-
-.history-item .status-pill.cell-rechazado {
-  background: var(--status-red-bg);
-  color: var(--status-red-text);
-  border-color: var(--status-red-border);
+.notes-textarea::placeholder {
+  color: #999;
+  font-size: 13px;
 }
 
 /* ===========================
@@ -187,19 +235,52 @@
   padding: 10px 18px;
   background-color: #007bff;
   color: #fff;
-  text-decoration: none;
   font-weight: 600;
   font-size: 14px;
   border-radius: 6px;
-  transition: background-color 0.2s;
   border: none;
   height: 40px;
   min-width: 120px;
+  transition: background-color 0.2s;
 }
 
-.big-btn svg {
-  font-size: 20px;
+.big-btn svg { font-size: 20px; }
+
+/* ===========================
+   TOAST
+=========================== */
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px auto;
+  max-width: 1200px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 14px;
 }
+
+.toast-success { background: #e6f4ea; color: #1e7e34; border: 1px solid #c7e6cf; }
+.toast-error   { background: #fdecea; color: #b02a37; border: 1px solid #f5c2c7; }
+.toast-close { background: transparent; border: none; cursor: pointer; font-size: 16px; line-height: 1; color: inherit; }
+
+/* ===========================
+   FOCUS GLOBAL SIN BORDE NEGRO
+=========================== */
+button:focus, input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ===========================
+   ENLACES DE DETALLE
+=========================== */
+.service-link {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.service-link:hover { text-decoration: underline; }
 
 /* ===========================
    COSTOS (Presupuesto desglosado)
@@ -257,107 +338,4 @@
 .strong {
   font-weight: 700;
   color: #000;
-}
-
-/* ===========================
-   PILLS (usan variables de :root)
-=========================== */
-.status-pill {
-  display: inline-block;
-  padding: 4px 10px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 700;
-  line-height: 1.2;
-  text-transform: capitalize;
-  border: 1px solid transparent;
-}
-
-.status-pendiente { color: var(--status-amber-text); background: var(--status-amber-bg); border-color: var(--status-amber-border); }
-.status-recibido,
-.status-revision  { color: var(--status-blue-text); background: var(--status-blue-bg); border-color: var(--status-blue-border); }
-.status-reparacion{ color: var(--status-grey-text); background: var(--status-grey-bg); border-color: var(--status-grey-border); }
-.status-pruebas,
-.status-entregado { color: var(--status-green-text); background: var(--status-green-bg); border-color: var(--status-green-border); }
-.status-listo     { color: var(--status-green-text); background: var(--status-green-bg); border-color: var(--status-green-border); }
-.status-garantia  { color: var(--status-warn-text);  background: var(--status-warn-bg);  border-color: var(--status-warn-border); }
-.status-rechazado { color: var(--status-red-text);   background: var(--status-red-bg);   border-color: var(--status-red-border); }
-.status-desconocido { color: #424242; background: #e0e0e0; border-color: #bdbdbd; }
-
-/* === SELECT con mismos colores === */
-.status-select {
-  width: 100%;
-  max-width: 150px;
-  padding: 4px;
-  font-size: 12px;
-  border-radius: 3px;
-  border: 1px solid #ccc;
-}
-.status-select.cell-pendiente { background: var(--status-amber-bg); color: var(--status-amber-text); border-color: var(--status-amber-border); }
-.status-select.cell-recibido,
-.status-select.cell-revision  { background: var(--status-blue-bg); color: var(--status-blue-text); border-color: var(--status-blue-border); }
-.status-select.cell-reparacion{ background: var(--status-grey-bg); color: var(--status-grey-text); border-color: var(--status-grey-border); }
-.status-select.cell-pruebas,
-.status-select.cell-entregado { background: var(--status-green-bg); color: var(--status-green-text); border-color: var(--status-green-border); }
-.status-select.cell-listo     { background: var(--status-green-bg); color: var(--status-green-text); border-color: var(--status-green-border); }
-.status-select.cell-garantia  { background: var(--status-warn-bg); color: var(--status-warn-text); border-color: var(--status-warn-border); }
-.status-select.cell-rechazado { background: var(--status-red-bg); color: var(--status-red-text); border-color: var(--status-red-border); }
-
-/* ===========================
-   NOTAS (compacto, sin borde negro)
-=========================== */
-.notes-textarea {
-  width: 100%;
-  min-height: 60px;
-  resize: vertical;
-  font-size: 14px;
-  padding: 6px 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  outline: none;
-}
-.notes-textarea:focus {
-  border-color: #007bff;
-  outline: none;
-  box-shadow: none;
-}
-.notes-textarea::placeholder {
-  color: #999;
-  font-size: 13px;
-}
-
-/* ===========================
-   TOAST
-=========================== */
-.toast {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 12px auto;
-  max-width: 1200px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-.toast-success { background: #e6f4ea; color: #1e7e34; border: 1px solid #c7e6cf; }
-.toast-error   { background: #fdecea; color: #b02a37; border: 1px solid #f5c2c7; }
-.toast-close { background: transparent; border: none; cursor: pointer; font-size: 16px; line-height: 1; color: inherit; }
-
-/* ===========================
-   FOCUS GLOBAL SIN BORDE NEGRO
-=========================== */
-button:focus, input:focus, select:focus, textarea:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-/* ===========================
-   ENLACES DE DETALLE
-=========================== */
-.service-link {
-  color: #007bff;
-  text-decoration: none;
-}
-.service-link:hover {
-  text-decoration: underline;
 }

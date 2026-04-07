@@ -11,6 +11,8 @@ import { faPen, faPrint } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import { formatCurrency } from '../../utils/currency.js'
 import { formatDate } from '../../utils/formatDate.js'
+import { getStatusLabel } from '../../utils/productsData.jsx'
+import { ESTADOS_SERVICIO } from '../../utils/productsData.jsx'
 import './ServiceDetail.css'
 
 const Item = ({ label, value }) => (
@@ -43,7 +45,8 @@ const getApiError = (err) => {
 
 const StatusPill = ({ status }) => {
   const cls = getStatusClass(status)
-  return <span className={`status-pill ${cls}`}>{normalizeStatus(status)}</span>
+  const label = getStatusLabel(status)
+  return <span className={`status-pill ${cls}`}>{label}</span>
 }
 
 
@@ -254,6 +257,7 @@ const ServiceDetail = () => {
                 userEmail={auth?.user?.email}
                 userBranch={auth?.user?.branch}
                 note={notesText}
+                estados={ESTADOS_SERVICIO}
                 onUpdated={(updatedService) => {
                   setService(updatedService)
                   showToast('Estado actualizado correctamente.', 'success')
@@ -324,16 +328,13 @@ const ServiceDetail = () => {
               {history.map((h, i) => {
                 const prev = history[i - 1]
                 const showNote = h.note && (!prev || h.note !== prev.note)
-                const statusClass = getStatusClass(h.status)
 
                 return (
                   <li key={i} className="history-item">
                     <div className="history-main">
                       <span className="history-date">{formatDate(h.changedAt, true)}</span>
-                      <span className={`status-pill ${statusClass}`}>
-                        {normalizeStatus(h.status)
-                          .replace('-', ' ')
-                          .replace(/\b\w/g, (l) => l.toUpperCase())}
+                      <span className={`status-pill ${getStatusClass(h.status)}`}>
+                        {getStatusLabel(h.status)}
                       </span>
                       <span className="history-by">({h.changedBy})</span>
                     </div>
@@ -344,21 +345,11 @@ const ServiceDetail = () => {
                       </p>
                     )}
 
-                    {h.receivedBy && (
-                      <p className="history-note">👤 Recibido por: {h.receivedBy}</p>
-                    )}
-                    {h.receivedAtBranch && (
-                      <p className="history-note">🏢 Sucursal: {h.receivedAtBranch}</p>
-                    )}
-                    {h.deliveredAt && (
-                      <p className="history-note">
-                        📦 Entregado: {formatDate(h.deliveredAt, true)}
-                      </p>
-                    )}
+                    {h.receivedBy && <p className="history-note">👤 Recibido por: {h.receivedBy}</p>}
+                    {h.receivedAtBranch && <p className="history-note">🏢 Sucursal: {h.receivedAtBranch}</p>}
+                    {h.deliveredAt && <p className="history-note">📦 Entregado: {formatDate(h.deliveredAt, true)}</p>}
                     {typeof h.isSatisfied === 'boolean' && (
-                      <p className="history-note">
-                        ⭐ Cliente satisfecho: {h.isSatisfied ? 'Sí ✅' : 'No ❌'}
-                      </p>
+                      <p className="history-note">⭐ Cliente satisfecho: {h.isSatisfied ? 'Sí ✅' : 'No ❌'}</p>
                     )}
                   </li>
                 )
