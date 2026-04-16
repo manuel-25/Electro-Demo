@@ -227,6 +227,6 @@ function generatePublicId(length = 8) {
 ServiceSchema.index({ customerNumber: 1, createdAt: -1 })
 ServiceSchema.index({ workOrderStatus: 1 })
 
-const ServiceModel = mongoose.model('Service', ServiceSchema/*, 'services_backup'*/)
+const ServiceModel = mongoose.model('Service', ServiceSchema, 'services')
 
 export default ServiceModel
