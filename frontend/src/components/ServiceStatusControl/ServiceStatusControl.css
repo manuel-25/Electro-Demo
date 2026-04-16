@@ -124,3 +124,51 @@
 .btn-submit:hover {
   background: #0056b3;
 }
+
+/* STATUS */
+.status-select.cell-pendiente {
+  background:#faf096;
+  color:#7a6000;
+}
+
+.status-select.cell-reparacion {
+  background:#007bff;
+  color:#fff;
+}
+
+.status-select.cell-revision, .status-select.cell-en-gestion {
+  background:#d0e2f2;
+  color:#004080;
+}
+
+.status-select.cell-recibido {
+  background:#e2f0ff;
+  color:#004085;
+}
+
+.status-select.cell-pruebas {
+  background:#d4edda;
+  color:#155724;
+}
+
+.status-select.cell-listo {
+  background:#d4edda;
+  color:#155724;
+}
+
+.status-select.cell-entregado {
+  background:#f8f9fa;
+  color:#6c757d;
+}
+
+.status-select.cell-garantia {
+  background:#ffbe5b;
+  color:#663c00;
+}
+
+.status-select.cell-devolucion,
+.status-select.cell-entregado-sr,
+.status-select.cell-armado-sr {
+  background:#f8d7da;
+  color:#721c24;
+}

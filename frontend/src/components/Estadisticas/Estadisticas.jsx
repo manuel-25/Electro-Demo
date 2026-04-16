@@ -85,16 +85,26 @@ fetchData()
 SERVICIOS ENTREGADOS
 ========================= */
 
-const deliveredServices = services.filter(s=>
-s.status === "Entregado" && s.deliveredAt
+const deliveredServices = services.filter(s =>
+  s.status === "Entregado" &&
+  s.deliveredAt
 )
 
-
 /* =========================
-FACTURACION TOTAL
+FACTURACION POR MES
 ========================= */
+const now = new Date()
 
-const totalRevenue = deliveredServices.reduce(
+const currentMonthServices = deliveredServices.filter(s => {
+  const d = new Date(s.deliveredAt)
+  return (
+    d.getMonth() === now.getMonth() &&
+    d.getFullYear() === now.getFullYear()
+  )
+})
+
+
+const totalRevenue = currentMonthServices.reduce(
 (acc,s)=> acc + (s.finalValue || 0),
 0
 )
@@ -361,7 +371,67 @@ const lastServices = deliveredServices
 .sort((a,b)=> new Date(b.deliveredAt) - new Date(a.deliveredAt))
 .slice(0,10)
 
+/* =========================
+% DE CONVERSION
+========================= */
 
+const receivedServices = services.filter(s =>
+  s.statusHistory?.some(h => h.status === "Recibido")
+)
+
+const deliveredCount = services.filter(s =>
+  s.status === "Entregado"
+).length
+
+const conversionRate = receivedServices.length
+  ? (deliveredCount / receivedServices.length) * 100
+  : 0
+
+/* =========================
+SERVICIOS PERDIDOS
+========================= */
+
+const lostStatuses = ['Sin respuesta', 'Rechazado', 'Retirado a bodega']
+
+const lostServices = services.filter(s =>
+  lostStatuses.includes(s.status)
+)
+
+const lostCount = lostServices.length
+
+/* =========================
+EMBUDO
+========================= */
+
+const activos = services.filter(s =>
+  !['Entregado', 'Entregado S/R', 'Sin respuesta', 'Retirado a bodega']
+    .includes(s.status)
+)
+
+const funnelActual = {
+  recibidos: activos.filter(s => s.status === "Recibido").length,
+
+  enGestion: activos.filter(s =>
+    ['En Gestión', 'Reparación', 'Armado S/R'].includes(s.status)
+  ).length,
+
+  listos: activos.filter(s =>
+    ['Listo para retirar', 'Listo para retiro S/R'].includes(s.status)
+  ).length
+}
+
+const chartFunnel = {
+  labels: ["Recibidos", "En gestión", "Listos"],
+  datasets: [{
+    label: "Flujo real",
+    data: [
+      funnelActual.recibidos,
+      funnelActual.enGestion,
+      funnelActual.listos,
+    ],
+    backgroundColor: "#42a5f5"
+  }]
+}
 
 return(
 
@@ -392,7 +462,7 @@ return(
 </div>
 
 <div className="info-card teal">
-<p>FACTURACIÓN TOTAL (SIN GASTOS)</p>
+<p>FACTURACIÓN MENSUAL (SIN GASTOS)</p>
 <h3>${totalRevenue.toLocaleString()}</h3>
 </div>
 
@@ -409,6 +479,16 @@ return(
 <div className="info-card orange">
 <p>SERVICIOS SIN FACTURAR</p>
 <h3>{zeroValueServices.length}</h3>
+</div>
+
+<div className="info-card green">
+  <p>CONVERSIÓN % DE ENTREGADOS</p>
+  <h3>{conversionRate.toFixed(0)}%</h3>
+</div>
+
+<div className="info-card red">
+  <p>SERVICIOS SIN REPARACION</p>
+  <h3>{lostCount}</h3>
 </div>
 
 </div>
@@ -444,12 +524,18 @@ onChange={(e)=>setEndDate(e.target.value)}
 
 </div>
 
+{/* EMBUDO SERVICIOS */}
+
+<div className="chart-box">
+  <p>📊 Flujo de servicios</p>
+  <Bar data={chartFunnel} />
+</div>
 
 {/* FACTURACION POR MES */}
 
 <div className="chart-box">
 
-<p>💰 Facturación por mes</p>
+<p>💰 Facturación por mes (Web)</p>
 
 <Bar data={chartRevenueMonth} />
 

@@ -1,0 +1,131 @@
+/* WORK ORDER*/
+.workorder-cell {
+  text-align: center;
+  white-space: normal;
+}
+
+.wo-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.wo-btn {
+  border: none;
+  font-size: 11px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.wo-btn.send { background:#0d6efd; color:white; }
+.wo-btn.accept { background:#28a745; color:white; }
+.wo-btn.reject { background:#dc3545; color:white; }
+.wo-btn.norepair { background:#6c757d; color:white; }
+
+.wo-status-box {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  font-size:11px;
+  font-weight:600;
+}
+
+.wo-status-box.aceptada { color:#28a745; }
+.wo-status-box.rechazada { color:#dc3545; }
+.wo-status-box.enviada { color:#ff8c00; } 
+
+/* === WORK ORDER SELECT VISUAL === */
+
+/* Sin presupuesto (gris suave) */
+.wo-select.sin-presupuesto {
+  background: #f1f3f5;
+  color: #495057;
+}
+
+/* Lista para enviar (verde suave) */
+.wo-select.lista-para-enviar {
+  background: #e6f4ea;
+  color: #1e7e34;
+}
+
+/* Sin reparación (rojo suave) */
+.wo-select.sin-reparacion {
+  background: #fdecea;
+  color: #a71d2a;
+}
+
+/* === WORK ORDER STATES === */
+
+.wo-select {
+  font-weight: 700;
+}
+
+/* Sin presupuesto */
+.wo-select option[value="Sin presupuesto"],
+.wo-select.sin-presupuesto {
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* Lista para enviar */
+.wo-select option[value="Lista para enviar"] {
+  background: #fff3cd;
+  color: #856404;
+}
+
+/* Enviada */
+.wo-sent-label {
+  background: #e7f1ff;
+  color: #0d6efd;
+}
+
+/* Aceptada */
+.wo-status-box.aceptada {
+  color: #28a745;
+}
+
+/* Rechazada */
+.wo-status-box.rechazada {
+  color: #dc3545;
+}
+
+/* Sin reparación (ROJO FUERTE) */
+.wo-select option[value="Sin reparación"] {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* === ESTADO ESPERANDO RESPUESTA (WORK ORDER) === */
+.wo-waiting {
+  font-size: 11px;
+  color: #d97706;
+  font-weight: 600;
+}
+
+/* contenedor de orden enviada */
+.wo-sent-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* texto orden enviada */
+.wo-sent-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0d6efd;
+  background: #e7f1ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* estados visuales */
+.wo-select.sin-presupuesto { background: #e9ecef; }
+.wo-select.enviada { background: #fff3cd; }
+.wo-select.autorizada { background: #d4edda; }
+.wo-select.rechazada { background: #f8d7da; }
