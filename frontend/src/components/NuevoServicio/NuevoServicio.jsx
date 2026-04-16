@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import NuevoClienteModal from '../NuevoClienteModal/NuevoClienteModal.jsx'
+import ServiceStatusControl from '../ServiceStatusControl/ServiceStatusControl.jsx'
 import { AuthContext } from '../../Context/AuthContext'
 import Select from 'react-select'
 import { equipoOptions } from '../../utils/productsData'
@@ -18,7 +19,6 @@ const NuevoServicio = () => {
   const [showClienteModal, setShowClienteModal] = useState(false)
 
   const [showChecklistModal, setShowChecklistModal] = useState(false)
-  const [checklistData, setChecklistData] = useState(null)
   const [pendingFinalData, setPendingFinalData] = useState(null)
 
   const [formData, setFormData] = useState({
@@ -157,6 +157,8 @@ const NuevoServicio = () => {
       receivedAtBranch,
       deliveryMethod: formData.deliveryMethod
     }
+
+    console.log("SUBMIT", finalData)
 
     // SI YA TIENE SUCURSAL, abrimos modal en vez de enviar directo
     if (receivedAtBranch) {
@@ -354,6 +356,31 @@ const NuevoServicio = () => {
             setClientes(prev => [...prev, nuevoCliente])
             setFormData(prev => ({ ...prev, customerNumber: nuevoCliente.customerNumber }))
             setShowClienteModal(false)
+          }}
+        />
+      )}
+      {showChecklistModal && (
+        <ServiceStatusControl
+          service={{ equipmentType: formData.equipmentType }} // 👈 SIN _id = CREATE MODE
+          userEmail={auth.user.email}
+          userBranch={formData.receivedAtBranch}
+
+          onChecklistComplete={async (checklist) => {
+            try {
+              await axios.post(`${getApiUrl()}/api/service`, {
+                ...pendingFinalData,
+                receptionChecklist: checklist
+              }, { withCredentials: true })
+
+              setPendingFinalData(null) // 🔥 AGREGAR ESTO
+              navigate('/servicios')
+            } catch (err) {
+              setError(err.response?.data?.error || 'Error al crear el servicio.')
+              console.error(err)
+            } finally {
+              setShowChecklistModal(false)
+              setPendingFinalData(null)
+            }
           }}
         />
       )}

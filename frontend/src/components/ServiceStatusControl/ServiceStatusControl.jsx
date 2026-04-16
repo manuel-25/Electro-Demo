@@ -79,12 +79,13 @@ export default function ServiceStatusControl({
   disabled = false,
   onUpdated = () => {},
   onError = () => {},
+  onChecklistComplete = () => {},
   className = '',
   branches = ['Quilmes'],
 }) {
+
   const [saving, setSaving] = useState(false)
   const [modalType, setModalType] = useState(null)
-  const [modalVisible, setModalVisible] = useState(false)
   const [nextStatus, setNextStatus] = useState(null)
   const [formData, setFormData] = useState({
     reparacion: '',
@@ -93,6 +94,8 @@ export default function ServiceStatusControl({
     accessories: [],
     otroAccesorio: ''
   })
+  const isCreateMode = !service?._id
+  const [modalVisible, setModalVisible] = useState(isCreateMode)
 
   const validateChecklist = () => {
     const { reparacion, higienizado, poseeAccesorios, accessories, otroAccesorio } = formData
@@ -215,13 +218,21 @@ export default function ServiceStatusControl({
       return
     }
 
-    // VALIDACIÓN
+    const checklist = buildChecklistPayload()
+
+    // 🟢 CREATE MODE
+    if (isCreateMode) {
+      onChecklistComplete(checklist)
+      setModalVisible(false)
+      resetForm()
+      return
+    }
+
+    // 🔵 UPDATE MODE (tu lógica original)
     if (!nextStatus) {
       console.error('No hay nextStatus definido')
       return
     }
-
-    const checklist = buildChecklistPayload()
 
     try {
       await persist({
@@ -251,18 +262,20 @@ const availableAccessories = currentEquipment?.accessories || []
 
   return (
     <>
-      <select
-        className={`status-select cell-${key} ${className}`}
-        value={service?.status || ''}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled || saving}
-      >
-        {getAvailableStatuses(service).map(value => (
-          <option key={value} value={value}>
-            {value}
-          </option>
-        ))}
-      </select>
+      {!isCreateMode && (
+        <select
+          className={`status-select cell-${key} ${className}`}
+          value={service?.status || ''}
+          onChange={(e) => onChange(e.target.value)}
+          disabled={disabled || saving}
+        >
+          {getAvailableStatuses(service).map(value => (
+            <option key={value} value={value}>
+              {value}
+            </option>
+          ))}
+        </select>
+      )}
 
       {saving && <small style={{ marginLeft: 8 }}>Guardando…</small>}
 
