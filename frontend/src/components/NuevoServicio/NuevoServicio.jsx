@@ -8,6 +8,7 @@ import { AuthContext } from '../../Context/AuthContext'
 import Select from 'react-select'
 import { equipoOptions } from '../../utils/productsData'
 import { getApiUrl } from '../../config'
+import { logError } from '../../utils/logger.js'
 import './NuevoServicio.css'
 
 const NuevoServicio = () => {
@@ -173,6 +174,7 @@ const NuevoServicio = () => {
       navigate(`/servicios`)
     } catch (err) {
       setError(err.response?.data?.error || 'Error al crear el servicio.')
+      logError(`Error creando servicio: ${err} | user: ${auth.user.email}`)
       console.error(err)
     }
   }
@@ -361,7 +363,7 @@ const NuevoServicio = () => {
       )}
       {showChecklistModal && (
         <ServiceStatusControl
-          service={{ equipmentType: formData.equipmentType }} // 👈 SIN _id = CREATE MODE
+          service={{ equipmentType: formData.equipmentType }} // SIN _id = CREATE MODE
           userEmail={auth.user.email}
           userBranch={formData.receivedAtBranch}
 
@@ -372,10 +374,14 @@ const NuevoServicio = () => {
                 receptionChecklist: checklist
               }, { withCredentials: true })
 
-              setPendingFinalData(null) // 🔥 AGREGAR ESTO
+              setPendingFinalData(null)
               navigate('/servicios')
             } catch (err) {
-              setError(err.response?.data?.error || 'Error al crear el servicio.')
+              const msg = err.response?.data?.error || err.message
+
+              logError(`Error creando servicio con checklist: ${msg} | user: ${auth.user.email}`)
+
+              setError(msg)
               console.error(err)
             } finally {
               setShowChecklistModal(false)

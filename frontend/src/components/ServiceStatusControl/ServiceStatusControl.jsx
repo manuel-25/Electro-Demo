@@ -4,6 +4,7 @@ import { updateServiceStatus } from '../../utils/updateServiceStatus.js'
 import StatusModal from '../StatusModal/StatusModal.jsx'
 import Modal from '../Modal/Modal.jsx'
 import './ServiceStatusControl.css'
+import { logError } from '../../utils/logger.js'
 
 const getAvailableStatuses = (service) => {
   if (!service) return []
@@ -149,22 +150,41 @@ export default function ServiceStatusControl({
 
   const persist = async (params) => {
     setSaving(true)
+
     try {
       const updated = await updateServiceStatus(params)
       onUpdated(updated)
+
     } catch (e) {
-      const errorMsg = e.response?.data?.error
+      const errorMsg = e.response?.data?.error || e.message
 
       console.error('[ServiceStatusControl] ERROR:', errorMsg)
 
-      // 🔥 AUTO-ABRIR CHECKLIST SI FALTA
+      // 🟡 ERROR ESPERADO → NO MAIL
       if (errorMsg === 'Debe completar el checklist') {
+        logError('Intento avanzar sin checklist', 'warn', {
+          serviceId: service?._id,
+          from: service?.status,
+          to: params?.newStatus,
+          user: userEmail
+        })
+
         setNextStatus('En Gestión')
         setModalVisible(true)
         return
       }
 
+      // 🔴 ERROR REAL → MAIL
+      logError('Error persistiendo estado de servicio', 'error', {
+        serviceId: service?._id,
+        from: service?.status,
+        to: params?.newStatus,
+        error: errorMsg,
+        user: userEmail
+      })
+
       onError(e)
+
     } finally {
       setSaving(false)
     }
