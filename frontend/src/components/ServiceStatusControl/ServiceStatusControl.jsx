@@ -97,6 +97,8 @@ export default function ServiceStatusControl({
   })
   const isCreateMode = !service?._id
   const [modalVisible, setModalVisible] = useState(isCreateMode)
+  const [deliveryModalVisible, setDeliveryModalVisible] = useState(false)
+  const [deliveryData, setDeliveryData] = useState(null)
 
   const validateChecklist = () => {
     const { reparacion, higienizado, poseeAccesorios, accessories, otroAccesorio } = formData
@@ -113,26 +115,29 @@ export default function ServiceStatusControl({
   }
 
   const buildChecklistPayload = () => {
-    const acc = formData.accessories
-
     return {
       wasRepairedBefore: formData.reparacion === 'Sí',
       isClean: formData.higienizado === 'Sí',
       hasAccessories: formData.poseeAccesorios === 'Sí',
 
-      accessories: {
-        cable: acc.includes('cable'),
-        controlRemoto: acc.includes('control remoto'),
-        bandejas: acc.includes('bandeja'),
-        jarra: acc.includes('jarra'),
-        plato: acc.includes('plato'),
-        tapa: acc.includes('tapa'),
-        manguera: acc.includes('manguera'),
-        bateria: acc.includes('batería'),
-        base: acc.includes('base de carga'),
-      },
+      accessories: [
+        // accesorios seleccionados del checklist
+        ...formData.accessories.map(acc => ({
+          name: acc,
+          label: acc
+        })),
 
-      accessoriesOther: formData.otroAccesorio || '',
+        // "Otro accesorio" como item real del array
+        ...(formData.otroAccesorio
+          ? [{
+              name: formData.otroAccesorio,
+              label: formData.otroAccesorio
+            }]
+          : [])
+      ],
+
+      accessoriesNotes: formData.otroAccesorio || '',
+
       completedAt: new Date(),
       completedBy: userEmail
     }
@@ -201,8 +206,16 @@ export default function ServiceStatusControl({
     }
 
     // Modal de satisfacción para entrega
-    if (value === 'Entregado') {
-      setModalType('satisfaction')
+    const isDeliveryStatus =
+    value === 'Listo para retirar' ||
+    value === 'Listo para retiro S/R'
+
+    if (isDeliveryStatus) {
+      setDeliveryData({
+        newStatus: value,
+        checklist: service.receptionChecklist // o donde lo guardes
+      })
+      setDeliveryModalVisible(true)
       return
     }
 
@@ -502,6 +515,77 @@ const availableAccessories = currentEquipment?.accessories || []
           })
         }}
       />
+
+      {/* Modal de accesorios entrega */}
+      {deliveryModalVisible && (
+        <Modal
+          title="Preparar Equipo para Entrega"
+          onClose={() => setDeliveryModalVisible(false)}
+        >
+          <div className="checklist-modal">
+
+            <h4>Resumen del ingreso</h4>
+
+            <div className="checklist-summary">
+
+              <p>
+                <strong>Ingresó higienizado:</strong>{' '}
+                {service?.receptionChecklist?.isClean ? 'Sí' : 'No'}
+              </p>
+
+              <p>
+                <strong>Reparado previamente:</strong>{' '}
+                {service?.receptionChecklist?.wasRepairedBefore ? 'Sí' : 'No'}
+              </p>
+
+              <div className="checklist-summary-section">
+                <p><strong>Accesorios:</strong></p>
+
+                {service?.receptionChecklist?.accessories?.length > 0 ? (
+                  <div className="accessories-grid">
+                    {service.receptionChecklist.accessories.map((acc, i) => (
+                      <div key={acc._id || i} className="accessory-badge">
+                        {acc.label || acc.name}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="empty-state">Sin accesorios declarados</p>
+                )}
+              </div>
+
+            </div>
+
+            <div className="checklist-actions">
+              <button
+                className="btn-cancelar"
+                onClick={() => setDeliveryModalVisible(false)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="btn-submit"
+                onClick={async () => {
+                  await persist({
+                    service,
+                    newStatus: deliveryData.newStatus,
+                    token,
+                    note,
+                    userEmail
+                  })
+
+                  setDeliveryModalVisible(false)
+                  setDeliveryData(null)
+                }}
+              >
+                Equipo listo para entregar
+              </button>
+            </div>
+
+          </div>
+        </Modal>
+      )}
     </>
   )
 }

@@ -148,7 +148,7 @@ class ServiceController {
         serviceType, approximateValue, finalValue, repuestos,
         quoteReference, photos, receivedAtBranch,
         deliveryMethod, receivedNotes, receivedPhoto,
-        notes, code
+        notes, code, receptionChecklist
       } = req.body
 
       // 📌 Validación mínima: el teléfono sí es obligatorio
@@ -225,7 +225,37 @@ class ServiceController {
         lastModifiedBy: req.user.email || 'No definido',
         warrantyExpiration: Number(req.body.warrantyExpiration ?? 30),
         photos,
-        notes: notes || ''
+        notes: notes || '',
+        receptionChecklist: receptionChecklist
+          ? {
+              wasRepairedBefore: receptionChecklist.wasRepairedBefore ?? null,
+              isClean: receptionChecklist.isClean ?? null,
+              hasAccessories: receptionChecklist.hasAccessories ?? null,
+
+              accessories: Array.isArray(receptionChecklist.accessories)
+                ? [
+                    ...receptionChecklist.accessories,
+                    ...(receptionChecklist.otroAccesorio
+                      ? [receptionChecklist.otroAccesorio]
+                      : [])
+                  ]
+                : receptionChecklist.otroAccesorio
+                  ? [receptionChecklist.otroAccesorio]
+                  : [],
+
+              accessoriesNotes: receptionChecklist.accessoriesNotes || '',
+              completedAt: receptionChecklist.completedAt || null,
+              completedBy: receptionChecklist.completedBy || null
+            }
+          : {
+              wasRepairedBefore: null,
+              isClean: null,
+              hasAccessories: null,
+              accessories: [],
+              accessoriesNotes: '',
+              completedAt: null,
+              completedBy: null
+            }
       }
 
       const newService = await ServiceModel.create(newServiceData)
@@ -375,12 +405,6 @@ class ServiceController {
         return res.status(404).json({ error: 'Servicio no encontrado' })
       }
 
-      // 1. aplicar datos de checklist antes de validar
-      if (receptionChecklist) {
-        service.receptionChecklist = receptionChecklist
-        console.log('service.receptionChecklist', receptionChecklist)
-      }
-
       // 2. VALIDACIÓN DE FLUJO
       const error = validateStatusTransition(service, status, receptionChecklist)
       if (error) {
@@ -392,16 +416,40 @@ class ServiceController {
         status,
         lastModifiedBy: req.user.email,
         lastModifiedAt: now,
+
         ...(receivedBy && { receivedBy }),
         ...(note && { notes: note }),
 
         ...(status === 'Recibido' && receivedAtBranch && { receivedAtBranch }),
         ...(status === 'Recibido' && { receivedAt: now }),
 
-         ...(receptionChecklist && { receptionChecklist }),
-
         ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
-        ...(status === 'Entregado' && typeof isSatisfied === 'boolean' && { isSatisfied })
+        ...(status === 'Entregado' && typeof isSatisfied === 'boolean' && { isSatisfied }),
+
+        // 🔥 FIX CLAVE: guardar checklist tal cual viene del frontend
+        ...(receptionChecklist && {
+          receptionChecklist: {
+            wasRepairedBefore: receptionChecklist.wasRepairedBefore ?? null,
+            isClean: receptionChecklist.isClean ?? null,
+            hasAccessories: receptionChecklist.hasAccessories ?? null,
+
+            // 🔥 ESTO ES LO IMPORTANTE
+            accessories: Array.isArray(receptionChecklist.accessories)
+              ? [
+                  ...receptionChecklist.accessories,
+                  ...(receptionChecklist.otroAccesorio
+                    ? [receptionChecklist.otroAccesorio]
+                    : [])
+                ]
+              : receptionChecklist.otroAccesorio
+                ? [receptionChecklist.otroAccesorio]
+                : [],
+
+            accessoriesNotes: receptionChecklist.accessoriesNotes || '',
+            completedAt: receptionChecklist.completedAt || now,
+            completedBy: receptionChecklist.completedBy || req.user.email
+          }
+        })
       }
 
       const historyEntry = {

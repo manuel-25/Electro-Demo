@@ -172,3 +172,26 @@
   background:#f8d7da;
   color:#721c24;
 }
+
+
+.accessories-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.accessory-badge {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: #111827;
+}
+
+.empty-state {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}

@@ -172,37 +172,30 @@ const ServiceSchema = new Schema(
 
     // EN GESTION CHECKLIST 
     receptionChecklist: {
-      wasRepairedBefore: { type: Boolean, default: null },
-      isClean: { type: Boolean, default: null },
-      hasAccessories: { type: Boolean, default: null },
+    wasRepairedBefore: { type: Boolean, default: null },
+    isClean: { type: Boolean, default: null },
+    hasAccessories: { type: Boolean, default: null },
 
-      accessories: {
-        cable: { type: Boolean, default: false },
-        controlRemoto: { type: Boolean, default: false },
-        bandejas: { type: Boolean, default: false },
-        jarra: { type: Boolean, default: false },
-        plato: { type: Boolean, default: false },
-        tapa: { type: Boolean, default: false },
-        manguera: { type: Boolean, default: false },
-        bateria: { type: Boolean, default: false },
-        base: { type: Boolean, default: false }
-      },
+    accessories: {
+      type: [
+        {
+          name: String,
+          label: String
+        }
+      ],
+      default: []
+    },
 
-      accessoriesOther: {
-        type: String,
-        default: '',
-      },
+    accessoriesNotes: {
+      type: String,
+      default: '',
+    },
 
-      accessoriesNotes: {
-        type: String,
-        default: '',
-      },
-
-      completedAt: { type: Date, default: null },
-      completedBy: {
-        type: String,
-        default: null
-      }
+    completedAt: { type: Date, default: null },
+    completedBy: {
+      type: String,
+      default: null
+    }
   },
 
   //Permite diferenciar estados viejos de los nuevos STATUS
@@ -234,6 +227,6 @@ function generatePublicId(length = 8) {
 ServiceSchema.index({ customerNumber: 1, createdAt: -1 })
 ServiceSchema.index({ workOrderStatus: 1 })
 
-const ServiceModel = mongoose.model('Service', ServiceSchema/*, 'services_backup'*/)
+const ServiceModel = mongoose.model('Service', ServiceSchema, 'services_backup')
 
 export default ServiceModel

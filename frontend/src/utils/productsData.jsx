@@ -586,7 +586,7 @@ export const bannerTexts = [
   "📲 Cotizá rápido por WhatsApp — Enviá fotos y te respondemos al momento",
   "⚡ ¿Tu electrodoméstico no funciona?",
   "📲 Cotizá ahora por WhatsApp en minutos",
-  "📍 Sucursales en Quilmes y Barracas"
+  "📍 Sucursal en Quilmes Vicente Lopez 770"
 ]
 
 export const barriosCABA = [
@@ -672,7 +672,7 @@ export const equipmentAccessories = [
   {
     id: 1, // Air Fryer
     name: "Air Fryer",
-    accessories: ["Baneja", "Recipiente para goteo"]
+    accessories: ["Bandeja", "Rejilla"]
   },
   {
     id: 2, // Aspiradora
