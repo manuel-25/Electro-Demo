@@ -230,8 +230,7 @@ ServiceSchema.index({ workOrderStatus: 1 })
 
 const ServiceModel = mongoose.model(
   'Service',
-  ServiceSchema,
-  config.COLLECTIONS.SERVICES
+  ServiceSchema
 )
 
 export default ServiceModel
