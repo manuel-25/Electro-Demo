@@ -244,6 +244,7 @@ const NuevoServicio = () => {
               classNamePrefix="react-select"
               placeholder="Buscar equipo..."
               options={equipoOptions}
+              value={equipoOptions.find(opt => opt.value === formData.equipmentType) || null}
               onChange={sel =>
                 setFormData(prev => ({ ...prev, equipmentType: sel?.value || '' }))
               }
