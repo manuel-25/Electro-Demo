@@ -1,5 +1,6 @@
 // models/service.model.js
 import mongoose from 'mongoose'
+import config from '../../utils/config.js'
 
 const { Schema, model } = mongoose
 
@@ -227,6 +228,10 @@ function generatePublicId(length = 8) {
 ServiceSchema.index({ customerNumber: 1, createdAt: -1 })
 ServiceSchema.index({ workOrderStatus: 1 })
 
-const ServiceModel = mongoose.model('Service', ServiceSchema, 'services')
+const ServiceModel = mongoose.model(
+  'Service',
+  ServiceSchema,
+  config.COLLECTIONS.SERVICES
+)
 
 export default ServiceModel

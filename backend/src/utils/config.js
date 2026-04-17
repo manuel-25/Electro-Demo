@@ -15,6 +15,12 @@ const config = {
   MAILER_USER: process.env.MAILER_USER,
   MAILER_PASS: process.env.MAILER_PASS,
   JWT_SECRET: process.env.JWT_SECRET,
+  COLLECTIONS: {
+    SERVICES:
+      process.env.NODE_ENV === 'production'
+        ? 'services'
+        : 'services_backup'
+  },
 
   // URLs dinámicas
   APP_URL:

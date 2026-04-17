@@ -397,7 +397,6 @@ class ServiceController {
     } = req.body
 
     try {
-      console.log('BODY:', req.body)
       const now = new Date()
 
       const service = await ServiceModel.findById(id)
