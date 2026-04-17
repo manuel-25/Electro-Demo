@@ -395,6 +395,7 @@ class ServiceController {
       isSatisfied,
       receptionChecklist
     } = req.body
+    console.log(receivedAtBranch, 'receivedAtBranch')
 
     try {
       const now = new Date()
@@ -418,21 +419,18 @@ class ServiceController {
 
         ...(receivedBy && { receivedBy }),
         ...(note && { notes: note }),
-
-        ...(status === 'Recibido' && receivedAtBranch && { receivedAtBranch }),
+        ...(status === 'Recibido' && receivedAtBranch && { receivedAtBranch }),...(status === 'Recibido' && { receivedAtBranch: receivedAtBranch || 'Quilmes'}),
         ...(status === 'Recibido' && { receivedAt: now }),
-
         ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
         ...(status === 'Entregado' && typeof isSatisfied === 'boolean' && { isSatisfied }),
 
-        // 🔥 FIX CLAVE: guardar checklist tal cual viene del frontend
+        // guardar checklist como viene del frontend
         ...(receptionChecklist && {
           receptionChecklist: {
             wasRepairedBefore: receptionChecklist.wasRepairedBefore ?? null,
             isClean: receptionChecklist.isClean ?? null,
             hasAccessories: receptionChecklist.hasAccessories ?? null,
 
-            // 🔥 ESTO ES LO IMPORTANTE
             accessories: Array.isArray(receptionChecklist.accessories)
               ? [
                   ...receptionChecklist.accessories,
@@ -461,7 +459,6 @@ class ServiceController {
         ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
         ...(typeof isSatisfied === 'boolean' && { isSatisfied })
       }
-      console.log('updatedPayload: ', updatePayload)
 
       const updated = await ServiceModel.findByIdAndUpdate(
         id,

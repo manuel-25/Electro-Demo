@@ -13,6 +13,7 @@ import { formatCurrency } from '../../utils/currency.js'
 import { formatDate } from '../../utils/formatDate.js'
 import { getStatusLabel } from '../../utils/productsData.jsx'
 import { ESTADOS_SERVICIO } from '../../utils/productsData.jsx'
+import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
 import './ServiceDetail.css'
 
 const Item = ({ label, value }) => (
@@ -269,10 +270,99 @@ const ServiceDetail = () => {
             <Item label="Modificado por" value={service.lastModifiedBy || '—'} />
             <Item label="Última modificación" value={formatDate(service.lastModifiedAt, true)} />
           </div>
+
+          {/*  Orden de Trabajo */}
+          <div className="info-column">
+            <h3>Orden de Trabajo</h3>
+
+            <Item
+              label="Estado OT"
+              value={
+                <WorkOrderControl
+                  service={service}
+                  onUpdate={(updatedService) => {
+                    setService(updatedService)
+                    showToast('Orden de trabajo actualizada.', 'success')
+                  }}
+                />
+              }
+            />
+
+            <Item
+              label="Enviado el"
+              value={formatDate(service.workOrderSentAt, true)}
+            />
+
+            <Item
+              label="Enviado por"
+              value={service.workOrderSentBy || '—'}
+            />
+
+            <Item
+              label="Respondido el"
+              value={formatDate(service.workOrderAnsweredAt, true)}
+            />
+
+            <Item
+              label="Respondido por"
+              value={service.workOrderAnsweredBy || '—'}
+            />
+          </div>
         </div>
 
         {/* Recepción, Entrega, Garantía, Metadatos */}
         <div className="info-group">
+          <div className="info-column">
+  <h3>Checklist de Recepción</h3>
+
+  <Item
+    label="¿Reparado previamente?"
+    value={
+      service.receptionChecklist?.wasRepairedBefore === true ? '✅ Sí'
+        : service.receptionChecklist?.wasRepairedBefore === false ? '❌ No'
+          : '—'
+    }
+  />
+
+  <Item
+    label="¿Equipo limpio?"
+    value={
+      service.receptionChecklist?.isClean === true ? '✅ Sí'
+        : service.receptionChecklist?.isClean === false ? '❌ No'
+          : '—'
+    }
+  />
+
+  <Item
+    label="¿Tiene accesorios?"
+    value={
+      service.receptionChecklist?.hasAccessories === true ? '✅ Sí'
+        : service.receptionChecklist?.hasAccessories === false ? '❌ No'
+          : '—'
+    }
+  />
+
+  {service.receptionChecklist?.accessories?.length > 0 && (
+    <Item
+      label="Accesorios"
+      value={
+        service.receptionChecklist.accessories
+          .map(a => a.label)
+          .join(', ')
+      }
+    />
+  )}
+
+  <Item
+    label="Completado por"
+    value={service.receptionChecklist?.completedBy || '—'}
+  />
+
+  <Item
+    label="Fecha"
+    value={formatDate(service.receptionChecklist?.completedAt, true)}
+  />
+</div>
           <div className="info-column">
             <h3>Recepción</h3>
             <Item label="Fecha de recepción" value={formatDate(service.receivedAt, true)} />
@@ -304,7 +394,20 @@ const ServiceDetail = () => {
             <Item label="Creado por" value={service.createdByEmail || service.createdBy || '—'} />
             <Item label="Fecha de creación" value={formatDate(service.createdAt, true)} />
             <Item label="Última actualización" value={formatDate(service.updatedAt, true)} />
-            <Item label="ID público" value={service.publicId || '—'} />
+            <Item
+              label="ID público"
+              value={
+                service.publicId ? (
+                  <strong
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => navigator.clipboard.writeText(service.publicId)}
+                    title="Click para copiar"
+                  >
+                    {service.publicId}
+                  </strong>
+                ) : '—'
+              }
+            />
           </div>
         </div>
 

@@ -2,6 +2,7 @@ import React from 'react'
 import axios from 'axios'
 import { getApiUrl } from '../../config'
 import { formatDate, timeSince } from '../../utils/formatDate'
+
 import './WorkOrderControl.css'
 
 export const normalizeClass = (text = '') =>

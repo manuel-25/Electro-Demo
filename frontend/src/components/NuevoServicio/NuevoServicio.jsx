@@ -159,8 +159,6 @@ const NuevoServicio = () => {
       deliveryMethod: formData.deliveryMethod
     }
 
-    console.log("SUBMIT", finalData)
-
     // SI YA TIENE SUCURSAL, abrimos modal en vez de enviar directo
     if (receivedAtBranch) {
       setPendingFinalData(finalData) // guardamos los datos pendientes
@@ -324,7 +322,6 @@ const NuevoServicio = () => {
             <label>Recibido En</label>
             <select name="receivedAtBranch" value={formData.receivedAtBranch} onChange={handleChange}>
               <option value="Quilmes">Quilmes</option>
-              <option value="Barracas">Barracas</option>
               <option value="">No recibido</option>
             </select>
           </div>
@@ -364,9 +361,14 @@ const NuevoServicio = () => {
       )}
       {showChecklistModal && (
         <ServiceStatusControl
-          service={{ equipmentType: formData.equipmentType }} // SIN _id = CREATE MODE
+          service={{ equipmentType: formData.equipmentType }}
           userEmail={auth.user.email}
           userBranch={formData.receivedAtBranch}
+
+          onClose={() => {
+            setShowChecklistModal(false)
+            setPendingFinalData(null)
+          }}
 
           onChecklistComplete={async (checklist) => {
             try {
@@ -375,15 +377,11 @@ const NuevoServicio = () => {
                 receptionChecklist: checklist
               }, { withCredentials: true })
 
-              setPendingFinalData(null)
               navigate('/servicios')
             } catch (err) {
               const msg = err.response?.data?.error || err.message
-
               logError(`Error creando servicio con checklist: ${msg} | user: ${auth.user.email}`)
-
               setError(msg)
-              console.error(err)
             } finally {
               setShowChecklistModal(false)
               setPendingFinalData(null)

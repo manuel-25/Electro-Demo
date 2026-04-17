@@ -74,8 +74,9 @@
 }
 
 .checkbox-item input[type="checkbox"] {
-  margin: 0;
-  transform: translateY(1px); /* 🔥 FIX CLAVE */
+  transform: scale(1.4);
+  margin-right: 6px;
+  cursor: pointer;
 }
 
 /* Input otro */

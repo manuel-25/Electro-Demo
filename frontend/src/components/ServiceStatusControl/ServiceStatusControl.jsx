@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ESTADOS_SERVICIO, normalizeStatus, equipmentAccessories } from '../../utils/productsData.jsx'
 import { updateServiceStatus } from '../../utils/updateServiceStatus.js'
 import StatusModal from '../StatusModal/StatusModal.jsx'
@@ -83,6 +83,7 @@ export default function ServiceStatusControl({
   onChecklistComplete = () => {},
   className = '',
   branches = ['Quilmes'],
+  onClose,
 }) {
 
   const [saving, setSaving] = useState(false)
@@ -291,7 +292,7 @@ export default function ServiceStatusControl({
   const currentEquipment = equipmentAccessories.find(
     eq => eq.name === service?.equipmentType
   )
-const availableAccessories = currentEquipment?.accessories || []
+  const availableAccessories = currentEquipment?.accessories || []
 
   return (
     <>
@@ -316,7 +317,10 @@ const availableAccessories = currentEquipment?.accessories || []
       {modalVisible && (
         <Modal
           title="Recepción del electrodoméstico"
-          onClose={() => setModalVisible(false)}
+          onClose={() => {
+            setModalVisible(false)
+            onClose?.()
+          }}
         >
           <div className="checklist-modal">
 
@@ -480,7 +484,10 @@ const availableAccessories = currentEquipment?.accessories || []
             <div className="checklist-actions">
               <button
                 className="btn-cancelar"
-                onClick={() => setModalVisible(false)}
+                onClick={() => {
+                  setModalVisible(false)
+                  onClose?.()
+                }}
               >
                 Cancelar
               </button>

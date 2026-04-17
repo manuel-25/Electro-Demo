@@ -108,7 +108,7 @@ botHandlers(client);
 
 
 // ====== WHATSAPP BOT ======
-client.on('qr', (qr) => {
+/*client.on('qr', (qr) => {
   qrcode.generate(qr, { small: true });
 });
 
@@ -158,4 +158,4 @@ setInterval(async () => {
     await client.destroy()
     await client.initialize()
   }
-}, 600000)
+}, 600000)  */
