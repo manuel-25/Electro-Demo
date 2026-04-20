@@ -4,7 +4,7 @@ export const USER_BRANCHES = ['Quilmes', 'Barracas', 'Ninguna']
 
 const UserSchema = new Schema(
   {
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true },
 
     firstName: { type: String, required: true },
@@ -17,6 +17,10 @@ const UserSchema = new Schema(
     lastLoginAt: { type: Date, default: Date.now },
     loginCount: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+
+    failedLoginAttempts: Number,
+    lockUntil: Date,
+    lockLevel: Number,
 
     notes: { type: String }
   },

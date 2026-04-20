@@ -2,15 +2,13 @@ import express from 'express'
 import UserController from '../controllers/userController.js'
 import authenticateJWT from '../middlewares/authenticateJWT.js'
 import authenticateAdmin from '../middlewares/authenticateAdmin.js'
+import checkUserLock from '../middlewares/checkUserLock.js'
+import loginLimiter from '../middlewares/loginLimiter.js'
 
 const router = express.Router()
 
-// Ruta para verificar el token (más específica)
 router.get('/verifytoken', authenticateJWT, UserController.verifyToken)
-
-
-router.get('/verifytoken', authenticateJWT, UserController.verifyToken)
-router.post('/login', UserController.login)
+router.post('/login', loginLimiter, checkUserLock, UserController.login)
 router.post('/logout', authenticateJWT, UserController.logout)
 router.get('/me', authenticateJWT, UserController.getProfile)
 

@@ -6,7 +6,7 @@ import { AuthContext } from '../../Context/AuthContext'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import ServiceStatusControl from '../ServiceStatusControl/ServiceStatusControl.jsx'
 import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
-import { formatDate, timeSince } from '../../utils/formatDate.js'
+import { timeSince } from '../../utils/formatDate.js'
 import { getStatusClass } from '../../utils/productsData.jsx'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faPrint } from '@fortawesome/free-solid-svg-icons'
@@ -117,7 +117,7 @@ const activeServices = services.filter(s => {
     <DashboardLayout>
       <div className="dashboard-wrapper">
         {/* ================= CARDS ================= */}
-        <h2 className="dashboard-title">📊 Resumen del negocio</h2>
+        <h2 className="dashboard-title">Electrosafe Dashboard</h2>
 
         <div className="card-container">
           <div className="info-card blue">

@@ -15,6 +15,7 @@ const config = {
   MAILER_USER: process.env.MAILER_USER,
   MAILER_PASS: process.env.MAILER_PASS,
   JWT_SECRET: process.env.JWT_SECRET,
+
   COLLECTIONS: {
     SERVICES:
       process.env.NODE_ENV === 'production'
@@ -27,6 +28,15 @@ const config = {
     process.env.NODE_ENV === 'production'
       ? process.env.APP_URL_PROD
       : process.env.APP_URL_DEV,
+
+  // 🔐 CONFIG DE SEGURIDAD LOGIN
+  AUTH: {
+    MAX_LOGIN_ATTEMPTS: Number(process.env.MAX_LOGIN_ATTEMPTS) || 5,
+    LOCK_TIME:
+  process.env.NODE_ENV === 'production'
+    ? Number(process.env.LOGIN_LOCK_TIME) || 15 * 60 * 1000
+    : 60 * 1000 // 1 min en dev
+  }
 }
 
 export default config

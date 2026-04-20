@@ -48,6 +48,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password, remember = true) => {
     setLoading(true)
     setError(null)
+
     try {
       const response = await fetch(`${getApiUrl()}/api/manager/login`, {
         method: 'POST',
@@ -55,18 +56,35 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password, remember }),
         credentials: 'include'
       })
-      if (!response.ok) {
-        setError('Credenciales inválidas o error de conexión')
-        return false
-      }
+
       const data = await response.json()
+
+      // ❌ ERROR (401, 403, etc)
+      if (!response.ok) {
+        setError(data.message || 'Error al iniciar sesión')
+
+        return {
+          success: false,
+          lockUntil: data.lockUntil || null
+        }
+      }
+
+      // ✅ LOGIN OK
       setAuth({ user: data.user })
       setAuthenticated(true)
-      return true
+
+      return {
+        success: true
+      }
+
     } catch (err) {
       console.error('Error en login:', err)
-      setError('Credenciales inválidas o error de conexión')
-      return false
+
+      setError('Error de conexión')
+
+      return {
+        success: false
+      }
     } finally {
       setLoading(false)
     }
