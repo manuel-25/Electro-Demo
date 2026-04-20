@@ -18,9 +18,9 @@ const config = {
 
   COLLECTIONS: {
     SERVICES:
-      process.env.NODE_ENV === 'production'
-        ? 'services'
-        : 'services_backup'
+      process.env.NODE_ENV === 'development'
+        ? 'services_backup'
+        : 'services'
   },
 
   // URLs dinámicas
