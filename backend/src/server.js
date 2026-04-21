@@ -24,7 +24,7 @@ dotenv.config()
 const app = express()
 const port = config.PORT || 5000 // config.PORT || 5000
 
-app.set('trust proxy', 1)
+app.set('trust proxy', true)
 
 // Middleware
 const allowedOrigins = [

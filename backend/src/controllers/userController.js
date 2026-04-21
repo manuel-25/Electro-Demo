@@ -86,6 +86,7 @@
             req.headers['x-forwarded-for']?.split(',')[0] ||
             req.socket?.remoteAddress ||
             req.ip
+            console.log('DEBUG IP:', ip)
 
           const geo = geoip.lookup(ip)
 
@@ -95,7 +96,7 @@
           const isSuspiciousLocation = !SAFE_COUNTRIES.includes(country)
 
           if (isSuspiciousLocation) {
-            logger.warn(`⚠️ Login desde país no permitido
+            logger.error(`⚠️ Login desde país no permitido
               Email: ${user.email}
               IP: ${ip}
               País: ${country}
