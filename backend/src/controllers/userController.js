@@ -5,7 +5,7 @@
   import { logger } from '../utils/logger.js'
   import geoip from 'geoip-lite'
 
-  const SAFE_COUNTRIES = ['AR']
+  const SAFE_COUNTRIES = ['AR', 'IT']
 
   class UserController {    // Crear un nuevo usuario
   static async createUser(req, res) {

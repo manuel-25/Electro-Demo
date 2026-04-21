@@ -12,6 +12,8 @@ import cookieParser from 'cookie-parser'
 import config from './utils/config.js'
 import { logger } from './utils/logger.js'
 import statsRoutes from './routes/statsRoutes.js'
+import helmet from 'helmet'
+import mongoSanitize from 'express-mongo-sanitize'
 
 //Whatsapp
 import qrcode from 'qrcode-terminal'
@@ -24,7 +26,7 @@ dotenv.config()
 const app = express()
 const port = config.PORT || 5000 // config.PORT || 5000
 
-app.set('trust proxy', true)
+app.set('trust proxy', 1)
 
 // Middleware
 const allowedOrigins = [
@@ -42,7 +44,9 @@ app.use(cors({
   credentials: true // Habilita el uso de credenciales (cookies, autorizaciones)
 }))
 app.use(cookieParser())
-app.use(express.json())
+app.use(express.json({ limit: '100kb' }))
+app.use(helmet())
+app.use(mongoSanitize())
 
 // Routes
 app.use('/api/quotes', quoteRoutes)
