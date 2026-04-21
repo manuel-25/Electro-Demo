@@ -87,14 +87,12 @@
             req.socket?.remoteAddress ||
             req.ip
             console.log('DEBUG IP:', ip)
-            console.log('HEADERS:', req.headers)
-            console.log('IP RAW:', req.socket?.remoteAddress)
-            console.log('IP EXPRESS:', req.ip)
-
           const geo = geoip.lookup(ip)
 
           const country = geo?.country || 'Unknown'
           const city = geo?.city || 'Unknown'
+          console.log('GEO:', geo)
+          console.log('DEBUG Country:', country, 'City:', city)
 
           const isSuspiciousLocation = !SAFE_COUNTRIES.includes(country)
 
