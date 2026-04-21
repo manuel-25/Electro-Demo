@@ -87,6 +87,9 @@
             req.socket?.remoteAddress ||
             req.ip
             console.log('DEBUG IP:', ip)
+            console.log('HEADERS:', req.headers)
+            console.log('IP RAW:', req.socket?.remoteAddress)
+            console.log('IP EXPRESS:', req.ip)
 
           const geo = geoip.lookup(ip)
 
