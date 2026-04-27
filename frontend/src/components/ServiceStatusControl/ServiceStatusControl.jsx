@@ -195,16 +195,8 @@ export default function ServiceStatusControl({
     } catch (e) {
       const errorMsg = e.response?.data?.error || e.message
 
-      console.error('[ServiceStatusControl] ERROR:', errorMsg)
-
       // 🟡 ERROR ESPERADO → NO MAIL
       if (errorMsg === 'Debe completar el checklist') {
-        logError('Intento avanzar sin checklist', 'warn', {
-          serviceId: service?._id,
-          from: service?.status,
-          to: params?.newStatus,
-          user: userEmail
-        })
 
         setNextStatus('En Gestión')
         setModalVisible(true)
@@ -742,11 +734,11 @@ export default function ServiceStatusControl({
                 }}
                 onClick={async () => {
                   if (sinRespuestaModal.level === 'fuerte') {
-                    logError('Servicio marcado como sin respuesta antes de tiempo', 'error', {
-                      serviceId: service._id,
-                      days: sinRespuestaModal.daysSinceCreation,
-                      user: userEmail
-                    })
+                    logError(
+                      `Servicio marcado como sin respuesta antes de tiempo | Equipo: ${service.equipmentType} | Código: ${service.code} | Días: ${sinRespuestaModal.daysSinceCreation} | Estado: ${service.status} | Usuario: ${userEmail}`,
+                      'error',
+                      { serviceId: service._id }
+                    )
                   }
 
                   await persist({
