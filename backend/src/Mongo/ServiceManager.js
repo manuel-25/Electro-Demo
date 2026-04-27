@@ -74,6 +74,65 @@ class ServiceManagerDao {
       { new: true }
     )
   }
+
+  async updateWithInactivity(id, updateOps, config = { new: true }) {
+    const service = await this.serviceModel.findById(id)
+    if (!service) return null
+
+    const now = new Date()
+
+    const lastActivity = service.lastActivityAt || service.createdAt
+    const inactivityMs = now - new Date(lastActivity)
+
+    const total = (service.inactivityAccumulatedMs || 0) + inactivityMs
+    const max = Math.max(service.maxInactivityMs || 0, inactivityMs)
+
+    return await this.serviceModel.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          ...(updateOps.$set || {}),
+          lastActivityAt: now,
+          inactivityAccumulatedMs: total,
+          maxInactivityMs: max
+        },
+        ...(updateOps.$push && { $push: updateOps.$push }),
+        ...(updateOps.$inc && { $inc: updateOps.$inc })
+      },
+      config
+    )
+  }
+
+  async getInactiveServices(days = 7) {
+    const limitDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
+
+    return await this.serviceModel
+      .find({
+        lastActivityAt: { $lte: limitDate },
+        status: { $nin: ['Entregado', 'Eliminado'] }
+      })
+      .sort({ lastActivityAt: 1 })
+  }
+
+  async registerClientInteraction(id) {
+    return await this.serviceModel.findByIdAndUpdate(
+      id,
+      {
+        lastClientMessageAt: new Date()
+      },
+      { new: true }
+    )
+  }
+
+  async registerOutboundContact(id) {
+    return await this.serviceModel.findByIdAndUpdate(
+      id,
+      {
+        lastOutboundContactAt: new Date()
+      },
+      { new: true }
+    )
+  }
 }
 
 const ServiceManager = new ServiceManagerDao()

@@ -5,7 +5,11 @@ import StatusModal from '../StatusModal/StatusModal.jsx'
 import Modal from '../Modal/Modal.jsx'
 import './ServiceStatusControl.css'
 import { logError } from '../../utils/logger.js'
+import { getSinRespuestaInfo } from '../../utils/sinRespuestaHelper.js'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 
+// Define los estados que salen en el select 
 const getAvailableStatuses = (service) => {
   if (!service) return []
 
@@ -15,24 +19,49 @@ const getAvailableStatuses = (service) => {
 
   const status = service.status || 'Pendiente'
 
+  let baseStatuses = []
+
   switch (status) {
     case 'En Gestión':
-      return ['En Gestión']
+      baseStatuses = ['En Gestión']
+      break
     case 'Reparación':
-      return ['Reparación', 'Listo para retirar']
+      baseStatuses = ['Reparación', 'Listo para retirar']
+      break
     case 'Armado S/R':
-      return ['Armado S/R', 'Listo para retiro S/R']
+      baseStatuses = ['Armado S/R', 'Listo para retiro S/R']
+      break
     case 'Listo para retirar':
-      return ['Listo para retirar', 'Entregado']
+      baseStatuses = ['Listo para retirar', 'Entregado']
+      break
     case 'Listo para retiro S/R':
-      return ['Listo para retiro S/R', 'Entregado S/R']
+      baseStatuses = ['Listo para retiro S/R', 'Entregado S/R']
+      break
     case 'Pendiente':
-      return ['Pendiente', 'Recibido']
+      baseStatuses = ['Pendiente', 'Recibido']
+      break
     case 'Recibido':
-      return ['Recibido', 'En Gestión']
+      baseStatuses = ['Recibido', 'En Gestión']
+      break
+    case 'Sin respuesta':
+      baseStatuses = ['Sin respuesta', 'Retirado a bodega']
+      break
     default:
-      return [status]
+      baseStatuses = [status]
+      break
   }
+
+  // 👇 agregar "Sin respuesta" SOLO si:
+  // - NO está entregado
+  // - NO está ya en sin respuesta o bodega
+  // - Y NO está en Pendiente
+  if (
+    !['Entregado', 'Entregado S/R', 'Sin respuesta', 'Retirado a bodega', 'Pendiente'].includes(status)
+  ) {
+    baseStatuses.push('Sin respuesta')
+  }
+
+  return [...new Set(baseStatuses)]
 }
 
 export const getNextActions = (service) => {
@@ -100,6 +129,8 @@ export default function ServiceStatusControl({
   const [modalVisible, setModalVisible] = useState(isCreateMode)
   const [deliveryModalVisible, setDeliveryModalVisible] = useState(false)
   const [deliveryData, setDeliveryData] = useState(null)
+  const [sinRespuestaModal, setSinRespuestaModal] = useState(null)
+  const [bodegaModal, setBodegaModal] = useState(false)
 
   const validateChecklist = () => {
     const { reparacion, higienizado, poseeAccesorios, accessories, otroAccesorio } = formData
@@ -198,6 +229,24 @@ export default function ServiceStatusControl({
 
   const onChange = (value) => {
     if (!service?._id || saving) return
+
+    // 🔴 SIN RESPUESTA
+    if (value === 'Sin respuesta') {
+      const info = getSinRespuestaInfo(service)
+
+      setSinRespuestaModal({
+        ...info,
+        nextStatus: value
+      })
+
+      return
+    }
+
+    // 🟡 BODEGA
+    if (value === 'Retirado a bodega') {
+      setBodegaModal(true)
+      return
+    }
 
     // Mostrar modal de recepción al pasar Pendiente → Recibido
     if (service.status === 'Pendiente' && value === 'Recibido') {
@@ -588,6 +637,238 @@ export default function ServiceStatusControl({
               >
                 Equipo listo para entregar
               </button>
+            </div>
+
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal de sin respuesta */}
+      {sinRespuestaModal && (
+        <Modal
+          title="Servicio sin respuesta"
+          onClose={() => setSinRespuestaModal(null)}
+        >
+          <div className="checklist-modal">
+
+            {/* INFO */}
+            <p>
+              <strong>Servicio:</strong> {service.code}
+            </p>
+
+            <p>
+              <strong>Cliente:</strong>{' '}
+              {service.userData?.firstName} {service.userData?.lastName}
+            </p>
+
+            <p>
+              <strong>Equipo:</strong>{' '}
+              {service.equipmentType} {service.brand}
+            </p>
+
+            <p>
+              ⏱ Creado hace <strong>{sinRespuestaModal.timeSinceCreation}</strong>
+            </p>
+
+            <p>
+              🕓 Última actividad{' '}
+              <strong>{sinRespuestaModal.timeSinceLastActivity}</strong>
+            </p>
+
+            {/* ALERTA */}
+            {sinRespuestaModal.level === 'fuerte' ? (
+              <p style={{
+                color: '#b00020',
+                background: '#ffe5e5',
+                padding: '8px',
+                borderRadius: '6px'
+              }}>
+                ⚠️ Este servicio es reciente. Evitá marcarlo como sin respuesta.
+              </p>
+            ) : (
+              <p style={{
+                color: '#8a6d3b',
+                background: '#fff7e0',
+                padding: '8px',
+                borderRadius: '6px'
+              }}>
+                Sugerencia: contactá al cliente antes de continuar.
+              </p>
+            )}
+
+            {/* WHATSAPP */}
+            {service?.userData?.phone && (
+              <a
+                href={`https://wa.me/54${String(service.userData.phone).replace(/\D/g, '')}?text=${encodeURIComponent(
+                  `Hola ${service.userData?.firstName || ''}, te contactamos por tu equipo (${service.code}) esta a la espera de coordinación, quedamos a disposición.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block',
+                  marginTop: 10,
+                  marginBottom: 10,
+                  padding: 10,
+                  background: '#25D366',
+                  color: '#fff',
+                  textAlign: 'center',
+                  borderRadius: 6,
+                  textDecoration: 'none'
+                }}
+              >
+                📲 Enviar WhatsApp
+              </a>
+            )}
+
+            {/* BOTONES */}
+            <div className="checklist-actions">
+
+              <button
+                className="btn-cancelar"
+                onClick={() => setSinRespuestaModal(null)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="btn-submit"
+                style={{
+                  background: sinRespuestaModal.level === 'fuerte'
+                    ? '#d32f2f'
+                    : undefined,
+                  color: sinRespuestaModal.level === 'fuerte'
+                    ? '#fff'
+                    : undefined
+                }}
+                onClick={async () => {
+                  if (sinRespuestaModal.level === 'fuerte') {
+                    logError('Servicio marcado como sin respuesta antes de tiempo', 'error', {
+                      serviceId: service._id,
+                      days: sinRespuestaModal.daysSinceCreation,
+                      user: userEmail
+                    })
+                  }
+
+                  await persist({
+                    service,
+                    newStatus: 'Sin respuesta',
+                    token,
+                    note,
+                    userEmail
+                  })
+
+                  setSinRespuestaModal(null)
+                }}
+              >
+                Marcar como sin respuesta
+              </button>
+
+            </div>
+          </div>
+        </Modal>
+      )}
+
+      {/* Modal de retirado a bodega */}
+      {bodegaModal && (
+        <Modal
+          title="Enviar a bodega"
+          onClose={() => setBodegaModal(false)}
+        >
+          <div className="checklist-modal">
+
+            {/* INFO */}
+            <div className="modal-section">
+              <p><strong>Servicio:</strong> {service.code}</p>
+              <p><strong>Cliente:</strong> {service.userData?.firstName}</p>
+              <p><strong>Equipo:</strong> {service.equipmentType}</p>
+              <p><strong>Marca:</strong> {service.brand}</p>
+            </div>
+
+            {/* WARNING */}
+            <div className="modal-warning">
+              📦 El equipo será almacenado en bodega. No se puede revertir esta acción.
+            </div>
+
+            {/* WHATSAPP 1 - AVISO SIMPLE */}
+            {service?.userData?.phone && (
+              <a
+                href={`https://wa.me/54${String(service.userData.phone).replace(/\D/g, '')}?text=${encodeURIComponent(
+                  `Hola ${service.userData?.firstName || ''}, te informamos que tu ${service.equipmentType} (${service.code}) será derivado a bodega en breve, ante cualquier consulta estamos a disposición.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block',
+                  marginTop: 10,
+                  marginBottom: 10,
+                  padding: 10,
+                  background: '#25D366',
+                  color: '#fff',
+                  textAlign: 'center',
+                  borderRadius: 6,
+                  textDecoration: 'none'
+                }}
+              >
+                <FontAwesomeIcon icon={faWhatsapp} /> Aviso de derivación
+              </a>
+            )}
+
+            {/* WHATSAPP 2 - FINAL PROFESIONAL */}
+            {service?.userData?.phone && (
+              <a
+                href={`https://wa.me/54${String(service.userData.phone).replace(/\D/g, '')}?text=${encodeURIComponent(
+                  `Hola ${service.userData?.firstName || ''}, tu ${service.equipmentType} (${service.code}) fue trasladado a bodega conforme a las condiciones del servicio, debido a requerimientos de almacenamiento. Cualquier duda estamos a disposición.`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'block',
+                  marginBottom: 12,
+                  padding: 10,
+                  background: '#128C7E',
+                  color: '#fff',
+                  textAlign: 'center',
+                  borderRadius: 6,
+                  textDecoration: 'none',
+                  fontWeight: 500
+                }}
+              >
+                📦 Aviso final de bodega
+              </a>
+            )}
+
+            {/* CONFIRMACION */}
+            <p className="modal-question">
+              ¿Confirmás esta acción?
+            </p>
+
+            {/* BOTONES */}
+            <div className="checklist-actions">
+
+              <button
+                className="btn-cancelar"
+                onClick={() => setBodegaModal(false)}
+              >
+                Cancelar
+              </button>
+
+              <button
+                className="btn-submit btn-danger"
+                onClick={async () => {
+                  await persist({
+                    service,
+                    newStatus: 'Retirado a bodega',
+                    token,
+                    note,
+                    userEmail
+                  })
+
+                  setBodegaModal(false)
+                }}
+              >
+                Confirmar
+              </button>
+
             </div>
 
           </div>

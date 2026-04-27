@@ -199,6 +199,24 @@ const ServiceSchema = new Schema(
     }
   },
 
+  // 📊 INACTIVIDAD (core del problema)
+  lastActivityAt: { type: Date, default: Date.now }, // última vez que se tocó el service (cualquier cambio)
+  inactivityAccumulatedMs: { type: Number, default: 0 }, // tiempo total acumulado inactivo
+  maxInactivityMs: { type: Number, default: 0 }, // pico máximo de inactividad
+
+  // TRACKEO DE "SIN RESPUESTA"
+  markedAsNoResponseAt: { type: Date, default: null },
+  lastClientMessageAt: { type: Date, default: null }, // si responde por whatsapp u otro canal
+  lastOutboundContactAt: { type: Date, default: null }, // cuando vos le escribiste
+
+  // CONTROL OPERATIVO
+  forceBodegaEligible: { type: Boolean, default: false }, // para casos +30 días,
+
+  previousStatus: {
+    type: String,
+    default: null
+  },
+
   //Permite diferenciar estados viejos de los nuevos STATUS
   flowVersion: { type: Number, default: 2 },
 

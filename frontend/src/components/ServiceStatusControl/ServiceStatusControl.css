@@ -196,3 +196,39 @@
   color: #9ca3af;
   margin-top: 4px;
 }
+
+.checklist-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checklist-modal p {
+  margin: 0;
+}
+
+.modal-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-warning {
+  background: #fff3cd;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.modal-question {
+  font-weight: 500;
+}
+
+.checklist-actions {
+  margin-top: 8px;
+}
+
+.btn-danger {
+  background: #d32f2f;
+  color: #fff;
+}

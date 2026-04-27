@@ -8,7 +8,7 @@ async function connectDB() {
     await mongoose.connect(MONGO_URI, {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      family: 4 // 🔥 FORZAR IPv4 (clave en tu caso)
+      family: 4 // 🔥 FORZAR IPv4
     })
 
     console.info('✅ Connected to MongoDB')

@@ -2,6 +2,7 @@ import ServiceModel from '../Mongo/models/service.model.js'
 import ClientManager from '../Mongo/ClientManager.js'
 import NumberGenerator from '../services/numberGenerator.js'
 import { logger } from '../utils/logger.js'
+import ServiceManager from '../Mongo/ServiceManager.js'
 
 const VALID_PREFIX = ['Q','B','W']
 
@@ -460,7 +461,7 @@ class ServiceController {
         ...(typeof isSatisfied === 'boolean' && { isSatisfied })
       }
 
-      const updated = await ServiceModel.findByIdAndUpdate(
+      const updated = await ServiceManager.updateWithInactivity(
         id,
         {
           $set: updatePayload,
@@ -585,6 +586,18 @@ class ServiceController {
         error: 'Error actualizando orden de trabajo',
         details: err.message
       })
+    }
+  }
+
+  static async getInactiveServices(req, res) {
+    try {
+      const days = Number(req.query.days) || 7
+
+      const services = await ServiceManager.getInactiveServices(days)
+
+      res.json(services)
+    } catch (err) {
+      res.status(500).json({ error: 'Error al obtener servicios inactivos' })
     }
   }
 
