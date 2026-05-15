@@ -29,15 +29,46 @@ export const isWarrantyStatus = (status) => {
 }
 
 export const canStartWarranty = (service) => {
+
   if (!service) return false
 
-  return (
-    service.status === 'Entregado' &&
-    service.workOrderStatus === 'Aceptada' &&
-    !!service.warrantyUntil &&
-    new Date(service.warrantyUntil) > new Date() &&
-    !service.activeWarrantyEventId
+  // solo entregados
+  if (service.status !== 'Entregado') {
+    return false
+  }
+
+  // evitar garantías duplicadas
+  if (service.activeWarrantyEventId) {
+    return false
+  }
+
+  // fecha base
+  const baseDate =
+    service.deliveredAt ||
+    service.receivedAt ||
+    service.createdAt
+
+  if (!baseDate) {
+    return false
+  }
+
+  // días de garantía
+  const days =
+    Number(service.warrantyExpiration) || 0
+
+  if (days <= 0) {
+    return false
+  }
+
+  // calcular vencimiento dinámico
+  const warrantyUntil = new Date(baseDate)
+
+  warrantyUntil.setDate(
+    warrantyUntil.getDate() + days
   )
+
+  // vigente
+  return warrantyUntil > new Date()
 }
 
 // =========================

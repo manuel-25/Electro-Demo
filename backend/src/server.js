@@ -18,23 +18,25 @@ import statsRoutes from './routes/statsRoutes.js'
 import helmet from 'helmet'
 import mongoSanitize from 'express-mongo-sanitize'
 
+/*
 //Whatsapp
 import qrcode from 'qrcode-terminal'
 import client from './whatsapp/whatsappClient.js'
 import botHandlers from './whatsapp/botHandlers.js'
 import ConversationManager from './Mongo/ConversationManager.js'
+*/
 
 dotenv.config()
 
 const app = express()
-const port = config.PORT || 5000 // config.PORT || 5000
+const port = config.PORT || 5000
 
 app.set('trust proxy', 1)
 
 // Middleware
 const allowedOrigins = [
-  'https://electrosafeweb.com',  // Dominio de producción
-  'http://localhost:3000'         // Origen de desarrollo
+  'https://electrosafeweb.com',
+  'http://localhost:3000'
 ]
 
 app.use(cors({
@@ -44,8 +46,9 @@ app.use(cors({
     }
     return callback(new Error('No permitido por CORS'))
   },
-  credentials: true // Habilita el uso de credenciales (cookies, autorizaciones)
+  credentials: true
 }))
+
 app.use(cookieParser())
 app.use(express.json({ limit: '100kb' }))
 app.use(helmet())
@@ -63,25 +66,31 @@ app.use('/api/stats', statsRoutes)
 // MongoDB Connection
 await connectDB()
 
-// Middleware general de manejo de errores (opcional)
+// Middleware general de manejo de errores
 app.use((err, req, res, next) => {
-  res.status(500).json({ message: 'Ocurrió un error en el servidor', error: err.message })
+  res.status(500).json({
+    message: 'Ocurrió un error en el servidor',
+    error: err.message
+  })
 })
 
+/*
 // ================================
 // ⏱ CHECK PRIORITY WHATSAPP
 // ================================
 setInterval(async () => {
   try {
-    await ConversationManager.checkWaitingPriority(60); // 1 para pruebas 60 produccion.
+    await ConversationManager.checkWaitingPriority(60)
   } catch (error) {
-    logger.debug('Error revisando prioridades:', error);
+    logger.debug('Error revisando prioridades:', error)
   }
-}, 60 * 1000); // cada 1 minuto
+}, 60 * 1000)
+*/
 
 /* ==========================================
-   🛑 GLOBAL ERROR HANDLERS (PRODUCCIÓN)
+   🛑 GLOBAL ERROR HANDLERS
 ========================================== */
+
 process.on('uncaughtException', (err) => {
   logger.fatal(`Uncaught Exception: ${err.stack}`)
 })
@@ -90,81 +99,33 @@ process.on('unhandledRejection', (reason) => {
   logger.fatal(`Unhandled Rejection: ${reason}`)
 })
 
+/*
 process.on('SIGTERM', async () => {
   logger.warn('Proceso detenido (SIGTERM)')
+
   try {
     await client.destroy()
   } catch (err) {
     logger.error(`Error cerrando WhatsApp: ${err.message}`)
   }
+
   process.exit(0)
 })
+*/
 
-
-
-// START THE SERVER
+// START SERVER
 app.listen(port, async () => {
-  logger.info(`Server is running on port: ${port}`);
+  logger.info(`Server is running on port: ${port}`)
 
+  /*
   if (!global.clientInitialized) {
-    client.initialize();
-    global.clientInitialized = true;
+    client.initialize()
+    global.clientInitialized = true
   }
+  */
 })
 
+/*
 // 🔥 HANDLERS DE MENSAJES
-botHandlers(client);
-
-
-// ====== WHATSAPP BOT ======
-/*client.on('qr', (qr) => {
-  qrcode.generate(qr, { small: true });
-});
-
-client.on('ready', () => {
-  logger.info('WhatsApp Bot conectado ✅');
-});
-
-client.on('change_state', (state) => {
-  logger.info(`Estado cambió a: ${state}`)
-});
-
-client.on('disconnected', async (reason) => {
-  logger.error(`WhatsApp desconectado ❌ Motivo: ${reason}`)
-
-  try {
-    await client.destroy().catch(() => {})
-    await client.initialize()
-  } catch (err) {
-    logger.fatal(`Reinicio fallido: ${err.message}`)
-  }
-})
-
-// 🛡 WATCHDOG PRODUCCIÓN
-let lastConnectedState = 'CONNECTED'
-
-setInterval(async () => {
-  try {
-    const state = await client.getState()
-    logger.info(`Estado actual: ${state}`)
-
-    if (state !== 'CONNECTED') {
-      logger.info(`Estado inválido detectado: ${state}`)
-
-      if (lastConnectedState === 'CONNECTED') {
-        logger.info(`⚠️ WhatsApp perdió conexión. Estado: ${state}`)
-      }
-
-      await client.destroy()
-      await client.initialize()
-    }
-
-    lastConnectedState = state
-
-  } catch (err) {
-    logger.fatal(`💥 Error obteniendo estado WhatsApp: ${err.message}`)
-
-    await client.destroy()
-    await client.initialize()
-  }
-}, 600000)  */
+botHandlers(client)
+*/
