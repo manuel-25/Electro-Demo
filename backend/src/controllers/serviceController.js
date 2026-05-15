@@ -384,9 +384,10 @@ class ServiceController {
     }
   }
 
-  // ✅ updateServiceStatus (reemplazar)
+  // ✅ updateServiceStatus
   static async updateServiceStatus(req, res) {
     const { id } = req.params
+
     const {
       status,
       receivedBy,
@@ -396,23 +397,55 @@ class ServiceController {
       isSatisfied,
       receptionChecklist
     } = req.body
-    console.log(receivedAtBranch, 'receivedAtBranch')
 
     try {
       const now = new Date()
 
       const service = await ServiceModel.findById(id)
+
       if (!service) {
         return res.status(404).json({ error: 'Servicio no encontrado' })
       }
 
-      // 2. VALIDACIÓN DE FLUJO
-      const error = validateStatusTransition(service, status, receptionChecklist)
+      // ✅ Validación de flujo
+      const error = validateStatusTransition(
+        service,
+        status,
+        receptionChecklist
+      )
+
       if (error) {
         return res.status(400).json({ error })
       }
 
-      //Payload antes de actualizar
+      // ✅ Cierre de garantía
+      const isClosingWarranty =
+        service.status === 'Listo para retirar Garantía' &&
+        status === 'Entregado' &&
+        service.activeWarrantyEventId
+
+      let closedWarrantyData = null
+
+      if (isClosingWarranty) {
+        const activeWarranty = service.warrantyEvents.id(
+          service.activeWarrantyEventId
+        )
+
+        if (activeWarranty) {
+          activeWarranty.closedAt = now
+          activeWarranty.closedBy = req.user.email
+          activeWarranty.finalStatus = 'Resuelta'
+          activeWarranty.resolutionNote = note || ''
+
+          await service.save()
+
+          closedWarrantyData = {
+            activeWarrantyEventId: null
+          }
+        }
+      }
+
+      // ✅ Payload
       const updatePayload = {
         status,
         lastModifiedBy: req.user.email,
@@ -420,19 +453,44 @@ class ServiceController {
 
         ...(receivedBy && { receivedBy }),
         ...(note && { notes: note }),
-        ...(status === 'Recibido' && receivedAtBranch && { receivedAtBranch }),...(status === 'Recibido' && { receivedAtBranch: receivedAtBranch || 'Quilmes'}),
-        ...(status === 'Recibido' && { receivedAt: now }),
-        ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
-        ...(status === 'Entregado' && typeof isSatisfied === 'boolean' && { isSatisfied }),
 
-        // guardar checklist como viene del frontend
+        ...(status === 'Recibido' && {
+          receivedAtBranch: receivedAtBranch || 'Quilmes',
+          receivedAt: now
+        }),
+
+        // ✅ Solo crear nueva garantía si NO es cierre de garantía
+        ...(status === 'Entregado' && !isClosingWarranty && {
+          deliveredAt: deliveredAt || now,
+          warrantyUntil: new Date(
+            (deliveredAt || now).getTime() +
+            (service.warrantyExpiration || 30) *
+            24 * 60 * 60 * 1000
+          )
+        }),
+
+        ...(status === 'Entregado' &&
+          typeof isSatisfied === 'boolean' && {
+            isSatisfied
+          }),
+
+        ...(closedWarrantyData || {}),
+
+        // ✅ Checklist
         ...(receptionChecklist && {
           receptionChecklist: {
-            wasRepairedBefore: receptionChecklist.wasRepairedBefore ?? null,
-            isClean: receptionChecklist.isClean ?? null,
-            hasAccessories: receptionChecklist.hasAccessories ?? null,
+            wasRepairedBefore:
+              receptionChecklist.wasRepairedBefore ?? null,
 
-            accessories: Array.isArray(receptionChecklist.accessories)
+            isClean:
+              receptionChecklist.isClean ?? null,
+
+            hasAccessories:
+              receptionChecklist.hasAccessories ?? null,
+
+            accessories: Array.isArray(
+              receptionChecklist.accessories
+            )
               ? [
                   ...receptionChecklist.accessories,
                   ...(receptionChecklist.otroAccesorio
@@ -443,22 +501,35 @@ class ServiceController {
                 ? [receptionChecklist.otroAccesorio]
                 : [],
 
-            accessoriesNotes: receptionChecklist.accessoriesNotes || '',
-            completedAt: receptionChecklist.completedAt || now,
-            completedBy: receptionChecklist.completedBy || req.user.email
+            accessoriesNotes:
+              receptionChecklist.accessoriesNotes || '',
+
+            completedAt:
+              receptionChecklist.completedAt || now,
+
+            completedBy:
+              receptionChecklist.completedBy || req.user.email
           }
         })
       }
 
+      // ✅ Historial
       const historyEntry = {
         status,
         changedBy: req.user.email,
         changedAt: now,
+
         ...(note && { note }),
         ...(receivedBy && { receivedBy }),
         ...(receivedAtBranch && { receivedAtBranch }),
-        ...(status === 'Entregado' && { deliveredAt: deliveredAt || now }),
-        ...(typeof isSatisfied === 'boolean' && { isSatisfied })
+
+        ...(status === 'Entregado' && {
+          deliveredAt: deliveredAt || now
+        }),
+
+        ...(typeof isSatisfied === 'boolean' && {
+          isSatisfied
+        })
       }
 
       const updated = await ServiceManager.updateWithInactivity(
@@ -467,13 +538,19 @@ class ServiceController {
           $set: updatePayload,
           $push: { statusHistory: historyEntry }
         },
-        { new: true, runValidators: true }
+        {
+          new: true,
+          runValidators: true
+        }
       )
 
       res.json(updated)
 
     } catch (err) {
-      res.status(500).json({ error: 'Error al actualizar servicio', details: err.message })
+      res.status(500).json({
+        error: 'Error al actualizar servicio',
+        details: err.message
+      })
     }
   }
 
@@ -598,6 +675,119 @@ class ServiceController {
       res.json(services)
     } catch (err) {
       res.status(500).json({ error: 'Error al obtener servicios inactivos' })
+    }
+  }
+
+  // ✅ Iniciar garantía
+  static async startWarranty(req, res) {
+    try {
+      const { id } = req.params
+
+      const {
+        reason,
+        diagnosis,
+        isCovered,
+        requiresNewBudget
+      } = req.body
+
+      // Validación básica
+      if (!reason?.trim()) {
+        return res.status(400).json({
+          error: 'El motivo de garantía es obligatorio'
+        })
+      }
+
+      // Buscar servicio
+      const service = await ServiceModel.findById(id)
+
+      if (!service) {
+        return res.status(404).json({
+          error: 'Servicio no encontrado'
+        })
+      }
+
+      // Solo puede ingresar desde entregado
+      if (service.status !== 'Entregado') {
+        return res.status(400).json({
+          error: 'Solo se puede iniciar garantía desde estado Entregado'
+        })
+      }
+
+      // Evitar garantías simultáneas
+      if (service.activeWarrantyEventId) {
+        return res.status(400).json({
+          error: 'El servicio ya tiene una garantía activa'
+        })
+      }
+
+      // Garantía vencida
+      if (
+        !service.warrantyUntil ||
+        new Date(service.warrantyUntil) < new Date()
+      ) {
+        return res.status(400).json({
+          error: 'La garantía está vencida'
+        })
+      }
+
+      const now = new Date()
+
+      // Registrar evento de garantía
+      const warrantyEvent = {
+        enteredAt: now,
+        enteredBy: req.user.email,
+        reason,
+        diagnosis,
+        isCovered,
+        requiresNewBudget
+      }
+
+      service.warrantyEvents.push(warrantyEvent)
+
+      // Obtener último evento agregado
+      const lastEvent =
+        service.warrantyEvents[service.warrantyEvents.length - 1]
+
+      service.activeWarrantyEventId = lastEvent._id
+
+      // Reiniciar estado operativo
+      service.status = 'En Gestión Garantía'
+
+      service.deliveredAt = null
+      service.isSatisfied = null
+
+      // Reiniciar OT si requiere nuevo presupuesto
+      if (requiresNewBudget) {
+        service.workOrderStatus = 'Sin presupuesto'
+      }
+
+      // Contador de garantías
+      service.totalWarrantyCount =
+        (service.totalWarrantyCount || 0) + 1
+
+      // Auditoría
+      service.lastModifiedBy = req.user.email
+      service.lastModifiedAt = now
+
+      // Historial
+      service.statusHistory.push({
+        status: 'En Gestión Garantía',
+        changedBy: req.user.email,
+        changedAt: now,
+        note: 'Ingreso por garantía'
+      })
+
+      await service.save()
+
+      res.json(service)
+
+    } catch (err) {
+      console.error(err)
+
+      res.status(500).json({
+        error: 'Error iniciando garantía',
+        details: err.message
+      })
     }
   }
 

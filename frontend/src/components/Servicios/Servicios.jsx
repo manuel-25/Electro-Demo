@@ -14,8 +14,9 @@ import ServiceFilters from '../ServiceFilters/ServiceFilters'
 import { formatDate } from '../../utils/formatDate.js'
 import { timeSince } from '../../utils/formatDate.js'
 import isDev from '../../utils/isDev.js'
-import { getStatusClass } from '../../utils/productsData.jsx'
+import { getStatusClass, canStartWarranty, hasActiveWarranty, isWarrantyStatus } from '../../utils/serviceStatusUtils.js'
 import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
+import Modal from '../Modal/Modal.jsx'
 import './Servicios.css'
 
 const Servicios = () => {
@@ -29,6 +30,13 @@ const Servicios = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' })
   const [isStateLoaded, setIsStateLoaded] = useState(false)
+  const [warrantyModal, setWarrantyModal] = useState(null)
+  const [loadingWarranty, setLoadingWarranty] = useState(false)
+  const [warrantyReason, setWarrantyReason] = useState('')
+  const [warrantyDiagnosis, setWarrantyDiagnosis] = useState('')
+  const [warrantyCovered, setWarrantyCovered] = useState(true)
+  const [requiresBudget, setRequiresBudget] = useState(false)
+  const [showWarrantyForm, setShowWarrantyForm] = useState(false)
 
   /*=== Filtros === */
   const [filters, setFilters] = useState({
@@ -173,6 +181,63 @@ const Servicios = () => {
     textarea.style.height = `${cellHeight}px`
   }
 
+  const resetWarrantyForm = () => {
+    setWarrantyReason('')
+    setWarrantyDiagnosis('')
+    setWarrantyCovered(true)
+    setRequiresBudget(false)
+    setShowWarrantyForm(false)
+  }
+
+  const handleStartWarranty = async () => {
+
+    if (!warrantyModal?._id) return
+
+    try {
+
+      setLoadingWarranty(true)
+
+      const res = await axios.post(
+        `${getApiUrl()}/api/service/${warrantyModal._id}/warranty`,
+        {
+          reason: warrantyReason,
+          diagnosis: warrantyDiagnosis,
+          isCovered: warrantyCovered,
+          requiresNewBudget: requiresBudget
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${auth?.token}`
+          },
+          withCredentials: true
+        }
+      )
+
+      setServices(prev =>
+        prev.map(s =>
+          s._id === warrantyModal._id
+            ? { ...s, ...res.data }
+            : s
+        )
+      )
+
+      // LIMPIAR FORM
+      resetWarrantyForm()
+      // CERRAR MODAL
+      setWarrantyModal(null)
+
+    } catch (err) {
+
+      alert(
+        err.response?.data?.error ||
+        'Error iniciando garantía'
+      )
+
+    } finally {
+      setLoadingWarranty(false)
+    }
+  }
+
 // ========================== HANDLERS ==========================
 
   // === Persistencia de filtros, búsqueda y paginación ===
@@ -274,8 +339,6 @@ const Servicios = () => {
                 </thead>
                 <tbody>
                   {pageData.map(s => {
-                    const hasWorkOrder = s.workOrderStatus !== undefined
-
                     return (
                       <tr key={s._id}>
                       <td><Link to={`/servicios/${s.code}`} className="service-link">{s.code}</Link></td>
@@ -287,7 +350,7 @@ const Servicios = () => {
                       <td>{formatDate(s.createdAt)}</td>
                       <td className="col-device">{s.equipmentType || '—'}</td>
                       <td>{s.description || '—'}</td>
-                      <td>{s.userData.firstName + ' ' + s.userData.lastName || '—'}</td>
+                      <td>{s.userData ? `${s.userData.firstName} ${s.userData.lastName}` : '—'}</td>
                       <td>
                         <ServiceStatusControl
                           service={s}
@@ -352,6 +415,30 @@ const Servicios = () => {
                           <FontAwesomeIcon icon={faFileLines} />
                         </a>
 
+                        {/* INICIAR GARANTÍA */}
+                          {canStartWarranty(s) && (
+                            <button
+                              className="action-btn warranty"
+                              title="Iniciar garantía"
+                              onClick={() => {
+                                setWarrantyModal(s)
+                                setShowWarrantyForm(false)
+                              }}
+                            >
+                              🛡
+                            </button>
+                          )}
+
+                          {/* GARANTÍA EN CURSO */}
+                          {hasActiveWarranty(s) && isWarrantyStatus(s.status) && (
+                            <button
+                              className="action-btn warranty active"
+                              title="Garantía en curso"
+                            >
+                              🛡️
+                            </button>
+                          )}
+
                         {s.userData?.phone && (
                           <a
                             href={`https://wa.me/54${String(s.userData.phone).replace(/\D/g, '')}`}
@@ -385,6 +472,264 @@ const Servicios = () => {
           </>
         )}
       </div>
+      {warrantyModal && (
+        <Modal
+          title={
+            !showWarrantyForm
+              ? 'Revisión de garantía'
+              : 'Ingreso de garantía'
+          }
+          onClose={() => {
+            setWarrantyModal(null)
+            resetWarrantyForm()
+          }}
+        >
+
+          <div className="warranty-modal">
+
+            {!showWarrantyForm ? (
+
+              <>
+                {/* HEADER */}
+                <div className="warranty-header">
+
+                  <div>
+
+                    <h2 className="warranty-code">
+                      {warrantyModal.code}
+                    </h2>
+
+                    <p className="warranty-device">
+                      {warrantyModal.equipmentType} • {warrantyModal.brand} {warrantyModal.model}
+                    </p>
+
+                  </div>
+
+                  <div className="warranty-status">
+                    {warrantyModal.status}
+                  </div>
+
+                </div>
+
+                {/* ALERTAS */}
+                <div className="warranty-alerts">
+
+                  <div className="warranty-alert-card">
+
+                    <span>Entregado hace</span>
+
+                    <strong>
+                      {warrantyModal.deliveredAt
+                        ? timeSince(warrantyModal.deliveredAt)
+                        : 'Sin entregar'}
+                    </strong>
+
+                  </div>
+
+                  <div className="warranty-alert-card">
+
+                    <span>Total abonado</span>
+
+                    <strong>
+                      ${warrantyModal.finalValue || 0}
+                    </strong>
+
+                  </div>
+
+                  <div className="warranty-alert-card">
+
+                    <span>Garantía hasta</span>
+
+                    <strong>
+                      {warrantyModal.warrantyUntil
+                        ? formatDate(warrantyModal.warrantyUntil)
+                        : 'No definida'}
+                    </strong>
+
+                  </div>
+
+                </div>
+
+                {/* CLIENTE */}
+                <div className="warranty-section">
+
+                  <h4>Cliente</h4>
+
+                  <p className="warranty-client-name">
+                    {warrantyModal.userData?.firstName} {warrantyModal.userData?.lastName}
+                  </p>
+
+                  <p>
+                    {warrantyModal.userData?.phone || 'Sin teléfono'}
+                  </p>
+
+                </div>
+
+                {/* INGRESO ORIGINAL */}
+                <div className="warranty-section">
+
+                  <h4>Problema informado originalmente</h4>
+
+                  <p>
+                    {warrantyModal.userDescription || '—'}
+                  </p>
+
+                </div>
+
+                {/* DIAGNOSTICO */}
+                <div className="warranty-section">
+
+                  <h4>Diagnóstico técnico previo</h4>
+
+                  <p>
+                    {warrantyModal.diagnosticoTecnico || '—'}
+                  </p>
+
+                </div>
+
+                {/* NOTAS */}
+                {!!warrantyModal.notes && (
+                  <div className="warranty-section">
+
+                    <h4>Notas internas</h4>
+
+                    <p>
+                      {warrantyModal.notes}
+                    </p>
+
+                  </div>
+                )}
+
+                {/* FOOTER */}
+                <div className="checklist-actions">
+
+                  <button
+                    className="btn-cancelar"
+                    onClick={() => {
+                      setWarrantyModal(null)
+                      setShowWarrantyForm(false)
+                    }}
+                  >
+                    Cancelar
+                  </button>
+
+                  <button
+                    className="btn-submit"
+                    onClick={() => setShowWarrantyForm(true)}
+                  >
+                    Continuar
+                  </button>
+
+                </div>
+              </>
+
+            ) : (
+
+              <>
+                {/* FORM */}
+                <div className="warranty-section">
+                  <h4>Ingreso de garantía</h4>
+                  <div className="form-group">
+                    <label>
+                      Motivo de la garantía *
+                    </label>
+                    <textarea
+                      value={warrantyReason}
+                      onChange={(e) => setWarrantyReason(e.target.value)}
+                      placeholder="Ej: vuelve sin calentar, pierde agua, no enciende..."
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      Diagnóstico inicial
+                    </label>
+                    <textarea
+                      value={warrantyDiagnosis}
+                      onChange={(e) => setWarrantyDiagnosis(e.target.value)}
+                      placeholder="Observaciones técnicas iniciales..."
+                    />
+                  </div>
+                  <div className="warranty-options">
+                    <button
+                      type="button"
+                      className={`warranty-option ${warrantyCovered ? 'active' : ''}`}
+                      onClick={() => setWarrantyCovered(prev => !prev)}
+                    >
+
+                      <div className="warranty-option-check">
+                        {warrantyCovered && '✓'}
+                      </div>
+
+                      <div className="warranty-option-content">
+
+                        <strong>
+                          Cubierto por garantía
+                        </strong>
+
+                        <span>
+                          La reparación entra dentro de la cobertura original.
+                        </span>
+
+                      </div>
+
+                    </button>
+
+                    <button
+                      type="button"
+                      className={`warranty-option ${requiresBudget ? 'active' : ''}`}
+                      onClick={() => setRequiresBudget(prev => !prev)}
+                    >
+
+                      <div className="warranty-option-check">
+                        {requiresBudget && '✓'}
+                      </div>
+
+                      <div className="warranty-option-content">
+
+                        <strong>
+                          Requiere nuevo presupuesto
+                        </strong>
+
+                        <span>
+                          Se debe aprobar un nuevo costo antes de continuar.
+                        </span>
+
+                      </div>
+
+                    </button>
+
+                  </div>
+                </div>
+                {/* ACTIONS */}
+                <div className="checklist-actions">
+                  <button
+                    className="btn-cancelar"
+                    onClick={() => setShowWarrantyForm(false)}
+                  >
+                    Volver
+                  </button>
+
+                  <button
+                    className="btn-submit"
+                    onClick={handleStartWarranty}
+                    disabled={
+                      loadingWarranty ||
+                      !warrantyReason.trim()
+                    }
+                  >
+                    {loadingWarranty
+                      ? 'Ingresando...'
+                      : 'Ingresar garantía'}
+                  </button>
+
+                </div>
+              </>
+            )}
+
+          </div>
+
+        </Modal>
+      )}
     </DashboardLayout>
   )
 }

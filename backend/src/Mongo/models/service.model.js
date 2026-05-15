@@ -7,24 +7,33 @@ const { Schema, model } = mongoose
 // ─── Enums ────────────────────────────────────────────────────────────────────
 export const SERVICE_TYPES = ['Reparación', 'Garantía', 'Mantenimiento']
 export const SERVICE_STATUS = [
-  // 🔴 VIEJOS (se mantienen temporalmente)
-  'Pendiente',
+  // ⚪ viejos no usar
   'Recibido',
   'En Revisión',
   'En Reparación',
   'En Pruebas',
-  'Listo para retirar',
-  'Entregado',
   'Garantía',
   'Rechazado',
   'Repuestos',
 
-  // 🟢 NUEVOS
+  // 🟢 flujo normal
+  'Pendiente',
   'En Gestión',
-  'Reparación',            // reemplaza "En Reparación"
+  'Reparación',
+  'Listo para retirar',
+  'Entregado',
+
+  // 🟡 flujo garantía
+  'En Gestión Garantía',
+  'Reparación Garantía',
+  'Listo para retirar Garantía',
+
+  // 🔴  sin reparación
   'Armado S/R',
   'Listo para retiro S/R',
   'Entregado S/R',
+
+  // ⚫ otros
   'Retirado a bodega',
   'Sin respuesta'
 ]
@@ -59,6 +68,57 @@ const StatusHistorySchema = new Schema(
 },
 { _id: false }
 )
+
+const WarrantyEventSchema = new Schema(
+{
+  enteredAt: {
+    type: Date,
+    default: Date.now
+  },
+
+  enteredBy: {
+    type: String,
+    default: null
+  },
+
+  reason: {
+    type: String,
+    required: true
+  },
+
+  diagnosis: {
+    type: String,
+    default: ''
+  },
+
+  resolution: {
+    type: String,
+    default: ''
+  },
+
+  isCovered: {
+    type: Boolean,
+    default: true
+  },
+
+  requiresNewBudget: {
+    type: Boolean,
+    default: false
+  },
+
+  deliveredAt: {
+    type: Date,
+    default: null
+  },
+
+  deliveredBy: {
+    type: String,
+    default: null
+  }
+},
+{
+  timestamps: true
+})
 
 // ─── Schema principal ─────────────────────────────────────────────────────────
 const ServiceSchema = new Schema(
@@ -143,7 +203,20 @@ const ServiceSchema = new Schema(
     lastModifiedAt: { type: Date, default: Date.now },
 
     // Otros
-    warrantyExpiration: { type: Number, default: 30 },     // días
+    warrantyExpiration: { type: Number, default: 30 },
+    warrantyUntil: { type: Date },
+
+    // GARANTÍAS
+    activeWarrantyEventId: {
+      type: Schema.Types.ObjectId,
+      default: null
+    },
+
+    warrantyEvents: {
+      type: [WarrantyEventSchema],
+      default: []
+    },
+
     photos: [String],
     notes: { type: String },
 
@@ -199,7 +272,7 @@ const ServiceSchema = new Schema(
     }
   },
 
-  // 📊 INACTIVIDAD (core del problema)
+  // 📊 INACTIVIDAD
   lastActivityAt: { type: Date, default: Date.now }, // última vez que se tocó el service (cualquier cambio)
   inactivityAccumulatedMs: { type: Number, default: 0 }, // tiempo total acumulado inactivo
   maxInactivityMs: { type: Number, default: 0 }, // pico máximo de inactividad

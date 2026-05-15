@@ -339,3 +339,24 @@ button:focus, input:focus, select:focus, textarea:focus {
   font-weight: 700;
   color: #000;
 }
+
+.status-en-gestion-garantia,
+.status-select.cell-en-gestion-garantia {
+  background: #fff3cd;
+  color: #856404;
+  border-color: #ffe69c;
+}
+
+.status-reparacion-garantia,
+.status-select.cell-reparacion-garantia {
+  background: #ffd6a5;
+  color: #7a3e00;
+  border-color: #ffb86b;
+}
+
+.status-listo-garantia,
+.status-select.cell-listo-garantia {
+  background: #ffe8cc;
+  color: #7a4b00;
+  border-color: #ffd8a8;
+}

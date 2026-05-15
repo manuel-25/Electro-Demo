@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { ESTADOS_SERVICIO, normalizeStatus, equipmentAccessories } from '../../utils/productsData.jsx'
+import { normalizeStatus } from '../../utils/serviceStatusUtils.js'
+import { equipmentAccessories, ESTADOS_SERVICIO } from '../../utils/productsData.jsx'
 import { updateServiceStatus } from '../../utils/updateServiceStatus.js'
 import StatusModal from '../StatusModal/StatusModal.jsx'
 import Modal from '../Modal/Modal.jsx'
@@ -18,7 +19,6 @@ const getAvailableStatuses = (service) => {
   }
 
   const status = service.status || 'Pendiente'
-
   let baseStatuses = []
 
   switch (status) {
@@ -46,15 +46,22 @@ const getAvailableStatuses = (service) => {
     case 'Sin respuesta':
       baseStatuses = ['Sin respuesta', 'Retirado a bodega']
       break
+      case 'En Gestión Garantía':
+      baseStatuses = ['En Gestión Garantía', 'Reparación Garantía']
+      break
+
+    case 'Reparación Garantía':
+      baseStatuses = ['Reparación Garantía', 'Listo para retirar Garantía']
+      break
+
+    case 'Listo para retirar Garantía':
+      baseStatuses = ['Listo para retirar Garantía', 'Entregado']
+      break
     default:
       baseStatuses = [status]
       break
   }
 
-  // 👇 agregar "Sin respuesta" SOLO si:
-  // - NO está entregado
-  // - NO está ya en sin respuesta o bodega
-  // - Y NO está en Pendiente
   if (
     !['Entregado', 'Entregado S/R', 'Sin respuesta', 'Retirado a bodega', 'Pendiente'].includes(status)
   ) {
@@ -250,7 +257,8 @@ export default function ServiceStatusControl({
     // Modal de satisfacción para entrega
     const isDeliveryStatus =
     value === 'Listo para retirar' ||
-    value === 'Listo para retiro S/R'
+    value === 'Listo para retiro S/R' ||
+    value === 'Listo para retirar Garantía'
 
     if (isDeliveryStatus) {
       setDeliveryData({

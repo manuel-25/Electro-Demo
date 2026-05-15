@@ -43,4 +43,7 @@ router.get('/public/:publicId/print-ticket', TicketController.printByPublicId)
 router.get('/public/:publicId', WorkOrderController.getPublicService)
 router.patch('/:id/workorder', authenticateJWT, ServiceController.updateWorkOrderStatus)
 
+// ================== Garantías ==================
+router.post('/:id/warranty', authenticateJWT, ServiceController.startWarranty)
+
 export default router

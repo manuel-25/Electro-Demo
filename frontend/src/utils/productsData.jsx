@@ -16,13 +16,19 @@ export const products = [
   { id: 13, name: 'Televisor' },
   { id: 14, name: 'Ventilador' },
   { id: 19, name: 'Heladera' },
-  { id: 20, name: 'Freezer' }
+  { id: 20, name: 'Freezer' },
+  { id: 21, name: 'Secadora de Pelo' },
+  { id: 22, name: 'Plancha de Pelo' },
+  { id: 23, name: 'Plancha de Ropa' },
+  { id: 24, name: 'Licuadora' },
+  { id: 25, name: 'Lustradora' },
+  { id: 26, name: 'Calefactor' },
 ]
 
 // Lista de IDs de categorías con NEW TAG
-export const newCategoryIds = [8, 16, 17, 18]
+export const newCategoryIds = [21, 22, 23, 24, 25, 26]
 
-export const discountCategoryIds = [10, 9]
+export const discountCategoryIds = [10, 9, 14]
 
 //Detalles adicionales por Categorias
 export const additionalDetailsConfig = [
@@ -359,18 +365,66 @@ export const detailedBrandsByCategory = {
             'Gafa': [],
             'Otros': []
         }
-        },
-        20: {
-        name: 'Freezer',
-        brands: {
-            'Patrick': [],
-            'Gafa': [],
-            'Whirlpool': [],
-            'Philco': [],
-            'Briket': [],
-            'Otros': []
-        }
-    }
+    },
+    21: {
+      name: 'Secadora de Pelo',
+      brands: {
+        'Philips': [],
+        'Gama': [],
+        'Remington': [],
+        'Atma': [],
+        'Otros': []
+      }
+    },
+    22: {
+      name: 'Plancha de Pelo',
+      brands: {
+        'Gama': [],
+        'Philips': [],
+        'Remington': [],
+        'Babyliss': [],
+        'Otros': []
+      }
+    },
+    23: {
+      name: 'Plancha de Ropa',
+      brands: {
+        'Philips': [],
+        'Atma': [],
+        'Liliana': [],
+        'Oster': [],
+        'Otros': []
+      }
+    },
+    24: {
+      name: 'Licuadora',
+      brands: {
+        'Oster': [],
+        'Philips': [],
+        'Atma': [],
+        'Liliana': [],
+        'Otros': []
+      }
+    },
+    25: {
+      name: 'Lustradora',
+      brands: {
+        'Liliana': [],
+        'Yelmo': [],
+        'Atma': [],
+        'Otros': []
+      }
+    },
+    26: {
+      name: 'Calefactor',
+      brands: {
+        'Liliana': [],
+        'Atma': [],
+        'Philco': [],
+        'Electrolux': [],
+        'Otros': []
+      }
+    },
 }
 
 //Steps para barra de progreso y variables dinamicas
@@ -417,8 +471,14 @@ export const faultsByCategory = {
     // Heladera
     19: ['No enciende','No enfría','Enfría poco','Hace hielo en exceso','Pérdida de gas','Motor no arranca','Hace ruidos fuertes','Problemas en el termostato','Fugas de agua','Se apaga sola','Otra'],
     // Freezer
-    20: ['No enciende','No congela','Pierde frío','Hace hielo en exceso','Pérdida de gas','Motor no arranca','Hace ruidos fuertes','Problemas en el termostato','Fugas de agua','Se apaga solo','Otra']
-}
+    20: ['No enciende','No congela','Pierde frío','Hace hielo en exceso','Pérdida de gas','Motor no arranca','Hace ruidos fuertes','Problemas en el termostato','Fugas de agua','Se apaga solo','Otra'],
+    21: ['No enciende', 'No calienta', 'Se apaga sola', 'Otra'],
+    22: ['No enciende', 'No calienta', 'Temperatura inestable', 'Otra'],
+    23: ['No enciende', 'No calienta', 'Pierde agua', 'Otra'],
+    24: ['No enciende', 'No gira', 'Ruidos extraños', 'Pierde líquido', 'Otra'],
+    25: ['No enciende', 'No gira', 'Ruidos fuertes', 'Problema en motor', 'Otra'],
+    26: ['No enciende', 'No calienta', 'Olor a quemado', 'Se apaga solo', 'Otra'],
+    }
 
 export const brandLogos = [
     { src: '/brands/apple.png', alt: 'Apple' },
@@ -585,7 +645,7 @@ export const bannerTexts = [
   "🔧 Servicio Técnico Especializado en Electrodomésticos",
   "📲 Cotizá rápido por WhatsApp — Enviá fotos y te respondemos al momento",
   "⚡ ¿Tu electrodoméstico no funciona?",
-  "📲 Cotizá ahora por WhatsApp en minutos",
+  "📲 Cotizá ahora nos comunicamos por WhatsApp",
   "📍 Sucursal en Quilmes Vicente Lopez 770"
 ]
 
@@ -753,7 +813,37 @@ export const equipmentAccessories = [
     id: 20, // Freezer
     name: "Freezer",
     accessories: ["Bandeja", "Estantes", "Cajones"]
-  }
+  },
+  {
+    id: 21,
+    name: "Secadora de Pelo",
+    accessories: ["Boquilla"]
+  },
+  {
+    id: 22,
+    name: "Plancha de Pelo",
+    accessories: []
+  },
+  {
+    id: 23,
+    name: "Plancha de Ropa",
+    accessories: []
+  },
+  {
+    id: 24,
+    name: "Licuadora",
+    accessories: ["Vaso", "Tapa"]
+  },
+  {
+    id: 25,
+    name: "Lustradora",
+    accessories: ["Cepillos"]
+  },
+  {
+    id: 26,
+    name: "Calefactor",
+    accessories: ["Cable de alimentación"]
+  },
 ];
 
 
@@ -780,62 +870,23 @@ export const ESTADOS_SERVICIO = [
     { key: 'listo-sr', label: 'Listo para retiro S/R', class: 'status-listo-sr' },
     { key: 'retirado-bodega', label: 'Retirado a bodega', class: 'status-retirado-bodega' },
     { key: 'sin-respuesta', label: 'Sin respuesta', class: 'status-sin-respuesta' },
+
+    {
+      key: 'en-gestion-garantia',
+      label: 'En Gestión Garantía',
+      class: 'status-en-gestion-garantia'
+    },
+    {
+      key: 'reparacion-garantia',
+      label: 'Reparación Garantía',
+      class: 'status-reparacion-garantia'
+    },
+    {
+      key: 'listo-garantia',
+      label: 'Listo para retirar Garantía',
+      class: 'status-listo-garantia'
+    }
 ]
-
-// =========================
-// NORMALIZACIÓN
-// Convierte texto arbitrario a formato consistente
-// =========================
-export const normalizeStatus = (raw = '') =>
-  raw
-    .toString()
-    .trim()
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\//g, '')
-    .replace(/\s+/g, '-')
-
-// =========================
-// OBTENER CLASE CSS
-// =========================
-export const getStatusClass = (status) => {
-  const found = ESTADOS_SERVICIO.find(
-    (s) => normalizeStatus(s.label) === normalizeStatus(status)
-  )
-  return found?.class || 'status-default'
-}
-
-// =========================
-// OBTENER LABEL "OFICIAL"
-// =========================
-export const getStatusLabel = (status) => {
-  const found = ESTADOS_SERVICIO.find(
-    (s) => normalizeStatus(s.label) === normalizeStatus(status)
-  )
-  return found?.label || status
-}
-
-// =========================
-// VALIDACIÓN DE TRANSICIONES
-// =========================
-export const esTransicionValida = (estadoActual, nuevoEstado, historial = []) => {
-  const idxActual = ESTADOS_SERVICIO.findIndex((e) => normalizeStatus(e.label) === normalizeStatus(estadoActual))
-  const idxNuevo = ESTADOS_SERVICIO.findIndex((e) => normalizeStatus(e.label) === normalizeStatus(nuevoEstado))
-
-  // Casos especiales
-  if (normalizeStatus(nuevoEstado) === 'garantia') {
-    return historial.some((h) => normalizeStatus(h) === 'entregado')
-  }
-  if (normalizeStatus(nuevoEstado) === 'repuestos') {
-    return historial.some(
-      (h) => ['listo', 'pruebas'].includes(normalizeStatus(h))
-    )
-  }
-
-  // Validación general: no saltar más de un estado
-  return idxNuevo <= idxActual + 1
-}
 
 export const branchMap = { W: 'Web', Q: 'Quilmes', B: 'Barracas' }
 

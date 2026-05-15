@@ -68,9 +68,6 @@ export const updateServiceStatus = async ({
     receptionChecklist
   })
 
-  // 🧪 DEBUG (podés comentarlo en prod)
-  console.log('🚀 updateServiceStatus payload:', payload)
-
   try {
     const response = await axios.put(
       `${getApiUrl()}/api/service/${service._id}/status`,

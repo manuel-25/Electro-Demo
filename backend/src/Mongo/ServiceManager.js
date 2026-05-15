@@ -133,6 +133,121 @@ class ServiceManagerDao {
       { new: true }
     )
   }
+
+  async startWarranty({
+    serviceId,
+    reason,
+    diagnosis = '',
+    enteredBy
+  }) {
+
+    const service = await this.serviceModel.findById(serviceId)
+
+    if (!service) {
+      throw new Error('Servicio no encontrado')
+    }
+
+    // Debe haber sido entregado
+    if (!['Entregado'].includes(service.status)) {
+      throw new Error('El servicio no fue entregado')
+    }
+
+    // No puede ser S/R
+    if (service.workOrderStatus === 'Sin reparación') {
+      throw new Error('El servicio fue entregado sin reparación y no tiene garantía.')
+    }
+
+    // Garantía vencida
+    if (!service.warrantyUntil || new Date(service.warrantyUntil) < new Date()) {
+      throw new Error('La garantía expiró el', service.warrantyUntil)
+    }
+
+    // Ya tiene una garantía activa
+    if (service.activeWarrantyEventId) {
+      throw new Error('Ya existe una garantía activa')
+    }
+
+    // Crear evento
+    const warrantyEvent = {
+      enteredAt: new Date(),
+      enteredBy,
+      reason,
+      diagnosis,
+      status: 'En revisión'
+    }
+
+    service.warrantyEvents.push(warrantyEvent)
+
+    // Obtener el último agregado
+    const createdEvent =
+      service.warrantyEvents[service.warrantyEvents.length - 1]
+
+    // Activar garantía visual
+    service.activeWarrantyEventId = createdEvent._id
+
+    // Volver flujo operativo
+    service.previousStatus = service.status
+    service.status = 'Reparación'
+
+    // Historial
+    service.statusHistory.push({
+      status: 'Reparación',
+      note: `Ingreso por garantía: ${reason}`,
+      changedAt: new Date(),
+      changedBy: enteredBy
+    })
+
+    await service.save()
+
+    return service
+  }
+
+  async closeWarranty({
+    serviceId,
+    resolution,
+    deliveredBy
+  }) {
+
+    const service = await this.serviceModel.findById(serviceId)
+
+    if (!service) {
+      throw new Error('Servicio no encontrado')
+    }
+
+    if (!service.activeWarrantyEventId) {
+      throw new Error('No hay garantía activa')
+    }
+
+    const warranty = service.warrantyEvents.id(
+      service.activeWarrantyEventId
+    )
+
+    if (!warranty) {
+      throw new Error('Garantía no encontrada')
+    }
+
+    warranty.status = 'Reparado'
+    warranty.resolution = resolution
+    warranty.deliveredAt = new Date()
+    warranty.deliveredBy = deliveredBy
+
+    // Desactivar modo garantía
+    service.activeWarrantyEventId = null
+
+    // Flujo operativo normal
+    service.status = 'Entregado'
+
+    service.statusHistory.push({
+      status: 'Entregado',
+      note: 'Garantía finalizada',
+      changedAt: new Date(),
+      changedBy: deliveredBy
+    })
+
+    await service.save()
+
+    return service
+  }
 }
 
 const ServiceManager = new ServiceManagerDao()
