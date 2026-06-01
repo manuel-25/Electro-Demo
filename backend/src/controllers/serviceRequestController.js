@@ -129,15 +129,9 @@ class ServiceRequestController {
             `
 
 
-            // Verificar que el destinatario del correo esté configurado
-            const recipientEmail = config.GMAIL_USER
-            if (!recipientEmail) {
-                throw new Error('No recipient email defined')
-            }
-
-            // Enviar correo electrónico
+            // Enviar correo electronico si la integracion esta configurada.
             await sendEmail(
-                config.GMAIL_USER,
+                config.GMAIL_USER || userData.email,
                 'Nueva solicitud de cotización',
                 emailContent
             )

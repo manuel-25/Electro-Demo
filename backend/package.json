@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node ./src/server.js",
-    "dev": "nodemon ./src/server.js"
+    "dev": "nodemon ./src/server.js",
+    "seed:demo": "node ./src/demo/seedDemoData.js",
+    "seed:demo:reset": "node ./src/demo/seedDemoData.js --reset"
   },
   "keywords": [],
   "author": "",

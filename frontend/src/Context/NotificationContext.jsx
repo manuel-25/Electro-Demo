@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react'
 import axios from 'axios'
 import { getApiUrl } from '../config'
+import { AuthContext } from './AuthContext'
 
 const NotificationContext = createContext()
 
 export const useNotifications = () => useContext(NotificationContext)
 
 export const NotificationProvider = ({ children }) => {
+  const { authenticated } = useContext(AuthContext)
   const [pendingQuotes, setPendingQuotes] = useState(0)
   const [pendingChats, setPendingChats] = useState(0)
   const [priorityChats, setPriorityChats] = useState(0)
@@ -29,9 +31,16 @@ export const NotificationProvider = ({ children }) => {
 
   // 🔔 Cotizaciones
   useEffect(() => {
+    if (!authenticated) {
+      setPendingQuotes(0)
+      return
+    }
+
     const fetchQuotes = async () => {
       try {
-        const res = await axios.get(`${getApiUrl()}/api/quotes/count/pending`)
+        const res = await axios.get(`${getApiUrl()}/api/quotes/count/pending`, {
+          withCredentials: true
+        })
         const newCount = res.data.count
 
         if (!isFirstQuotesLoad.current && newCount > previousQuotesRef.current) {
@@ -49,10 +58,16 @@ export const NotificationProvider = ({ children }) => {
     fetchQuotes()
     const interval = setInterval(fetchQuotes, 15000)
     return () => clearInterval(interval)
-  }, [])
+  }, [authenticated])
 
   // 💬 WhatsApp
   useEffect(() => {
+    if (!authenticated) {
+      setPendingChats(0)
+      setPriorityChats(0)
+      return
+    }
+
     const fetchChats = async () => {
       try {
         const res = await axios.get(`${getApiUrl()}/api/conversations/count/sidebar`, {
@@ -79,7 +94,7 @@ export const NotificationProvider = ({ children }) => {
     fetchChats()
     const interval = setInterval(fetchChats, 15000)
     return () => clearInterval(interval)
-  }, [])
+  }, [authenticated])
 
   return (
     <NotificationContext.Provider

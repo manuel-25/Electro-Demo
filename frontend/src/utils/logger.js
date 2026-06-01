@@ -1,6 +1,8 @@
+import { getApiUrl } from '../config'
+
 export const logError = async (message, level = 'error', extra = {}) => {
   try {
-    await fetch('https://electrosafeweb.com/api/logs', {
+    await fetch(`${getApiUrl()}/api/logs`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -12,10 +14,6 @@ export const logError = async (message, level = 'error', extra = {}) => {
       })
     })
   } catch (err) {
-    console.error("Error al enviar log:", err)
+    console.error('Error al enviar log:', err)
   }
 }
-
-
-
-// http://localhost:5000/api/logs/ping          https://electrosafeweb.com/api/logs

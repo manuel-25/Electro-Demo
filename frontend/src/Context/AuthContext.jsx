@@ -4,14 +4,30 @@ import { getApiUrl } from '../config.js'
 
 export const AuthContext = createContext()
 
+const DEMO_AUTH = {
+  user: {
+    email: 'demo@electrosafe.app',
+    role: 'admin',
+    branch: 'Quilmes'
+  }
+}
+
 export const AuthProvider = ({ children }) => {
-  const [auth, setAuth] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true'
+  const [auth, setAuth] = useState(isDemoMode ? DEMO_AUTH : null)
+  const [loading, setLoading] = useState(!isDemoMode)
   const [error, setError] = useState(null)
-  const [authenticated, setAuthenticated] = useState(false)
+  const [authenticated, setAuthenticated] = useState(isDemoMode)
 
   // Verificación inicial del token desde backend (cookie)
   useEffect(() => {
+    if (isDemoMode) {
+      setAuth(DEMO_AUTH)
+      setAuthenticated(true)
+      setLoading(false)
+      return
+    }
+
     const verifyToken = async () => {
       try {
         const response = await axios.get(`${getApiUrl()}/api/manager/verifytoken`, { withCredentials: true })
@@ -29,9 +45,11 @@ export const AuthProvider = ({ children }) => {
       }
     }
     verifyToken()
-  }, [])
+  }, [isDemoMode])
 
   useEffect(() => {
+    if (isDemoMode) return
+
     const interval = setInterval(() => {
       axios.get(`${getApiUrl()}/api/manager/verifytoken`, { withCredentials: true })
         .then(res => setAuthenticated(true))
@@ -42,10 +60,17 @@ export const AuthProvider = ({ children }) => {
     }, 60 * 1000) // cada 60 segundos
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isDemoMode])
 
   // Login: no maneja token desde JS, confías en cookie
   const login = async (email, password, remember = true) => {
+    if (isDemoMode) {
+      setAuth(DEMO_AUTH)
+      setAuthenticated(true)
+      setLoading(false)
+      return { success: true }
+    }
+
     setLoading(true)
     setError(null)
 
@@ -92,6 +117,13 @@ export const AuthProvider = ({ children }) => {
 
 // Logout: pedir al backend borrar cookie
 const logout = async () => {
+  if (isDemoMode) {
+    setAuth(DEMO_AUTH)
+    setAuthenticated(true)
+    setLoading(false)
+    return
+  }
+
   setLoading(true)
   try {
     await axios.post(`${getApiUrl()}/api/manager/logout`, {}, {

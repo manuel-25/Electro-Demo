@@ -12,12 +12,11 @@ router.post('/login', loginLimiter, checkUserLock, UserController.login)
 router.post('/logout', authenticateJWT, UserController.logout)
 router.get('/me', authenticateJWT, UserController.getProfile)
 
-// 🔐 Solo admins
-router.post('/', /*authenticateJWT, authenticateAdmin,*/ UserController.createUser)
+// Solo admins: para demo usar un usuario de prueba precreado.
+router.post('/', authenticateJWT, authenticateAdmin, UserController.createUser)
 router.get('/', authenticateJWT, authenticateAdmin, UserController.getUsers)
 router.get('/:email', authenticateJWT, authenticateAdmin, UserController.getUserByEmail)
 router.put('/:email', authenticateJWT, authenticateAdmin, UserController.updateUserByEmail)
 router.delete('/:email', authenticateJWT, authenticateAdmin, UserController.deleteUserByEmail)
-
 
 export default router

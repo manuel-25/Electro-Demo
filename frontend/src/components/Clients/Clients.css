@@ -101,3 +101,283 @@
   font-size: 13px;
   color: #888;
 }
+
+.clients-page .page-heading {
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+.clients-page .page-heading span {
+  display: block;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.clients-note {
+  margin: 6px 0;
+  color: #667085;
+  font-size: 13px;
+  text-align: center;
+}
+
+.clients-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.clients-list-panel {
+  min-width: 0;
+}
+
+.client-preview-panel {
+  position: sticky;
+  top: 92px;
+  min-height: 360px;
+  padding: 22px;
+  border: 1px solid #dfe4ea;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+}
+
+.client-preview-panel > span {
+  display: block;
+  color: #667085;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.client-preview-panel h3 {
+  margin: 6px 0 2px;
+  color: #18212f;
+  font-size: 24px;
+}
+
+.client-preview-panel > strong {
+  display: block;
+  color: #344054;
+  font-size: 18px;
+}
+
+.client-preview-actions {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0;
+}
+
+.client-preview-actions a {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 8px;
+  background: #ff7b00;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+}
+
+.client-preview-actions a + a {
+  background: #18212f;
+}
+
+.client-preview-panel dl {
+  margin: 0;
+  border: 1px solid #e7ebf0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.client-preview-panel dl div {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  border-bottom: 1px solid #e7ebf0;
+}
+
+.client-preview-panel dl div:last-child {
+  border-bottom: 0;
+}
+
+.client-preview-panel dt,
+.client-preview-panel dd {
+  margin: 0;
+  padding: 10px 12px;
+  min-width: 0;
+}
+
+.client-preview-panel dt {
+  background: #f8fafc;
+  color: #344054;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.client-preview-panel dd {
+  overflow: hidden;
+  color: #18212f;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clients-page .styled-table {
+  table-layout: fixed;
+}
+
+.clients-page .styled-table tr {
+  cursor: pointer;
+}
+
+.clients-page .styled-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clients-page .selected-client-row td {
+  background: #e8f2ff;
+  box-shadow: inset 0 1px 0 #b7d7ff, inset 0 -1px 0 #b7d7ff;
+}
+
+.client-code-col {
+  width: 90px;
+}
+
+.client-phone-col {
+  width: 126px;
+}
+
+.client-location-col {
+  width: 170px;
+}
+
+.client-requests-col {
+  width: 110px;
+}
+
+.client-name-cell {
+  min-width: 0;
+}
+
+.client-name-cell strong,
+.client-name-cell span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.client-name-cell span {
+  margin-top: 3px;
+  color: #667085;
+  font-size: 12px;
+}
+
+.clients-page.dashboard-wrapper {
+  width: calc(100% - 60px);
+  max-width: none;
+  min-height: 100vh;
+  margin-left: 60px;
+  padding: 28px 16px 48px;
+  background: #f6f7f9;
+  text-align: left;
+}
+
+.clients-page .dashboard-title {
+  margin: 0 0 20px;
+  text-align: center;
+  color: #18212f;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.clients-page .search-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.clients-page .search-input {
+  width: min(420px, 100%);
+  max-width: none;
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #d0d5dd;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.clients-page .quotes-items,
+.clients-page .table-wrapper,
+.clients-page .pagination {
+  width: 100%;
+}
+
+.clients-page .table-wrapper {
+  max-width: none;
+  margin: 0 0 16px;
+}
+
+.clients-page .styled-table {
+  min-width: 760px;
+  font-size: 13px;
+}
+
+.clients-page .styled-table td {
+  background: #fff;
+  vertical-align: middle;
+}
+
+.clients-page .styled-table th {
+  cursor: pointer;
+}
+
+@media (max-width: 1200px) {
+  .clients-page.dashboard-wrapper {
+    width: calc(100% - 50px);
+    margin-left: 50px;
+    padding-left: 12px;
+    padding-right: 14px;
+  }
+
+  .clients-page .table-wrapper {
+    max-width: calc(100vw - 78px);
+  }
+
+  .clients-page .styled-table {
+    min-width: 680px;
+    font-size: 12px;
+  }
+
+  .clients-page .styled-table th,
+  .clients-page .styled-table td {
+    padding: 6px 7px;
+  }
+}
+
+@media (max-width: 1050px) {
+  .clients-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .client-preview-panel {
+    position: static;
+  }
+
+  .client-location-col {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .client-phone-col,
+  .client-requests-col {
+    display: none;
+  }
+}

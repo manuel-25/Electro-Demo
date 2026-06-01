@@ -1,28 +1,45 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import './SideBar.css'
-import { Link } from 'react-router-dom'
-import { FaClipboardList, FaPlusCircle, FaUsers, FaChartBar, FaWhatsapp } from 'react-icons/fa'
+import { Link, useLocation } from 'react-router-dom'
+import { FaClipboardList, FaPlusCircle, FaUsers, FaChartBar, FaWhatsapp, FaTachometerAlt } from 'react-icons/fa'
 import { useNotifications } from '../../Context/NotificationContext'
 
 const Sidebar = () => {
   const { pendingQuotes, pendingChats, priorityChats } = useNotifications()
+  const location = useLocation()
+  const [isExpanded, setIsExpanded] = useState(false)
 
   const totalChats = pendingChats + priorityChats
   const displayChats = totalChats > 9 ? '9+' : totalChats
 
-  return (
-    <aside className="sidebar">
+  useEffect(() => {
+    setIsExpanded(false)
+  }, [location.pathname, location.search])
 
+  const collapseSidebar = () => setIsExpanded(false)
+
+  return (
+    <aside
+      className={`sidebar ${isExpanded ? 'is-expanded' : ''}`}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+    >
       <div className="sidebar-logo">
-        <Link to="/dashboard">
+        <Link to="/dashboard" onClick={collapseSidebar}>
           <img src="/images/ElectrosafeIsotipo.png" alt="Electrosafe Logo" />
         </Link>
       </div>
 
       <ul className="sidebar-nav">
+        <li title="Dashboard">
+          <Link to="/dashboard" className="sidebar-link" onClick={collapseSidebar}>
+            <FaTachometerAlt />
+            <span>Dashboard</span>
+          </Link>
+        </li>
 
         <li title="Cotizaciones">
-          <Link to="/cotizaciones" className="sidebar-link">
+          <Link to="/cotizaciones" className="sidebar-link" onClick={collapseSidebar}>
             <FaClipboardList />
             <span>Cotizaciones</span>
 
@@ -35,28 +52,28 @@ const Sidebar = () => {
         </li>
 
         <li title="Servicios">
-          <Link to="/servicios" className="sidebar-link">
+          <Link to="/servicios" className="sidebar-link" onClick={collapseSidebar}>
             <FaPlusCircle />
             <span>Servicios</span>
           </Link>
         </li>
 
         <li title="Clientes">
-          <Link to="/clientes" className="sidebar-link">
+          <Link to="/clientes" className="sidebar-link" onClick={collapseSidebar}>
             <FaUsers />
             <span>Clientes</span>
           </Link>
         </li>
 
-        <li title="Estadísticas">
-          <Link to="/estadisticas" className="sidebar-link">
+        <li title="Estadisticas">
+          <Link to="/estadisticas" className="sidebar-link" onClick={collapseSidebar}>
             <FaChartBar />
-            <span>Estadísticas</span>
+            <span>Estadisticas</span>
           </Link>
         </li>
 
         <li title="WhatsApp">
-          <Link to="/whatsapp" className="sidebar-link">
+          <Link to="/whatsapp" className="sidebar-link" onClick={collapseSidebar}>
             <FaWhatsapp />
             <span>WhatsApp</span>
 
@@ -71,7 +88,6 @@ const Sidebar = () => {
             )}
           </Link>
         </li>
-
       </ul>
     </aside>
   )

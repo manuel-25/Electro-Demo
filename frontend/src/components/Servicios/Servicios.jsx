@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useCallback, useEffect, useState, useContext } from 'react'
 import axios from 'axios'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import { AuthContext } from '../../Context/AuthContext'
 import { getApiUrl } from '../../config'
@@ -19,8 +19,101 @@ import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
 import Modal from '../Modal/Modal.jsx'
 import './Servicios.css'
 
+const INITIAL_FILTERS = {
+  code: '',
+  branch: '',
+  createdBy: '',
+  equipment: '',
+  month: '',
+  status: '',
+  scope: '',
+  workOrderStatus: ''
+}
+
+const READY_STATUSES = ['Listo para retirar', 'Listo para retiro S/R', 'Listo para retirar Garantía']
+const CLOSED_STATUSES = ['Entregado', 'Entregado S/R', 'Retirado a bodega', 'Sin respuesta']
+
+const ServicePreviewPanel = ({ service }) => {
+  if (!service) {
+    return (
+      <section className="service-preview-panel service-preview-empty">
+        <div>
+          <span>Vista rápida</span>
+          <strong>Seleccioná un servicio</strong>
+        </div>
+        <p>Al elegir una fila vas a ver el resumen operativo sin entrar al detalle.</p>
+      </section>
+    )
+  }
+
+  const clientName = service.userData
+    ? `${service.userData.firstName || ''} ${service.userData.lastName || ''}`.trim()
+    : ''
+  const deviceName = [service.equipmentType, service.brand, service.model].filter(Boolean).join(' ')
+  const accessories = service.receptionChecklist?.accessories || []
+
+  return (
+    <section className="service-preview-panel">
+      <div className="service-preview-main">
+        <div>
+          <span>Vista rápida</span>
+          <strong>{service.code}</strong>
+          <p>{deviceName || 'Equipo sin especificar'}</p>
+        </div>
+        <div className="service-preview-actions">
+          <Link to={`/servicios/${service.code}`}>Ver detalle</Link>
+          <Link to={`/servicios/${service.code}/editar`}>Editar</Link>
+        </div>
+      </div>
+
+      <div className="service-preview-grid">
+        <div>
+          <span>Cliente</span>
+          <strong>{clientName || 'Sin cliente'}</strong>
+          <small>#{service.customerNumber || '—'}</small>
+        </div>
+        <div>
+          <span>Estado</span>
+          <strong>{service.status || 'Sin estado'}</strong>
+          <small>{service.workOrderStatus || 'Sin presupuesto'}</small>
+        </div>
+        <div>
+          <span>Sucursal</span>
+          <strong>{service.receivedAtBranch || 'No recibido'}</strong>
+          <small>{service.deliveryMethod || 'Presencial'}</small>
+        </div>
+        <div>
+          <span>Valor</span>
+          <strong>${Number(service.finalValue || 0).toLocaleString('es-AR')}</strong>
+          <small>{service.approximateValue || 'Sin aproximado'}</small>
+        </div>
+      </div>
+
+      <div className="service-preview-notes">
+        <div>
+          <span>Descripción</span>
+          <p>{service.description || service.userDescription || 'Sin descripción cargada.'}</p>
+        </div>
+        <div>
+          <span>Notas</span>
+          <p>{service.notes || 'Sin notas internas.'}</p>
+        </div>
+      </div>
+
+      {accessories.length > 0 && (
+        <div className="preview-accessories">
+          {accessories.slice(0, 6).map((acc, index) => (
+            <small key={acc._id || `${acc.name}-${index}`}>{acc.label || acc.name}</small>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
 const Servicios = () => {
   const { auth } = useContext(AuthContext)
+  const location = useLocation()
 
   const [services, setServices] = useState([])
   const [loading, setLoading] = useState(true)
@@ -37,73 +130,44 @@ const Servicios = () => {
   const [warrantyCovered, setWarrantyCovered] = useState(true)
   const [requiresBudget, setRequiresBudget] = useState(false)
   const [showWarrantyForm, setShowWarrantyForm] = useState(false)
+  const [selectedServiceId, setSelectedServiceId] = useState(null)
 
-  /*=== Filtros === */
-  const [filters, setFilters] = useState({
-    code: '',
-    branch: '',
-    createdBy: '',
-    equipment: '',
-    month: '',
-    status: ''
-  })
+  const [filters, setFilters] = useState(INITIAL_FILTERS)
 
   const handleFilterChange = (key, value) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
   const clearFilters = () => {
-    setFilters({
-      code: '',
-      branch: '',
-      createdBy: '',
-      equipment: '',
-      month: '',
-      status: ''
-    })
+    setFilters(INITIAL_FILTERS)
   }
 
-  useEffect(() => {
-    if (!isStateLoaded) return // espera a que se carguen los filtros guardados antes de pedir datos
-    const fetchAll = async () => {
-      try {
-        const res = await axios.get(`${getApiUrl()}/api/service`, {
-          withCredentials: true
-        })
-        setServices(res.data || [])
-      } catch (e) {
-        if (isDev()) console.error('Error al actualizar servicios', e)
-        setError('No se pudieron cargar los servicios.')
-      } finally {
-        setLoading(false)
-      }
+  const fetchServices = useCallback(async ({ finishLoading = false } = {}) => {
+    try {
+      const res = await axios.get(`${getApiUrl()}/api/service`, {
+        withCredentials: true
+      })
+      setServices(res.data || [])
+    } catch (e) {
+      if (isDev()) console.error('Error al actualizar servicios', e)
+      setError('No se pudieron cargar los servicios.')
+    } finally {
+      if (finishLoading) setLoading(false)
     }
-    fetchAll()
-  }, [auth, isStateLoaded])
+  }, [])
 
-  //Recarga si actualizan el estado
   useEffect(() => {
-    const fetchLatest = async () => {
-      try {
-        const res = await axios.get(`${getApiUrl()}/api/service`, {
-          // headers: { Authorization: `Bearer ${auth?.token}` },
-          withCredentials: true
-        })
-        setServices(res.data || [])
-      } catch (e) {
-          if (isDev()) {
-            console.error('Error al actualizar servicios', e)
-          }
-          setError('No se pudieron cargar los servicios.')
-      }
-    }
+    if (!isStateLoaded) return
+    fetchServices({ finishLoading: true })
+  }, [fetchServices, isStateLoaded])
 
+  useEffect(() => {
     const intervalId = setInterval(() => {
-      fetchLatest()
-    }, 30000) // cada 30 segundos
+      fetchServices()
+    }, 30000)
 
     return () => clearInterval(intervalId)
-  }, [auth])
+  }, [fetchServices])
 
   const handleSort = key => {
     let direction = 'asc'
@@ -157,8 +221,13 @@ const Servicios = () => {
     const matchesEquipment = !filters.equipment || s.equipmentType === filters.equipment
     const matchesMonth = !filters.month || new Date(s.createdAt).toISOString().slice(0, 7) === filters.month
     const matchesStatus = !filters.status || s.status === filters.status
+    const matchesWorkOrderStatus = !filters.workOrderStatus || s.workOrderStatus === filters.workOrderStatus
+    const matchesScope =
+      !filters.scope ||
+      (filters.scope === 'active' && !CLOSED_STATUSES.includes(s.status)) ||
+      (filters.scope === 'ready' && READY_STATUSES.includes(s.status))
 
-    return matchesSearch && matchesCode && matchesBranch && matchesCreatedBy && matchesEquipment && matchesMonth && matchesStatus
+    return matchesSearch && matchesCode && matchesBranch && matchesCreatedBy && matchesEquipment && matchesMonth && matchesStatus && matchesWorkOrderStatus && matchesScope
   })
 
   const sorted = [...filtered].sort((a, b) => {
@@ -171,6 +240,7 @@ const Servicios = () => {
 
   const totalPages = Math.ceil(sorted.length / itemsPerPage)
   const pageData = sorted.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const selectedService = services.find(service => service._id === selectedServiceId) || null
 
   function resizeToCellHeight(textarea) {
     if (!textarea) return
@@ -244,7 +314,12 @@ const Servicios = () => {
   useEffect(() => {
     // Cargar estado guardado antes de todo
     const savedState = localStorage.getItem('serviciosState')
-    if (savedState) {
+    const params = new URLSearchParams(location.search)
+    const urlStatus = params.get('status')
+    const urlScope = params.get('scope')
+    const urlWorkOrderStatus = params.get('workOrderStatus')
+
+    if (savedState && !urlStatus && !urlScope && !urlWorkOrderStatus) {
       try {
         const parsed = JSON.parse(savedState)
         if (parsed.filters) setFilters(parsed.filters)
@@ -255,8 +330,16 @@ const Servicios = () => {
         console.error('Error cargando estado guardado', err)
       }
     }
+    if (urlStatus || ['active', 'ready'].includes(urlScope) || urlWorkOrderStatus) {
+      setFilters(prev => ({
+        ...prev,
+        status: urlStatus || '',
+        scope: urlScope || '',
+        workOrderStatus: urlWorkOrderStatus || ''
+      }))
+    }
     setIsStateLoaded(true) // marcamos que ya cargamos el estado
-  }, [])
+  }, [location.search])
 
   useEffect(() => {
     if (!isStateLoaded) return // evitamos guardar antes de cargar
@@ -272,7 +355,10 @@ const Servicios = () => {
   return (
     <DashboardLayout>
       <div className="dashboard-wrapper servicios-page">
-        <h2 className="dashboard-title">🧰 Servicios</h2>
+        <div className="services-page-heading">
+          <span>Gestion operativa</span>
+          <h2 className="dashboard-title">Panel de servicios tecnicos</h2>
+        </div>
 
         {loading ? (
           <div className="loading-container"><Loading /></div>
@@ -280,30 +366,18 @@ const Servicios = () => {
           <>
             {error && <p className="error-message">{error}</p>}
 
-            <div className="search-wrapper" style={{ position: 'relative', display: 'inline-block' }}>
-              <input
-                type="text"
-                placeholder="Buscar por Código, Cliente, Equipo..."
-                className="search-input"
-                id="searchInputServices"
-                value={search}
-                onChange={e => { setSearch(e.target.value); setCurrentPage(1) }}
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch('')}
-                  className="clear-search-btn"
-                  title="Borrar búsqueda"
-                >
-                  ✖
-                </button>
-              )}
-            </div>
-
             <ServiceFilters
               services={services}
               filters={filters}
+              search={search}
+              onSearchChange={(value) => {
+                setSearch(value)
+                setCurrentPage(1)
+              }}
+              onSearchClear={() => {
+                setSearch('')
+                setCurrentPage(1)
+              }}
               onChange={handleFilterChange}
               onClear={clearFilters}
             />
@@ -318,6 +392,8 @@ const Servicios = () => {
                 <Link to="/servicios/nuevo" className="btn-new-service">➕ Nuevo Servicio</Link>
               </div>
             </div>
+
+            <ServicePreviewPanel service={selectedService} />
 
             <div className="table-wrapper">
               <table className="styled-table">
@@ -340,10 +416,14 @@ const Servicios = () => {
                 <tbody>
                   {pageData.map(s => {
                     return (
-                      <tr key={s._id}>
-                      <td><Link to={`/servicios/${s.code}`} className="service-link">{s.code}</Link></td>
+                      <tr
+                        key={s._id}
+                        className={selectedServiceId === s._id ? 'selected-service-row' : ''}
+                        onClick={() => setSelectedServiceId(s._id)}
+                      >
+                      <td><Link to={`/servicios/${s.code}`} className="service-link" onClick={(event) => event.stopPropagation()}>{s.code}</Link></td>
                       <td>
-                        <Link to={`/clientes/${s.customerNumber}`} className="service-link">
+                        <Link to={`/clientes/${s.customerNumber}`} className="service-link" onClick={(event) => event.stopPropagation()}>
                           {s.customerNumber}
                         </Link>
                       </td>
@@ -352,6 +432,7 @@ const Servicios = () => {
                       <td>{s.description || '—'}</td>
                       <td>{s.userData ? `${s.userData.firstName} ${s.userData.lastName}` : '—'}</td>
                       <td>
+                        <div onClick={(event) => event.stopPropagation()}>
                         <ServiceStatusControl
                           service={s}
                           token={auth?.token}
@@ -366,8 +447,10 @@ const Servicios = () => {
                           }}
                           onError={() => alert('Error al actualizar estado')}
                         />
+                        </div>
                       </td>
                       <td className="workorder-cell">
+                        <div onClick={(event) => event.stopPropagation()}>
                         <WorkOrderControl
                           service={s}
                           onUpdate={(updated) => {
@@ -378,6 +461,7 @@ const Servicios = () => {
                             )
                           }}
                         />
+                        </div>
                       </td>
                       <td>
                         <textarea
@@ -385,6 +469,7 @@ const Servicios = () => {
                           defaultValue={s.notes || ''}
                           ref={el => el && resizeToCellHeight(el)}
                           onKeyDown={(e) => handleNoteKeyDown(s, e)}
+                          onClick={(event) => event.stopPropagation()}
                         />
                       </td>
                       <td className="col-received">
@@ -392,7 +477,8 @@ const Servicios = () => {
                       </td>
                       <td className="col-created">{s.createdByEmail || '—'}</td>
                       <td className="acciones-cell">
-                        <Link to={`/servicios/${s.code}/editar`} className="action-btn edit" title="Editar">
+                        <div className="actions-group">
+                        <Link to={`/servicios/${s.code}/editar`} className="action-btn edit" title="Editar" onClick={(event) => event.stopPropagation()}>
                           <FontAwesomeIcon icon={faPen} />
                         </Link>
 
@@ -402,6 +488,7 @@ const Servicios = () => {
                           rel="noopener noreferrer"
                           className="action-btn print"
                           title="Imprimir"
+                          onClick={(event) => event.stopPropagation()}
                         >
                           <FontAwesomeIcon icon={faPrint} />
                         </a>
@@ -411,6 +498,7 @@ const Servicios = () => {
                           rel="noopener noreferrer"
                           className="action-btn orden"
                           title="Ver Orden de Trabajo"
+                          onClick={(event) => event.stopPropagation()}
                         >
                           <FontAwesomeIcon icon={faFileLines} />
                         </a>
@@ -420,7 +508,8 @@ const Servicios = () => {
                             <button
                               className="action-btn warranty"
                               title="Iniciar garantía"
-                              onClick={() => {
+                              onClick={(event) => {
+                                event.stopPropagation()
                                 setWarrantyModal(s)
                                 setShowWarrantyForm(false)
                               }}
@@ -434,6 +523,7 @@ const Servicios = () => {
                             <button
                               className="action-btn warranty active"
                               title="Garantía en curso"
+                              onClick={(event) => event.stopPropagation()}
                             >
                               🛡️
                             </button>
@@ -446,10 +536,12 @@ const Servicios = () => {
                             rel="noopener noreferrer"
                             className="action-btn wa"
                             title="WhatsApp"
+                            onClick={(event) => event.stopPropagation()}
                           >
                             <FontAwesomeIcon icon={faWhatsapp} />
                           </a>
                         )}
+                        </div>
                       </td>
                     </tr>
                   )

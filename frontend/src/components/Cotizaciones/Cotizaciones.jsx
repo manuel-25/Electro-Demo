@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from 'axios'
 import { getApiUrl } from '../../config'
-import { AuthContext } from '../../Context/AuthContext'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import Loading from '../Loading/Loading'
 import './Cotizaciones.css'
-
-const ITEMS_PER_PAGE = 50
 
 const Cotizaciones = () => {
   const [quotes, setQuotes] = useState([])
@@ -17,8 +14,15 @@ const Cotizaciones = () => {
   const [sortConfig, setSortConfig] = useState({ key: 'serviceRequestNumber', direction: 'desc' })
   const [itemsPerPage, setItemsPerPage] = useState(25)
   const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState('')
 
-  const { auth } = useContext(AuthContext)
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    setStatusFilter(params.get('status') || '')
+    setCurrentPage(1)
+  }, [location.search])
 
   useEffect(() => {
   const fetchQuotes = async () => {
@@ -61,10 +65,18 @@ const Cotizaciones = () => {
     }
   }
 
-  const filteredQuotes = quotes.filter(q =>
-    q.serviceRequestNumber?.toString().includes(search.trim()) ||
-    q.customerNumber?.toString().includes(search.trim())
-  )
+  const filteredQuotes = quotes.filter(q => {
+    const term = search.trim().toLowerCase()
+    const fullDevice = [q.category?.name, q.brand, q.model].filter(Boolean).join(' ').toLowerCase()
+    const matchesSearch =
+      !term ||
+      q.serviceRequestNumber?.toString().includes(term) ||
+      q.customerNumber?.toString().includes(term) ||
+      `${q.userData?.firstName || ''} ${q.userData?.lastName || ''}`.toLowerCase().includes(term) ||
+      fullDevice.includes(term)
+    const matchesStatus = !statusFilter || q.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
 
   const sortedQuotes = [...filteredQuotes].sort((a, b) => {
     const { key, direction } = sortConfig
@@ -110,8 +122,8 @@ const Cotizaciones = () => {
 
   return (
     <DashboardLayout>
-      <div className="dashboard-wrapper">
-        <h2 className="dashboard-title">📋 Solicitud de Cotizaciones</h2>
+      <div className="dashboard-wrapper cotizaciones-page">
+        <h2 className="dashboard-title">Solicitud de Cotizaciones</h2>
 
         {loading ? (
           <div className="loading-container">
@@ -119,17 +131,48 @@ const Cotizaciones = () => {
           </div>
         ) : (
           <>
-          <div className="search-wrapper">
-            <input
-              type="text"
-              placeholder="Buscar N° Solicitud o Cliente..."
-              className="search-input"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value)
+          <div className="quotes-filter-panel">
+            <label>
+              <span>Busqueda</span>
+              <input
+                type="text"
+                placeholder="Solicitud, cliente o equipo..."
+                className="search-input"
+                value={search}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setCurrentPage(1)
+                }}
+              />
+            </label>
+            <label>
+              <span>Estado</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value)
+                  setCurrentPage(1)
+                }}
+              >
+                <option value="">Todos</option>
+                <option value="Pendiente">Pendiente</option>
+                <option value="Respondido">Respondido</option>
+                <option value="No Respondido">No Respondido</option>
+                <option value="Datos incorrectos">Datos incorrectos</option>
+                <option value="Rechazada">Rechazada</option>
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => {
+                setSearch('')
+                setStatusFilter('')
                 setCurrentPage(1)
               }}
-            />
+              disabled={!search && !statusFilter}
+            >
+              Limpiar
+            </button>
           </div>
 
           {error && <p className="error-message">{error}</p>}
@@ -163,14 +206,8 @@ const Cotizaciones = () => {
                   <th style={{ width: '8%' }} onClick={() => handleSort('date')}>
                     Fecha {renderSortIcon('date')}
                   </th>
-                  <th style={{ width: '8%' }} onClick={() => handleSort('category')}>
+                  <th style={{ width: '18%' }} onClick={() => handleSort('category')}>
                     Equipo {renderSortIcon('category')}
-                  </th>
-                  <th style={{ width: '8%' }} onClick={() => handleSort('brand')}>
-                    Marca {renderSortIcon('brand')}
-                  </th>
-                  <th style={{ width: '8%' }} onClick={() => handleSort('model')}>
-                    Modelo {renderSortIcon('model')}
                   </th>
                   <th style={{ width: '18%' }} onClick={() => handleSort('userData.additionalDetails')}>
                     Descripción {renderSortIcon('userData.additionalDetails')}
@@ -214,9 +251,9 @@ const Cotizaciones = () => {
                         </Link>
                       </td>
                       <td>{new Date(q.date).toLocaleDateString()}</td>
-                      <td className="quotes-equipo">{q.category?.name || 'N/A'}</td>
-                      <td>{q.brand}</td>
-                      <td>{q.model || 'N/A'}</td>
+                      <td className="quotes-equipo">
+                        {[q.category?.name, q.brand, q.model].filter(Boolean).join(' ') || 'N/A'}
+                      </td>
                       <td className="quotes-details">{q.userData?.additionalDetails || 'N/A'}</td>
                       <td>{q.faults?.join(', ') || 'N/A'}</td>
                       <td>{q.branch || 'N/A'}</td>

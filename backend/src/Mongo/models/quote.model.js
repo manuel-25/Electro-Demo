@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose"
+import config from '../../utils/config.js'
 
-const collection = 'cotizaciones'
+const collection = config.COLLECTIONS.QUOTES
 
 // Función para obtener la fecha actual menos tres horas
 function getArgentinaTime() {

@@ -15,6 +15,7 @@ const Clients = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(25)
   const [loading, setLoading] = useState(true)
+  const [selectedClientId, setSelectedClientId] = useState(null)
 
   const isAdmin = auth?.user?.role === 'admin'
 
@@ -22,7 +23,9 @@ const Clients = () => {
     const fetchClients = async () => {
       try {
         const res = await axios.get(`${getApiUrl()}/api/client`, { withCredentials: true })
-        setClients(res.data)
+        const data = Array.isArray(res.data) ? res.data : []
+        setClients(data)
+        setSelectedClientId(prev => prev || data[0]?._id || null)
       } catch (err) {
         console.error('Error al obtener los clientes')
       } finally {
@@ -39,7 +42,7 @@ const Clients = () => {
   }
 
   const renderSortIcon = (key) => {
-    if (sortConfig.key !== key) return '⇅'
+    if (sortConfig.key !== key) return '↕'
     return sortConfig.direction === 'asc' ? '↑' : '↓'
   }
 
@@ -51,7 +54,7 @@ const Clients = () => {
       ? aVal.localeCompare(bVal)
       : bVal.localeCompare(aVal)
 
-    return sortConfig.direction === 'asc' ? aVal - bVal : bVal - aVal
+    return sortConfig.direction === 'asc' ? (aVal || 0) - (bVal || 0) : (bVal || 0) - (aVal || 0)
   })
 
   const filteredClients = sortedClients.filter(c => {
@@ -59,10 +62,11 @@ const Clients = () => {
     return (
       c.customerNumber?.toString().includes(term) ||
       c.firstName?.toLowerCase().includes(term) ||
-      c.lastName?.toLowerCase().includes(term)
+      c.lastName?.toLowerCase().includes(term) ||
+      c.email?.toLowerCase().includes(term) ||
+      c.phone?.toString().includes(term)
     )
   })
-
 
   const visibleClients = isAdmin
     ? filteredClients
@@ -73,11 +77,18 @@ const Clients = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
+  const selectedClient =
+    clients.find(client => client._id === selectedClientId) ||
+    paginatedClients[0] ||
+    null
 
   return (
     <DashboardLayout>
-      <div className="dashboard-wrapper">
-        <h2 className="dashboard-title">📁 Clientes Registrados</h2>
+      <div className="dashboard-wrapper clients-page">
+        <div className="page-heading">
+          <span>Historial y seguimiento</span>
+          <h2 className="dashboard-title">Clientes</h2>
+        </div>
 
         {loading ? (
           <div className="loading-container">
@@ -89,7 +100,7 @@ const Clients = () => {
               <input
                 type="text"
                 className="search-input"
-                placeholder="Buscar por Nombre o N° de cliente"
+                placeholder="Buscar nombre, telefono, email o numero"
                 value={search}
                 onChange={e => {
                   setSearch(e.target.value)
@@ -99,7 +110,7 @@ const Clients = () => {
             </div>
 
             {!isAdmin && filteredClients.length > 5 && (
-              <p style={{ fontSize: '13px', color: '#555', margin: '6px 0', textAlign: 'center' }}>
+              <p className="clients-note">
                 Mostrando solo los primeros 5 resultados.
               </p>
             )}
@@ -114,45 +125,69 @@ const Clients = () => {
               <label> registros</label>
             </div>
 
-            <div className="table-wrapper">
-              <table className="styled-table">
-                <thead className="table-head">
-                  <tr>
-                    <th onClick={() => handleSort('customerNumber')}>N° Cliente {renderSortIcon('customerNumber')}</th>
-                    <th onClick={() => handleSort('firstName')}>Nombre {renderSortIcon('firstName')}</th>
-                    <th onClick={() => handleSort('lastName')}>Apellido {renderSortIcon('lastName')}</th>
-                    <th onClick={() => handleSort('phone')}>Teléfono {renderSortIcon('phone')}</th>
-                    <th onClick={() => handleSort('email')}>Email {renderSortIcon('email')}</th>
-                    <th onClick={() => handleSort('municipio')}>Ubicación {renderSortIcon('municipio')}</th>
-                    <th onClick={() => handleSort('serviceRequestNumbers')}>Solicitudes {renderSortIcon('serviceRequestNumbers')}</th>
-                    <th onClick={() => handleSort('createdAt')}>Fecha {renderSortIcon('createdAt')}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {paginatedClients.map(client => (
-                    <tr key={client._id}>
-                      <td>
-                        <Link to={`/clientes/${client.customerNumber}`} className="service-link">
-                          {client.customerNumber}
-                        </Link>
-                      </td>
-                      <td>{client.firstName || 'N/A'}</td>
-                      <td>{client.lastName || 'N/A'}</td>
-                      <td>{client.phone || 'N/A'}</td>
-                      <td>{client.email || 'N/A'}</td>
-                      <td>{client.municipio}, {client.province}</td>
-                      <td>
-                        {Array.isArray(client.serviceRequestNumbers) && client.serviceRequestNumbers.length > 0
-                          ? <Link to={`/cotizaciones/${client.serviceRequestNumbers}`} className="service-link">
-                              {client.serviceRequestNumbers.join(', ')}
-                            </Link>
-                          : '—'}
-                      </td>
-                      <td>{client.createdAt?.split(',')[0] || '—'}</td>
+            <div className="clients-workspace">
+              <div className="table-wrapper clients-list-panel">
+                <table className="styled-table">
+                  <thead className="table-head">
+                    <tr>
+                      <th className="client-code-col" onClick={() => handleSort('customerNumber')}>Cliente {renderSortIcon('customerNumber')}</th>
+                      <th onClick={() => handleSort('firstName')}>Nombre {renderSortIcon('firstName')}</th>
+                      <th className="client-phone-col" onClick={() => handleSort('phone')}>Telefono {renderSortIcon('phone')}</th>
+                      <th className="client-location-col" onClick={() => handleSort('municipio')}>Ubicacion {renderSortIcon('municipio')}</th>
+                      <th className="client-requests-col" onClick={() => handleSort('serviceRequestNumbers')}>Solicitudes {renderSortIcon('serviceRequestNumbers')}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {paginatedClients.map(client => (
+                      <tr
+                        key={client._id}
+                        className={selectedClient?._id === client._id ? 'selected-client-row' : ''}
+                        onClick={() => setSelectedClientId(client._id)}
+                      >
+                        <td className="client-code-col">
+                          <Link to={`/clientes/${client.customerNumber}`} className="service-link" onClick={(event) => event.stopPropagation()}>
+                            {client.customerNumber}
+                          </Link>
+                        </td>
+                        <td className="client-name-cell">
+                          <strong>{client.firstName || 'N/A'} {client.lastName || ''}</strong>
+                          <span>{client.email || 'Sin email'}</span>
+                        </td>
+                        <td className="client-phone-col">{client.phone || 'N/A'}</td>
+                        <td className="client-location-col">{[client.municipio, client.province].filter(Boolean).join(', ') || 'N/A'}</td>
+                        <td className="client-requests-col">
+                          {Array.isArray(client.serviceRequestNumbers) && client.serviceRequestNumbers.length > 0
+                            ? client.serviceRequestNumbers.join(', ')
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <aside className="client-preview-panel">
+                {selectedClient ? (
+                  <>
+                    <span>Detalle del cliente</span>
+                    <h3>#{selectedClient.customerNumber}</h3>
+                    <strong>{selectedClient.firstName} {selectedClient.lastName}</strong>
+                    <div className="client-preview-actions">
+                      <Link to={`/clientes/${selectedClient.customerNumber}`}>Editar cliente</Link>
+                      <Link to="/servicios/nuevo">Nuevo servicio</Link>
+                    </div>
+                    <dl>
+                      <div><dt>Telefono</dt><dd>{selectedClient.phone || 'N/A'}</dd></div>
+                      <div><dt>Email</dt><dd>{selectedClient.email || 'N/A'}</dd></div>
+                      <div><dt>Ubicacion</dt><dd>{[selectedClient.municipio, selectedClient.province].filter(Boolean).join(', ') || 'N/A'}</dd></div>
+                      <div><dt>Domicilio</dt><dd>{selectedClient.domicilio || 'N/A'}</dd></div>
+                      <div><dt>Solicitudes</dt><dd>{selectedClient.serviceRequestNumbers?.length || 0}</dd></div>
+                    </dl>
+                  </>
+                ) : (
+                  <p>Selecciona un cliente para ver su detalle.</p>
+                )}
+              </aside>
             </div>
 
             {isAdmin && totalPages > 1 && (

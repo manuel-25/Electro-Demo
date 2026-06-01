@@ -1,9 +1,18 @@
 import jwt from 'jsonwebtoken'
 import config from '../utils/config.js'
+import { DEMO_USER_ID } from '../demo/demoData.js'
 
 const authenticateJWT = (req, res, next) => {
   const token = req.cookies?.authToken
   if (!token) {
+    if (config.DEMO_MODE) {
+      req.user = {
+        _id: DEMO_USER_ID,
+        email: 'demo@electrofix.app',
+        role: 'admin'
+      }
+      return next()
+    }
     return res.sendStatus(401)
   }
 

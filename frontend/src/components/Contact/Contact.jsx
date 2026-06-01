@@ -27,9 +27,9 @@ const Contact = () => {
         window.scrollTo({ top: offset, behavior: 'smooth' })
     }
 
-    const GoogleMaps = () => {
+    const GoogleMaps = ({ apiKey }) => {
         const { isLoaded, loadError } = useLoadScript({
-            googleMapsApiKey: process.env.REACT_APP_GOOGLE_API_KEY,
+            googleMapsApiKey: apiKey,
             libraries,
         })
 
@@ -168,7 +168,9 @@ const Contact = () => {
                         </div>
                     </div>
                     <div className="map-container">
-                        <GoogleMaps />
+                        {process.env.REACT_APP_GOOGLE_API_KEY ? (
+                            <GoogleMaps apiKey={process.env.REACT_APP_GOOGLE_API_KEY} />
+                        ) : null}
                     </div>
                 </section>
             </div>

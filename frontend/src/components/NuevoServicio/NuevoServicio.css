@@ -1,13 +1,13 @@
 .form-elegante {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(4, minmax(180px, 1fr));
+  gap: 16px;
   background: #fff;
-  padding: 32px;
-  border-radius: 16px;
+  padding: 24px;
+  border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
   font-family: 'Segoe UI', sans-serif;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: auto;
 }
 
@@ -26,8 +26,8 @@
 .form-section input,
 .form-section select,
 .form-section textarea {
-  padding: 10px 12px;
-  border-radius: 8px;
+  padding: 9px 10px;
+  border-radius: 7px;
   border: 1px solid #ccc;
   font-size: 14px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
@@ -48,7 +48,7 @@
 
 textarea {
   resize: vertical;
-  min-height: 80px;
+  min-height: 72px;
 }
 
 .error-message {
@@ -107,8 +107,8 @@ textarea {
 /* React Select Overrides */
 .react-select__control {
   border: 1px solid #ccc !important;
-  border-radius: 8px !important;
-  min-height: 42px;
+  border-radius: 7px !important;
+  min-height: 39px;
   font-size: 14px;
 }
 
@@ -121,6 +121,15 @@ textarea {
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .form-elegante {
+    grid-template-columns: repeat(3, minmax(170px, 1fr));
+    max-width: calc(100vw - 110px);
+    padding: 20px;
+    gap: 14px;
+  }
+}
+
 @media (max-width: 768px) {
   .form-elegante {
     grid-template-columns: 1fr;

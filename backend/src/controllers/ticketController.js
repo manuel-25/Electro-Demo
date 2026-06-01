@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import fs from 'fs'
 import qrcode from 'qrcode'
 import imageSize from 'image-size'
+import config from '../utils/config.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -13,7 +14,7 @@ const __dirname = path.dirname(__filename)
 /* ===== Config ===== */
 const PAGE_WIDTH_PT = 226.77 // 80mm
 const MARGIN = 14
-const BASE_URL = (publicId) => `https://electrosafeweb.com/ticket/${encodeURIComponent(publicId)}`
+const BASE_URL = (publicId) => `${config.APP_URL}/ticket/${encodeURIComponent(publicId)}`
 
 const TOKENS = {
   font: { base: 8.1, small: 7.2, title: 10.2, brandSmall: 8.4 },
@@ -264,7 +265,7 @@ async function buildAndSendTicket(service, res) {
   {
     const qrUrl = svc.publicId
     ? BASE_URL(svc.publicId)
-    : `https://electrosafeweb.com/servicios/${encodeURIComponent(svc.code || '')}`
+    : `${config.APP_URL}/servicios/${encodeURIComponent(svc.code || '')}`
     const size = 90
     const captionH = 6
     const footerH = 24

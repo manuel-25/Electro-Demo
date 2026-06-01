@@ -3,29 +3,30 @@ import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { getApiUrl } from '../../config'
 import { AuthContext } from '../../Context/AuthContext'
-import DashboardLayout from '../DashboardLayout/DashboardLayout'
 import ServiceStatusControl from '../ServiceStatusControl/ServiceStatusControl.jsx'
 import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
 import { timeSince } from '../../utils/formatDate.js'
-import { getStatusClass } from '../../utils/serviceStatusUtils.js'
+import { getStatusClass, normalizeStatus } from '../../utils/serviceStatusUtils.js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPen, faPrint } from '@fortawesome/free-solid-svg-icons'
+import { faPen, faPrint, faFileLines } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
-import { faFileLines } from '@fortawesome/free-solid-svg-icons'
 import './Dashboard.css'
+
+const money = (value) =>
+  new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    maximumFractionDigits: 0
+  }).format(Number(value) || 0)
 
 const getInactivityBadge = (lastActivity) => {
   const now = new Date()
   const diffDays = (now - new Date(lastActivity)) / (1000 * 60 * 60 * 24)
-
   const days = Math.floor(diffDays)
 
-  let fire = ''
-
-  if (days >= 30) fire = '🔥🔥'
-  else if (days >= 7) fire = '🔥'
-
-  return { days, fire }
+  if (days >= 30) return { days, label: 'Critico' }
+  if (days >= 7) return { days, label: 'Atencion' }
+  return { days, label: '' }
 }
 
 const Dashboard = () => {
@@ -49,9 +50,9 @@ const Dashboard = () => {
           axios.get(`${getApiUrl()}/api/client`, { withCredentials: true }),
           axios.get(`${getApiUrl()}/api/service`, { withCredentials: true })
         ])
-        setQuotes(quotesRes.data)
-        setClients(clientsRes.data)
-        setServices(servicesRes.data)
+        setQuotes(Array.isArray(quotesRes.data) ? quotesRes.data : [])
+        setClients(Array.isArray(clientsRes.data) ? clientsRes.data : [])
+        setServices(Array.isArray(servicesRes.data) ? servicesRes.data : [])
       } catch (err) {
         setError('Error al obtener datos')
       }
@@ -61,7 +62,7 @@ const Dashboard = () => {
   }, [authLoading, auth])
 
   useEffect(() => {
-    if (!token || authLoading) return
+    if (authLoading || !auth) return
 
     const fetchFullUser = async () => {
       try {
@@ -73,216 +74,308 @@ const Dashboard = () => {
     }
 
     fetchFullUser()
-  }, [token, authLoading])
+  }, [auth, authLoading])
 
-  // ================= ALERTAS =================
-
-  const getLastActivity = (s) => {
+  const getLastActivity = (service) => {
     return new Date(
-      s.updatedAt ||
-      s.workOrderAnsweredAt ||
-      s.workOrderSentAt ||
-      s.createdAt
+      service.updatedAt ||
+      service.workOrderAnsweredAt ||
+      service.workOrderSentAt ||
+      service.createdAt
     )
   }
 
-const activeServices = services.filter(s => {
-  if (['Entregado', 'Entregado S/R', 'Retirado a bodega', 'Garantía'].includes(s.status)) return false
+  const activeServices = services.filter(service => {
+    if (['Entregado', 'Entregado S/R', 'Retirado a bodega', 'Garantía'].includes(service.status)) return false
 
-  const last = getLastActivity(s)
-  const diffDays = (now - last) / (1000 * 60 * 60 * 24)
+    const last = getLastActivity(service)
+    const diffDays = (now - last) / (1000 * 60 * 60 * 24)
 
-  return diffDays >= 1 && diffDays <= 60
-})
+    return diffDays >= 1 && diffDays <= 60
+  })
 
   const sortedAlerts = [...activeServices].sort((a, b) =>
     getLastActivity(a) - getLastActivity(b)
   )
-  // ================= CARDS =================
 
   const thisMonth = now.getMonth()
   const thisYear = now.getFullYear()
 
-  const servicesCreatedThisMonth = services.filter(s => {
-    const d = new Date(s.createdAt)
-    return d.getMonth() === thisMonth && d.getFullYear() === thisYear
+  const servicesCreatedThisMonth = services.filter(service => {
+    const date = new Date(service.createdAt)
+    return date.getMonth() === thisMonth && date.getFullYear() === thisYear
   })
 
-  const servicesDeliveredThisMonth = services.filter(s => {
-    const d = new Date(s.deliveredAt)
-    return s.status === 'Entregado' && d.getMonth() === thisMonth && d.getFullYear() === thisYear
+  const servicesDeliveredThisMonth = services.filter(service => {
+    const date = new Date(service.deliveredAt)
+    return service.status === 'Entregado' && date.getMonth() === thisMonth && date.getFullYear() === thisYear
   })
+
+  const pendingQuotes = quotes.filter(quote => quote.status === 'Pendiente')
+  const activeRepairServices = services.filter(service =>
+    !['Entregado', 'Entregado S/R', 'Retirado a bodega'].includes(service.status)
+  )
+  const readyToPickup = services.filter(service =>
+    ['Listo para retirar', 'Listo para retirar Garantía', 'Listo para retiro S/R'].includes(service.status)
+  )
+  const monthlyRevenue = servicesDeliveredThisMonth.reduce((sum, service) => sum + (Number(service.finalValue) || 0), 0)
+  const conversionRate = quotes.length
+    ? Math.round((services.filter(service => service.quoteReference).length / quotes.length) * 100)
+    : 0
+
+  const statusFlow = [
+    { label: 'Pendientes', value: services.filter(service => service.status === 'Pendiente').length },
+    { label: 'En gestion', value: services.filter(service => service.status === 'En Gestión').length },
+    { label: 'Reparacion', value: services.filter(service => service.status === 'Reparación').length },
+    { label: 'Listos', value: readyToPickup.length },
+    { label: 'Entregados', value: services.filter(service => service.status === 'Entregado').length }
+  ]
+
+  const countStatus = (...statuses) => {
+    const normalized = statuses.map(normalizeStatus)
+    return services.filter(service => normalized.includes(normalizeStatus(service.status))).length
+  }
+  const flowValues = {
+    Pendientes: countStatus('Pendiente'),
+    'En gestion': countStatus('En Gestión'),
+    Reparacion: countStatus('Reparación'),
+    Listos: readyToPickup.length,
+    Entregados: countStatus('Entregado')
+  }
+  const flowColors = ['#f2b705', '#1976d2', '#8e9aa3', '#12b76a', '#027a48']
+  const coloredStatusFlow = statusFlow.map((item, index) => ({
+    ...item,
+    value: flowValues[item.label] ?? item.value,
+    color: flowColors[index] || '#027a48'
+  }))
+  const maxFlowValue = Math.max(...coloredStatusFlow.map(item => item.value), 1)
 
   return (
-    <DashboardLayout>
-      <div className="dashboard-wrapper">
-        {/* ================= CARDS ================= */}
-        <h2 className="dashboard-title">Electrosafe Dashboard</h2>
-
-        <div className="card-container">
-          <div className="info-card blue">
-            <p>SOLICITUDES</p>
-            <h3>{quotes.length}</h3>
-          </div>
-
-          <div className="info-card red">
-            <p>CLIENTES</p>
-            <h3>{clients.length}</h3>
-          </div>
-
-          <div className="info-card teal">
-            <p>SERVICIOS MES</p>
-            <h3>{servicesCreatedThisMonth.length}</h3>
-          </div>
-
-          <div className="info-card purple">
-            <p>ENTREGADOS MES</p>
-            <h3>{servicesDeliveredThisMonth.length}</h3>
-          </div>
+    <div className="main-content dashboard-wrapper">
+      <section className="dashboard-hero">
+        <div>
+          <span className="dashboard-kicker">Demo operativa</span>
+          <h1>Electrosafe Dashboard</h1>
+          <p>
+            Flujo interno para cotizaciones, recepcion de equipos, ordenes de trabajo,
+            reparacion y entrega. Datos cargados desde Mongo en colecciones demo.
+          </p>
         </div>
 
-        {/* ================= USER ================= */}
         {fullUser && (
           <div className="user-greeting">
-            <h2>👋 Hola, {fullUser.firstName} {fullUser.lastName}</h2>
-            <p>Rol: <strong>{fullUser.role}</strong></p>
-            {fullUser.branch && <p>Sucursal: <strong>{fullUser.branch}</strong></p>}
+            <span>Sesion demo</span>
+            <h2>{fullUser.firstName} {fullUser.lastName}</h2>
+          <p>{fullUser.role} - {fullUser.branch || 'Sin sucursal'}</p>
           </div>
         )}
+      </section>
 
-        {/* ================= ALERTAS ================= */}
-        <h2 className="dashboard-title">🚨 Alertas - Servicios Inactivos</h2>
-
-        <div className="table-wrapper">
-          <table className="styled-table">
-            <thead className="table-head">
-              <tr>
-                <th className="col-code">Código</th>
-                <th className="col-client">Cliente</th>
-                <th className="col-device">Equipo</th>
-                <th className="col-status">Estado</th>
-                <th className="col-date">Orden de Trabajo</th>
-                <th className="col-workorder">Inactividad</th>
-                <th className="col-created">Ultimo en Actualizar</th>
-                <th className="col-actions">Acciones</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {sortedAlerts.slice(0, 50).map(s => {
-                const lastActivity = getLastActivity(s)
-                const { days, fire } = getInactivityBadge(lastActivity)
-
-                return (
-                  <tr key={s._id}>
-                    
-                    {/* CODIGO */}
-                    <td className="col-code">
-                      <Link to={`/servicios/${s.code}`} className="service-link">
-                        {s.code}
-                      </Link>
-                    </td>
-
-                    {/* CLIENTE */}
-                    <td className="col-client">
-                      {s.userData?.firstName} {s.userData?.lastName}
-                    </td>
-
-                    {/* EQUIPO */}
-                    <td className="col-device">
-                      {s.equipmentType || '—'}
-                    </td>
-
-                    {/* STATUS (MISMO COMPONENTE) */}
-                    <td className="col-status">
-                      <ServiceStatusControl
-                        service={s}
-                        token={token}
-                        userEmail={auth?.user?.email}
-                        userBranch={auth?.user?.branch}
-                        className={getStatusClass(s.status)}
-                        onUpdated={(updated) => {
-                          setServices(prev =>
-                            prev.map(item =>
-                              item._id === s._id ? { ...item, ...updated } : item
-                            )
-                          )
-                        }}
-                      />
-                    </td>
-
-                    {/* WORK ORDER CONTROL */}
-                    <td className="col-workorder">
-                      <WorkOrderControl
-                        service={s}
-                        onUpdate={(updated) => {
-                          setServices(prev =>
-                            prev.map(item =>
-                              item._id === s._id ? { ...item, ...updated } : item
-                            )
-                          )
-                        }}
-                      />
-                    </td>
-
-                    {/* TIEMPO */}
-                    <td className="col-date">
-                      <span className="inactivity-cell">
-                        {timeSince(lastActivity)} ({days}d) {fire}
-                      </span>
-                    </td>
-
-                    {/* RESPONSABLE */}
-                    <td className="col-client">
-                      {s.updatedByEmail || s.createdByEmail || '—'}
-                    </td>
-                    {/* ACCIONES (MISMO ESTILO) */}
-                    <td className="acciones-cell">
-                      <Link to={`/servicios/${s.code}/editar`} className="action-btn edit" title="Editar">
-                        <FontAwesomeIcon icon={faPen} />
-                      </Link>
-                    
-                      <a
-                        href={`/ticket/${s.publicId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="action-btn print"
-                        title="Imprimir"
-                      >
-                        <FontAwesomeIcon icon={faPrint} />
-                      </a>
-                      <a
-                        href={`/orden/${s.publicId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="action-btn orden"
-                        title="Ver Orden de Trabajo"
-                      >
-                        <FontAwesomeIcon icon={faFileLines} />
-                      </a>
-                    
-                      {s.userData?.phone && (
-                        <a
-                          href={`https://wa.me/54${String(s.userData.phone).replace(/\D/g, '')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="action-btn wa"
-                          title="WhatsApp"
-                        >
-                          <FontAwesomeIcon icon={faWhatsapp} />
-                        </a>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
+      <div className="card-container">
+        <div className="info-card blue">
+          <p>Cotizaciones</p>
+          <h3>{quotes.length}</h3>
+          <small>{pendingQuotes.length} pendientes</small>
         </div>
 
-        {error && <p className="error-message">{error}</p>}
+        <div className="info-card red">
+          <p>Clientes</p>
+          <h3>{clients.length}</h3>
+          <small>Base demo editable</small>
+        </div>
+
+        <div className="info-card teal">
+          <p>Servicios mes</p>
+          <h3>{servicesCreatedThisMonth.length}</h3>
+          <small>{activeRepairServices.length} en circuito</small>
+        </div>
+
+        <div className="info-card purple">
+          <p>Facturado mes</p>
+          <h3>{money(monthlyRevenue)}</h3>
+          <small>{servicesDeliveredThisMonth.length} entregados</small>
+        </div>
+
+        <div className="info-card green">
+          <p>Conversion</p>
+          <h3>{conversionRate}%</h3>
+          <small>cotizacion a servicio</small>
+        </div>
       </div>
-    </DashboardLayout>
+
+      <section className="dashboard-grid">
+        <div className="dashboard-panel">
+          <div className="dashboard-panel-heading">
+            <span>Embudo operativo</span>
+            <strong>{services.length} servicios</strong>
+          </div>
+          <div className="flow-list">
+            {coloredStatusFlow.map(item => (
+              <div className="flow-row" key={item.label}>
+                <div>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </div>
+                <i
+                  style={{
+                    width: `${Math.max((item.value / maxFlowValue) * 100, 8)}%`,
+                    background: item.color
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="dashboard-panel">
+          <div className="dashboard-panel-heading">
+            <span>Proximas acciones</span>
+            <strong>{readyToPickup.length + pendingQuotes.length}</strong>
+          </div>
+          <div className="action-stack">
+            <Link to="/cotizaciones?status=Pendiente">Responder {pendingQuotes.length} cotizaciones pendientes</Link>
+            <Link to="/servicios?scope=active">Gestionar {activeRepairServices.length} servicios activos</Link>
+            <Link to="/servicios?scope=ready">Coordinar retiro de {readyToPickup.length} equipos listos</Link>
+            <Link to="/estadisticas">Ver rendimiento mensual</Link>
+          </div>
+        </div>
+      </section>
+
+      <div className="dashboard-section-title">
+        <div>
+          <span>Control de seguimiento</span>
+          <h2>Servicios con inactividad</h2>
+        </div>
+        <Link to="/servicios" className="dashboard-text-link">Ver todos</Link>
+      </div>
+
+      <div className="table-wrapper">
+        <table className="styled-table">
+          <thead className="table-head">
+            <tr>
+              <th className="col-code">Codigo</th>
+              <th className="col-client">Cliente</th>
+              <th className="col-device">Equipo</th>
+              <th className="col-status">Estado</th>
+              <th className="col-date">Orden de trabajo</th>
+              <th className="col-workorder">Inactividad</th>
+              <th className="col-created">Responsable</th>
+              <th className="col-actions">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {sortedAlerts.slice(0, 50).map(service => {
+              const lastActivity = getLastActivity(service)
+              const { days, label } = getInactivityBadge(lastActivity)
+
+              return (
+                <tr key={service._id}>
+                  <td className="col-code">
+                    <Link to={`/servicios/${service.code}`} className="service-link">
+                      {service.code}
+                    </Link>
+                  </td>
+
+                  <td className="col-client">
+                    {service.userData?.firstName} {service.userData?.lastName}
+                  </td>
+
+                  <td className="col-device">
+                    {service.equipmentType || '-'}
+                  </td>
+
+                  <td className="col-status">
+                    <ServiceStatusControl
+                      service={service}
+                      token={token}
+                      userEmail={auth?.user?.email}
+                      userBranch={auth?.user?.branch}
+                      className={getStatusClass(service.status)}
+                      onUpdated={(updated) => {
+                        setServices(prev =>
+                          prev.map(item =>
+                            item._id === service._id ? { ...item, ...updated } : item
+                          )
+                        )
+                      }}
+                    />
+                  </td>
+
+                  <td className="col-workorder">
+                    <WorkOrderControl
+                      service={service}
+                      onUpdate={(updated) => {
+                        setServices(prev =>
+                          prev.map(item =>
+                            item._id === service._id ? { ...item, ...updated } : item
+                          )
+                        )
+                      }}
+                    />
+                  </td>
+
+                  <td className="col-date">
+                    <span className={`inactivity-cell ${days >= 7 ? 'is-warn' : ''}`}>
+                      {timeSince(lastActivity)} ({days}d) {label}
+                    </span>
+                  </td>
+
+                  <td className="col-client">
+                    {service.updatedByEmail || service.createdByEmail || '-'}
+                  </td>
+
+                  <td className="acciones-cell">
+                    <Link to={`/servicios/${service.code}/editar`} className="action-btn edit" title="Editar">
+                      <FontAwesomeIcon icon={faPen} />
+                    </Link>
+
+                    <a
+                      href={`/ticket/${service.publicId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="action-btn print"
+                      title="Imprimir"
+                    >
+                      <FontAwesomeIcon icon={faPrint} />
+                    </a>
+                    <a
+                      href={`/orden/${service.publicId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="action-btn orden"
+                      title="Ver orden de trabajo"
+                    >
+                      <FontAwesomeIcon icon={faFileLines} />
+                    </a>
+
+                    {service.userData?.phone && (
+                      <a
+                        href={`https://wa.me/54${String(service.userData.phone).replace(/\D/g, '')}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="action-btn wa"
+                        title="WhatsApp"
+                      >
+                        <FontAwesomeIcon icon={faWhatsapp} />
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {sortedAlerts.length === 0 && (
+        <div className="empty-dashboard-state">
+          No hay servicios inactivos para revisar.
+        </div>
+      )}
+
+      {error && <p className="error-message">{error}</p>}
+    </div>
   )
 }
 

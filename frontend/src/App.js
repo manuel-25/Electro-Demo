@@ -6,6 +6,7 @@ import './root.css'
 import Navbar from './components/Navbar/Navbar'
 import Footer from './components/Footer/Footer'
 import DashboardLayout from './components/DashboardLayout/DashboardLayout.jsx'
+import DemoShowcase from './components/DemoShowcase/DemoShowcase.jsx'
 
 // Páginas públicas
 import MainContent from './components/MainContent/MainContent'
@@ -15,7 +16,6 @@ import AboutUs from './components/AboutUs/AboutUs'
 import TermsAndConditions from './components/TermsAndConditions/TermsAndConditions'
 import PrivacyPolicy from './components/PrivacyPolicy/PrivacyPolicy'
 import FormSubmissionStatus from './components/FormSubmissionStatus/FormSubmissionStatus.jsx'
-import Login from './components/Login/Login.jsx'
 import TicketViewer from './components/TicketViewer/TicketViewer.jsx'
 
 // Dashboard y autenticación
@@ -44,6 +44,7 @@ import useGtagPageView from './utils/useGtagPageView.js'
 
 import {
   BrowserRouter as Router,
+  Navigate,
   Route,
   Routes,
   useLocation
@@ -52,22 +53,35 @@ import {
 function AppContent() {
   const location = useLocation()
   useGtagPageView()
+  const businessRoutes = [
+    '/dashboard',
+    '/perfil',
+    '/cotizaciones',
+    '/clientes',
+    '/servicios',
+    '/orden',
+    '/estadisticas',
+    '/whatsapp'
+  ]
+  const isBusinessRoute = businessRoutes.some(path => location.pathname.startsWith(path))
 
   return (
-    <div className="App">
-      <Navbar />
+    <div className={`App ${isBusinessRoute ? 'App--dashboard' : ''}`}>
+      {!isBusinessRoute && <Navbar />}
       <main>
         <NotificationProvider>
           <Routes>
             {/* 🌐 Rutas públicas */}
-            <Route path="/" element={<MainContent />} />
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/demo-showcase" element={<DemoShowcase />} />
+            <Route path="/inicio" element={<MainContent />} />
             <Route path="/nosotros" element={<AboutUs />} />
             <Route path="/contacto" element={<Contact />} />
             <Route path="/reparacion-electrodomesticos" element={<Services />} />
             <Route path="/confirmacion" element={<FormSubmissionStatus />} />
             <Route path="/terminos-condiciones" element={<TermsAndConditions />} />
             <Route path="/privacidad" element={<PrivacyPolicy />} />
-            <Route path="/manager" element={<Login />} />
+            <Route path="/manager" element={<Navigate to="/dashboard" replace />} />
             <Route path="/ticket/:publicId" element={<TicketViewer />} />
 
             {/* 🔒 Rutas protegidas */}
@@ -83,7 +97,7 @@ function AppContent() {
               path="/perfil"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><Perfil /></DashboardLayout>
+                  <Perfil />
                 </ProtectedRoute>
               }
             />
@@ -91,7 +105,7 @@ function AppContent() {
               path="/cotizaciones"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><Cotizaciones /></DashboardLayout>
+                  <Cotizaciones />
                 </ProtectedRoute>
               }
             />
@@ -107,7 +121,7 @@ function AppContent() {
               path="/clientes"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><Clients /></DashboardLayout>
+                  <Clients />
                 </ProtectedRoute>
               }
             />
@@ -123,7 +137,7 @@ function AppContent() {
               path="/servicios"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><Servicios /></DashboardLayout>
+                  <Servicios />
                 </ProtectedRoute>
               }
             />
@@ -131,7 +145,7 @@ function AppContent() {
               path="/servicios/nuevo"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><NuevoServicio /></DashboardLayout>
+                  <NuevoServicio />
                 </ProtectedRoute>
               }
             />
@@ -139,7 +153,7 @@ function AppContent() {
               path="/servicios/:code/editar"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><EditarServicio /></DashboardLayout>
+                  <EditarServicio />
                 </ProtectedRoute>
               }
             />
@@ -147,7 +161,7 @@ function AppContent() {
               path="/servicios/:code"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><ServiceDetail /></DashboardLayout>
+                  <ServiceDetail />
                 </ProtectedRoute>
               }
             />
@@ -163,7 +177,7 @@ function AppContent() {
               path="/estadisticas"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><Estadisticas /></DashboardLayout>
+                  <Estadisticas />
                 </ProtectedRoute>
               }
             />
@@ -171,7 +185,7 @@ function AppContent() {
               path="/whatsapp"
               element={
                 <ProtectedRoute>
-                  <DashboardLayout><WhatsAppDashboard /></DashboardLayout>
+                  <WhatsAppDashboard />
                 </ProtectedRoute>
               }
             />
@@ -182,7 +196,7 @@ function AppContent() {
         </NotificationProvider>
       </main>
 
-      {location.pathname !== '/reparacion-electrodomesticos' && <Footer />}
+      {!isBusinessRoute && !['/', '/reparacion-electrodomesticos'].includes(location.pathname) && <Footer />}
     </div>
   )
 }

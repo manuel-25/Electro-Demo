@@ -1,4 +1,19 @@
 {
+  "name": "electro-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio demo for an Electrosafe service-management workflow.",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev": "npm run dev:backend",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend start",
+    "start:backend": "npm --prefix backend start",
+    "build:frontend": "npm --prefix frontend run build",
+    "test:frontend": "npm --prefix frontend test -- --watchAll=false",
+    "seed:demo": "npm --prefix backend run seed:demo",
+    "seed:demo:reset": "npm --prefix backend run seed:demo:reset"
+  },
   "dependencies": {
     "node-fetch": "^3.3.2",
     "react-helmet": "^6.1.0"

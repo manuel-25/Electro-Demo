@@ -12,6 +12,8 @@ npm-debug.log*
 
 # Environment variables
 .env
+.env.*
+!.env.example
 
 # Build output
 dist/
@@ -24,6 +26,9 @@ build/
 # Backend specific ignores
 /backend/node_modules/
 /backend/.env
+/frontend/.env
 /backend/logs/
 /backend/*.log
 /backend/npm-debug.log*
+/backend/whatsapp-session/
+/backend/.wwebjs_cache/

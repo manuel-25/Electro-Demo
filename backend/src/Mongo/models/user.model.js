@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import config from '../../utils/config.js'
 const { Schema, model } = mongoose
 export const USER_BRANCHES = ['Quilmes', 'Barracas', 'Ninguna']
 
@@ -29,5 +30,5 @@ const UserSchema = new Schema(
   }
 )
 
-const UserModel = model('User', UserSchema)
+const UserModel = model('User', UserSchema, config.COLLECTIONS.USERS)
 export default UserModel

@@ -19,6 +19,10 @@ html, body {
   background-color: var(--background-color);
 }
 
+.App.App--dashboard {
+  margin-top: 0;
+}
+
 /*h1, h2, h3, h4, h5, h6 {
   font-family: var(--logo-font);
   color: var(--black-color) !important;

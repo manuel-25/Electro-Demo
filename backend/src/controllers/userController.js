@@ -86,13 +86,10 @@
             req.headers['x-forwarded-for']?.split(',')[0] ||
             req.socket?.remoteAddress ||
             req.ip
-            console.log('DEBUG IP:', ip)
           const geo = geoip.lookup(ip)
 
           const country = geo?.country || 'Unknown'
           const city = geo?.city || 'Unknown'
-          console.log('GEO:', geo)
-          console.log('DEBUG Country:', country, 'City:', city)
 
           const isSuspiciousLocation = !SAFE_COUNTRIES.includes(country)
 

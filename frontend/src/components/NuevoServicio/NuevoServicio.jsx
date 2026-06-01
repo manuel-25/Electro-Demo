@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react'
+import React, { useState, useEffect, useContext, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import DashboardLayout from '../DashboardLayout/DashboardLayout'
@@ -44,6 +44,16 @@ const NuevoServicio = () => {
 
   const [previewDescription, setPreviewDescription] = useState('')
   const [error, setError] = useState(null)
+  const {
+    code,
+    equipmentType,
+    brand,
+    model,
+    approximateValue,
+    quoteReference,
+    userDescription,
+    deliveryMethod
+  } = formData
 
   useEffect(() => {
     axios.get(`${getApiUrl()}/api/client`, { withCredentials: true})
@@ -75,26 +85,21 @@ const NuevoServicio = () => {
     }))
   ]
 
-  const updatePreview = () => {
-    const { code, equipmentType, brand, model, approximateValue, quoteReference, userDescription } = formData
+  useEffect(() => {
     const base = [code, equipmentType, brand, model].filter(Boolean).join(' ')
     const texto = (userDescription || '').trim()
     const approx = approximateValue ? `Aprox.: ${approximateValue}` : ''
     const cotRef = quoteReference ? ` #${quoteReference}` : ''
     setPreviewDescription([base, texto, approx].filter(Boolean).join('. ').trim().concat(cotRef))
-  }
-
-  useEffect(() => {
-    updatePreview()
   }, [
-    formData.code,
-    formData.equipmentType,
-    formData.brand,
-    formData.model,
-    formData.approximateValue,
-    formData.quoteReference,
-    formData.userDescription,
-    formData.deliveryMethod
+    code,
+    equipmentType,
+    brand,
+    model,
+    approximateValue,
+    quoteReference,
+    userDescription,
+    deliveryMethod
   ])
 
   const handleChange = e => {
@@ -102,9 +107,7 @@ const NuevoServicio = () => {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  // Pide un "siguiente" SOLO para preview (el definitivo lo asigna el backend)
-  const handleCodePrefixChange = async (prefix) => {
-    setFormData(prev => ({ ...prev, codePrefix: prefix, code: '' }))
+  const loadNextCode = useCallback(async (prefix) => {
     if (!prefix) return
     try {
       const res = await axios.get(`${getApiUrl()}/api/service/last-code/${prefix}`, { withCredentials: true })
@@ -113,6 +116,10 @@ const NuevoServicio = () => {
     } catch {
       setFormData(prev => ({ ...prev, code: `${prefix}1000` }))
     }
+  }, [])
+
+  const handleCodePrefixChange = (prefix) => {
+    setFormData(prev => ({ ...prev, codePrefix: prefix, code: '' }))
   }
 
   const handleSubmit = async e => {
@@ -168,8 +175,9 @@ const NuevoServicio = () => {
 
     // si no, enviamos directo
     try {
-      await axios.post(`${getApiUrl()}/api/service`, finalData, { withCredentials: true })
-      navigate(`/servicios`)
+      const created = await axios.post(`${getApiUrl()}/api/service`, finalData, { withCredentials: true })
+      const publicId = created.data?.publicId
+      navigate(publicId ? `/ticket/${publicId}` : '/servicios')
     } catch (err) {
       setError(err.response?.data?.error || 'Error al crear el servicio.')
       logError(`Error creando servicio: ${err} | user: ${auth.user.email}`)
@@ -179,9 +187,9 @@ const NuevoServicio = () => {
 
   useEffect(() => {
     if (formData.codePrefix) {
-      handleCodePrefixChange(formData.codePrefix)
+      loadNextCode(formData.codePrefix)
     }
-  }, [])
+  }, [formData.codePrefix, loadNextCode])
 
   return (
     <DashboardLayout>
@@ -219,6 +227,7 @@ const NuevoServicio = () => {
                   classNamePrefix="react-select"
                   placeholder="Buscar cliente..."
                   options={clienteOptions}
+                  value={clienteOptions.find(opt => opt.value === Number(formData.customerNumber)) || null}
                   onChange={sel =>
                     setFormData(prev => ({ ...prev, customerNumber: sel?.value || '' }))
                   }
@@ -301,6 +310,7 @@ const NuevoServicio = () => {
               classNamePrefix="react-select"
               placeholder="Buscar cotización..."
               options={cotOptions}
+              value={cotOptions.find(opt => opt.value === Number(formData.quoteReference)) || null}
               onChange={sel =>
                 setFormData(prev => ({ ...prev, quoteReference: sel?.value || '' }))
               }
@@ -322,6 +332,7 @@ const NuevoServicio = () => {
             <label>Recibido En</label>
             <select name="receivedAtBranch" value={formData.receivedAtBranch} onChange={handleChange}>
               <option value="Quilmes">Quilmes</option>
+              <option value="Barracas">Barracas</option>
               <option value="">No recibido</option>
             </select>
           </div>
@@ -372,12 +383,13 @@ const NuevoServicio = () => {
 
           onChecklistComplete={async (checklist) => {
             try {
-              await axios.post(`${getApiUrl()}/api/service`, {
+              const created = await axios.post(`${getApiUrl()}/api/service`, {
                 ...pendingFinalData,
                 receptionChecklist: checklist
               }, { withCredentials: true })
 
-              navigate('/servicios')
+              const publicId = created.data?.publicId
+              navigate(publicId ? `/ticket/${publicId}` : '/servicios')
             } catch (err) {
               const msg = err.response?.data?.error || err.message
               logError(`Error creando servicio con checklist: ${msg} | user: ${auth.user.email}`)

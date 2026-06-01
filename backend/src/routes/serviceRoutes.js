@@ -7,7 +7,7 @@ import WorkOrderController from '../controllers/workOrderController.js'
 
 const router = express.Router()
 
-// ================== Rutas de Servicio ==================
+// ================== Rutas de servicio ==================
 
 // Obtener todos los servicios
 router.get('/', authenticateJWT, ServiceController.getAllServices)
@@ -35,11 +35,14 @@ router.put('/:id/status', authenticateJWT, ServiceController.updateServiceStatus
 router.patch('/soft-delete/:code', authenticateJWT, authenticateAdmin, ServiceController.softDeleteByCode)
 
 // ================== Ruta para imprimir comprobante ==================
-router.get('/:publicId/print-ticket', /*authenticateJWT,*/ TicketController.printServiceTicket) // por _id
-router.get('/code/:code/print-ticket', /*authenticateJWT,*/ TicketController.printByCode) // por code
+router.get('/:publicId/print-ticket', authenticateJWT, TicketController.printServiceTicket) // interna por _id
+router.get('/code/:code/print-ticket', authenticateJWT, TicketController.printByCode) // interna por código
+
+// Pública: ticket compartible por ID no secuencial.
 router.get('/public/:publicId/print-ticket', TicketController.printByPublicId)
 
 // ================== Orden de trabajo ==================
+// Pública: orden compartible por ID no secuencial.
 router.get('/public/:publicId', WorkOrderController.getPublicService)
 router.patch('/:id/workorder', authenticateJWT, ServiceController.updateWorkOrderStatus)
 

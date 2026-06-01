@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import config from '../../utils/config.js'
 
 const clientSchema = new mongoose.Schema({
   firstName: { type: String, required: true, trim: true },
@@ -20,5 +21,5 @@ const clientSchema = new mongoose.Schema({
   serviceRequestNumbers: [Number]
 }, { timestamps: true })
 
-const clientModel = mongoose.model('Client', clientSchema)
+const clientModel = mongoose.model('Client', clientSchema, config.COLLECTIONS.CLIENTS)
 export default clientModel

@@ -17,6 +17,7 @@ import { logger } from './utils/logger.js'
 import statsRoutes from './routes/statsRoutes.js'
 import helmet from 'helmet'
 import mongoSanitize from 'express-mongo-sanitize'
+import { seedDemoData } from './demo/seedDemoData.js'
 
 /*
 //Whatsapp
@@ -34,10 +35,12 @@ const port = config.PORT || 5000
 app.set('trust proxy', 1)
 
 // Middleware
-const allowedOrigins = [
-  'https://electrosafeweb.com',
-  'http://localhost:3000'
-]
+const allowedOrigins = config.FRONTEND_ORIGINS.length
+  ? config.FRONTEND_ORIGINS
+  : [
+      'https://electrosafeweb.com',
+      'http://localhost:3000'
+    ]
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -65,12 +68,16 @@ app.use('/api/stats', statsRoutes)
 
 // MongoDB Connection
 await connectDB()
+if (config.DEMO_MODE) {
+  const demoSeed = await seedDemoData()
+  logger.info(`Demo mode enabled. Collections: ${JSON.stringify(config.COLLECTIONS)}. Seed: ${JSON.stringify(demoSeed.results)}`)
+}
 
 // Middleware general de manejo de errores
 app.use((err, req, res, next) => {
   res.status(500).json({
-    message: 'Ocurrió un error en el servidor',
-    error: err.message
+    message: 'Ocurrio un error en el servidor',
+    error: config.NODE_ENV === 'production' ? undefined : err.message
   })
 })
 

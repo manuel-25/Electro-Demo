@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { products, additionalDetailsConfig } from '../../utils/productsData.jsx'
 import { steps } from '../../utils/productsData.jsx'
 import { logError } from '../../utils/logger.js'
+import { getApiUrl } from '../../config.js'
 import { Helmet } from 'react-helmet'
 import './Services.css'
 
@@ -118,7 +119,7 @@ const Services = () => {
     const updatedFormData = { ...formData, date }
 
     try {
-      const response = await fetch('https://electrosafeweb.com/api/quotes/', {       //https://electrosafeweb.com/api/quotes/
+      const response = await fetch(`${getApiUrl()}/api/quotes/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedFormData),

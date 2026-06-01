@@ -15,7 +15,7 @@
 }
 
 /* Expansión al pasar el mouse */
-.sidebar:hover {
+.sidebar.is-expanded {
   width: 180px;
 }
 
@@ -82,7 +82,7 @@
 }
 
 /* Muestra texto cuando la barra se expande */
-.sidebar:hover .sidebar-link span:not(.notification-badge) {
+.sidebar.is-expanded .sidebar-link span:not(.notification-badge) {
   opacity: 1;
   margin-left: 10px;
 }
@@ -117,7 +117,7 @@
 }
 
 /* Desplazamiento del badge cuando la barra se expande */
-.sidebar:hover .notification-badge {
+.sidebar.is-expanded .notification-badge {
   left: 150px;
 }
 
@@ -160,7 +160,7 @@
     height: 100%;
   }
 
-  .sidebar:hover {
+  .sidebar.is-expanded {
     width: 150px;
   }
 
@@ -191,7 +191,7 @@
     width: 65px;
   }
 
-  .sidebar:hover {
+  .sidebar.is-expanded {
     width: 130px;
   }
 

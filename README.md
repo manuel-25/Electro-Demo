@@ -1,70 +1,115 @@
-# Getting Started with Create React App
+# Electro-Demo
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Demo full stack de gestión operativa para un servicio técnico de electrónica/electrodomésticos. El proyecto está preparado para portfolio: muestra el flujo de negocio completo con datos demo, sin depender de usuarios reales ni credenciales productivas.
 
-## Available Scripts
+La marca visible de la demo es **Electrosafe**. El repositorio original de trabajo se llamaba ElectroFix, pero esta versión queda orientada exclusivamente a demostración.
 
-In the project directory, you can run:
+## Qué muestra la demo
 
-### `npm start`
+- Dashboard operativo con indicadores de cotizaciones, clientes, servicios activos, entregas y facturación demo.
+- Gestión de cotizaciones con filtros por estado y acciones rápidas.
+- Gestión de clientes con vista de detalle y relación con servicios.
+- Gestión de servicios técnicos con estados, órdenes de trabajo, tickets, notas, recepción, accesorios y garantía.
+- Vista previa de servicio al seleccionar una fila, sin entrar al detalle.
+- Estadísticas de flujo del negocio: estados del servicio, conversión, ticket promedio, tiempos de arreglo y comparación mensual.
+- Modo demo con colecciones separadas en MongoDB y seed controlado.
+- Login omitido para que la demo entre directo al dashboard.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- Frontend: React 18, React Router, CSS por componente, Chart.js/Recharts, React PDF.
+- Backend: Node.js, Express, MongoDB/Mongoose.
+- Seguridad: cookie httpOnly, CORS allowlist, rate limit de login, sanitización Mongo y variables de entorno.
+- Datos demo: seed propio para clientes, cotizaciones, servicios y usuario demo.
 
-### `npm test`
+## Estructura
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```txt
+frontend/   App React pública y dashboard demo
+backend/    API Express, modelos Mongo, rutas, controladores y seed demo
+```
 
-### `npm run build`
+## Instalación local
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm run install:all
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Crear los archivos de entorno desde los ejemplos:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
 
-### `npm run eject`
+Valores importantes para correr la demo:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```env
+DEMO_MODE=true
+PORT=5000
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Frontend:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```env
+PORT=3001
+REACT_APP_DEV_API_URL=http://localhost:5000
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Correr la demo
 
-## Learn More
+Backend:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm run dev:backend
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Frontend:
 
-### Code Splitting
+```bash
+npm run dev:frontend
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Abrir:
 
-### Analyzing the Bundle Size
+```txt
+http://localhost:3001
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Datos demo
 
-### Making a Progressive Web App
+El backend puede poblar colecciones separadas para demo:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+```bash
+npm run seed:demo
+```
 
-### Advanced Configuration
+Para resetear y volver a cargar los datos:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+```bash
+npm run seed:demo:reset
+```
 
-### Deployment
+Las colecciones demo se configuran desde `backend/src/utils/config.js` cuando `DEMO_MODE=true`.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Scripts útiles
 
-### `npm run build` fails to minify
+```bash
+npm run build:frontend
+npm run test:frontend
+npm run start:backend
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Seguridad antes de publicar
+
+Este repositorio está pensado para portfolio. Antes de subir o desplegar:
+
+- No commitear `.env`, logs, dumps de base, sesiones de WhatsApp, caches ni datos reales.
+- Usar siempre una base demo o datos mock.
+- Mantener fuera de este repo cualquier credencial real.
+- Rotar credenciales si alguna vez estuvieron en un repo público.
+- Revisar que las rutas administrativas sigan protegidas en backend.
+
+## Estado del proyecto
+
+Esta demo prioriza mostrar el flujo del negocio y la experiencia operativa. Algunas pantallas grandes todavía son candidatas a refactor por módulos y tests más finos, pero el circuito principal de clientes, cotizaciones, servicios, tickets, órdenes y estadísticas está preparado para una presentación de portfolio.
