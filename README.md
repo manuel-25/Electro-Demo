@@ -2,7 +2,7 @@
 
 Demo full stack de gestión operativa para un servicio técnico de electrónica/electrodomésticos. El proyecto está preparado para portfolio: muestra el flujo de negocio completo con datos demo, sin depender de usuarios reales ni credenciales productivas.
 
-La marca visible de la demo es **Electrosafe**. El repositorio original de trabajo se llamaba ElectroFix, pero esta versión queda orientada exclusivamente a demostración.
+La marca visible de la demo es **Electrosafe**. El repositorio original de trabajo se llamaba ElectroSafe, pero esta versión queda orientada exclusivamente a demostración para preservar la seguridad del codigo.
 
 ## Qué muestra la demo
 
