@@ -9,8 +9,8 @@
 
 .styled-table {
   width: 100%;
-  min-width: 1260px;
-  table-layout: auto;
+  min-width: max(1120px, 100%);
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -19,6 +19,8 @@
 .styled-table td {
   padding: 6px 8px;
   border: 1px solid #dee2e6;
+  min-width: 0;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
   vertical-align: middle;
@@ -88,22 +90,69 @@
 }
 
 /* Distribución de columnas */
-.col-code { width: 6%; }
-.col-date { width: 6%; }
+.servicios-page .styled-table th:nth-child(1),
+.servicios-page .styled-table td:nth-child(1) { width: clamp(58px, 4.8vw, 86px); }
 
-.col-client { width: 6%; }
-.col-device { width: 8%; } 
+.servicios-page .styled-table th:nth-child(2),
+.servicios-page .styled-table td:nth-child(2) { width: clamp(56px, 4.6vw, 78px); }
 
-.col-description { width: 18%; overflow: hidden; white-space: normal; }
-.col-notes { width: 20%; white-space: normal; }             
+.servicios-page .styled-table th:nth-child(3),
+.servicios-page .styled-table td:nth-child(3) { width: clamp(74px, 5.5vw, 96px); }
 
-.col-status { width: 10%; }  
-.col-workorder { width: 10%; } 
+.servicios-page .styled-table th:nth-child(4),
+.servicios-page .styled-table td:nth-child(4) { width: clamp(82px, 6.2vw, 120px); }
 
-.col-created { width: 6%; } 
-.col-received { width: 6%; } 
+.servicios-page .styled-table th:nth-child(5),
+.servicios-page .styled-table td:nth-child(5) { width: clamp(170px, 15vw, 300px); }
 
-.col-actions { width: 6%; text-align: center; }
+.servicios-page .styled-table th:nth-child(6),
+.servicios-page .styled-table td:nth-child(6) { width: clamp(80px, 7vw, 128px); }
+
+.servicios-page .styled-table th:nth-child(7),
+.servicios-page .styled-table td:nth-child(7) { width: clamp(130px, 10vw, 170px); }
+
+.servicios-page .styled-table th:nth-child(8),
+.servicios-page .styled-table td:nth-child(8) { width: clamp(140px, 11vw, 200px); }
+
+.servicios-page .styled-table th:nth-child(9),
+.servicios-page .styled-table td:nth-child(9) { width: clamp(280px, 24vw, 440px); }
+
+.servicios-page .styled-table th:nth-child(10),
+.servicios-page .styled-table td:nth-child(10) { width: clamp(72px, 6vw, 100px); }
+
+.servicios-page .styled-table th:nth-child(11),
+.servicios-page .styled-table td:nth-child(11) { width: clamp(118px, 11vw, 180px); }
+
+.servicios-page .styled-table th:nth-child(12),
+.servicios-page .styled-table td:nth-child(12) { width: clamp(108px, 7.5vw, 140px); }
+
+.servicios-page .styled-table td:nth-child(1),
+.servicios-page .styled-table td:nth-child(2),
+.servicios-page .styled-table td:nth-child(3),
+.servicios-page .styled-table td:nth-child(4),
+.servicios-page .styled-table td:nth-child(6),
+.servicios-page .styled-table td:nth-child(10),
+.servicios-page .styled-table td:nth-child(11) {
+  white-space: nowrap;
+}
+
+.col-code,
+.col-date,
+.col-client,
+.col-device,
+.col-created,
+.col-received {
+  white-space: nowrap;
+}
+
+.col-description,
+.col-notes {
+  white-space: normal;
+}
+
+.col-actions {
+  text-align: center;
+}
 
 .servicios-page .styled-table td.acciones-cell {
   display: table-cell !important;
@@ -132,12 +181,18 @@
 /* TEXT AREA */
 
 .notes-textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   min-height: 25px;
   max-height: 75px;
   font-size: 13px;
   padding: 6px;
-  border: none;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
   resize: vertical;
+  line-height: 1.35;
 }
 
 .notes-textarea:focus {
@@ -927,7 +982,8 @@
 
 .servicios-page .styled-table {
   width: 100%;
-  min-width: 1260px;
+  min-width: max(1120px, 100%);
+  table-layout: fixed;
   font-size: 13px;
 }
 
@@ -949,7 +1005,84 @@
   }
 
   .servicios-page .styled-table {
-    min-width: 1120px;
+    min-width: max(1040px, 100%);
     font-size: 12px;
+  }
+}
+
+@media (min-width: 1201px) {
+  .servicios-page .table-wrapper {
+    overflow-x: visible;
+  }
+
+  .servicios-page .styled-table {
+    min-width: 100%;
+    table-layout: fixed;
+    font-size: clamp(11px, 0.68vw, 12px);
+  }
+
+  .servicios-page .styled-table th,
+  .servicios-page .styled-table td {
+    height: 64px;
+    padding: clamp(4px, 0.35vw, 6px);
+  }
+
+  .servicios-page .styled-table th:nth-child(1),
+  .servicios-page .styled-table td:nth-child(1) { width: 5%; }
+
+  .servicios-page .styled-table th:nth-child(2),
+  .servicios-page .styled-table td:nth-child(2) { width: 4.5%; }
+
+  .servicios-page .styled-table th:nth-child(3),
+  .servicios-page .styled-table td:nth-child(3) { width: 5.5%; }
+
+  .servicios-page .styled-table th:nth-child(4),
+  .servicios-page .styled-table td:nth-child(4) { width: 6.5%; }
+
+  .servicios-page .styled-table th:nth-child(5),
+  .servicios-page .styled-table td:nth-child(5) { width: 15%; }
+
+  .servicios-page .styled-table th:nth-child(6),
+  .servicios-page .styled-table td:nth-child(6) { width: 7%; }
+
+  .servicios-page .styled-table th:nth-child(7),
+  .servicios-page .styled-table td:nth-child(7) { width: 10%; }
+
+  .servicios-page .styled-table th:nth-child(8),
+  .servicios-page .styled-table td:nth-child(8) { width: 10%; }
+
+  .servicios-page .styled-table th:nth-child(9),
+  .servicios-page .styled-table td:nth-child(9) { width: 16%; }
+
+  .servicios-page .styled-table th:nth-child(10),
+  .servicios-page .styled-table td:nth-child(10) { width: 5.5%; }
+
+  .servicios-page .styled-table th:nth-child(11),
+  .servicios-page .styled-table td:nth-child(11) { width: 10%; }
+
+  .servicios-page .styled-table th:nth-child(12),
+  .servicios-page .styled-table td:nth-child(12) { width: 5%; }
+
+  .servicios-page .status-select,
+  .servicios-page .wo-select {
+    min-width: 0;
+    padding: 5px 20px 5px 7px;
+    font-size: clamp(11px, 0.68vw, 12px);
+  }
+
+  .servicios-page .notes-textarea {
+    min-height: 56px;
+    max-height: 72px;
+    font-size: clamp(11px, 0.68vw, 12px);
+  }
+
+  .servicios-page .acciones-cell .actions-group {
+    gap: 4px;
+  }
+
+  .servicios-page .action-btn {
+    width: clamp(20px, 1.45vw, 24px);
+    height: clamp(20px, 1.45vw, 24px);
+    font-size: 11px;
   }
 }

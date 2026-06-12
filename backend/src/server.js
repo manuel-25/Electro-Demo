@@ -15,9 +15,11 @@ import cookieParser from 'cookie-parser'
 import config from './utils/config.js'
 import { logger } from './utils/logger.js'
 import statsRoutes from './routes/statsRoutes.js'
+import demoAnalyticsRoutes from './routes/demoAnalyticsRoutes.js'
 import helmet from 'helmet'
 import mongoSanitize from 'express-mongo-sanitize'
 import { seedDemoData } from './demo/seedDemoData.js'
+import { demoAnalyticsMiddleware } from './utils/demoAnalytics.js'
 
 /*
 //Whatsapp
@@ -56,8 +58,10 @@ app.use(cookieParser())
 app.use(express.json({ limit: '100kb' }))
 app.use(helmet())
 app.use(mongoSanitize())
+app.use(demoAnalyticsMiddleware)
 
 // Routes
+app.use('/api/demo', demoAnalyticsRoutes)
 app.use('/api/quotes', quoteRoutes)
 app.use('/api/manager', userRoutes)
 app.use('/api/client', clientRoutes)

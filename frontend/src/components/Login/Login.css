@@ -22,10 +22,26 @@
 .login-form h2 {
   font-size: 21px;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin: 0 0 5px;
   color: var(--black-color);
   text-align: center;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
+}
+
+.login-kicker {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.login-copy {
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.45;
+  margin: -4px 0 2px;
+  text-align: center;
 }
 
 .input-group {

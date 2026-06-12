@@ -11,6 +11,7 @@ const DashboardLayout = ({ children }) => {
     '/cotizaciones': 'Cotizaciones',
     '/clientes': 'Clientes',
     '/estadisticas': 'Estadisticas',
+    '/demo-analytics': 'Analitica Demo',
     '/whatsapp': 'WhatsApp'
   }
   const currentTitle = Object.entries(titleByPath)
@@ -32,6 +33,7 @@ const DashboardLayout = ({ children }) => {
           <Link to="/servicios">Servicios</Link>
           <Link to="/cotizaciones">Cotizaciones</Link>
           <Link to="/clientes">Clientes</Link>
+          <Link to="/demo-analytics">Analitica</Link>
         </nav>
       </header>
       {children}

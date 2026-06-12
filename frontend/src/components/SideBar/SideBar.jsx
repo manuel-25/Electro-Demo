@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import './SideBar.css'
 import { Link, useLocation } from 'react-router-dom'
-import { FaClipboardList, FaPlusCircle, FaUsers, FaChartBar, FaWhatsapp, FaTachometerAlt } from 'react-icons/fa'
+import { FaClipboardList, FaPlusCircle, FaUsers, FaChartBar, FaWhatsapp, FaTachometerAlt, FaMousePointer } from 'react-icons/fa'
 import { useNotifications } from '../../Context/NotificationContext'
 
 const Sidebar = () => {
@@ -69,6 +69,13 @@ const Sidebar = () => {
           <Link to="/estadisticas" className="sidebar-link" onClick={collapseSidebar}>
             <FaChartBar />
             <span>Estadisticas</span>
+          </Link>
+        </li>
+
+        <li title="Analitica Demo">
+          <Link to="/demo-analytics" className="sidebar-link" onClick={collapseSidebar}>
+            <FaMousePointer />
+            <span>Analitica</span>
           </Link>
         </li>
 

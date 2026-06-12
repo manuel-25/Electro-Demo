@@ -10,6 +10,18 @@ const MessageSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  provider: {
+    type: String,
+    enum: ['whatsapp-web', 'cloud-api', 'demo', 'manual'],
+    default: 'manual'
+  },
+  externalId: String,
+  status: {
+    type: String,
+    enum: ['queued', 'sent', 'delivered', 'read', 'failed'],
+    default: 'sent'
+  },
+  error: String,
   createdAt: {
     type: Date,
     default: Date.now
@@ -52,6 +64,12 @@ const ConversationSchema = new mongoose.Schema({
   inProgressAt: Date,
   lastAssignedTo: String,
   firstResponseAt: Date,
+  lastOutboundAt: Date,
+  channelProvider: {
+    type: String,
+    enum: ['whatsapp-web', 'cloud-api', 'demo', 'manual'],
+    default: 'manual'
+  },
 
   messages: [MessageSchema]
 

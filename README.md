@@ -1,48 +1,222 @@
-# Electro-Demo
+# Electro-Demo | Electrosafe
 
-Demo full stack de gestión operativa para un servicio técnico de electrónica/electrodomésticos. El proyecto está preparado para portfolio: muestra el flujo de negocio completo con datos demo, sin depender de usuarios reales ni credenciales productivas.
+**Electro-Demo** es una demo full stack de gestion operativa para un servicio tecnico de electronica y electrodomesticos. La aplicacion muestra como una empresa puede centralizar cotizaciones, clientes, servicios, tickets, ordenes de trabajo, garantias, estadisticas y conversaciones de WhatsApp en un solo panel.
 
-La marca visible de la demo es **Electrosafe**. El repositorio original de trabajo se llamaba ElectroSafe, pero esta versión queda orientada exclusivamente a demostración para preservar la seguridad del codigo.
+La marca visible dentro de la demo es **Electrosafe**. El objetivo del proyecto es presentar un flujo de negocio completo, usable y entendible para portfolio, entrevistas, clientes potenciales o demostraciones comerciales, preservando la seguridad del codigo real.
 
-## Qué muestra la demo
+---
 
-- Dashboard operativo con indicadores de cotizaciones, clientes, servicios activos, entregas y facturación demo.
-- Gestión de cotizaciones con filtros por estado y acciones rápidas.
-- Gestión de clientes con vista de detalle y relación con servicios.
-- Gestión de servicios técnicos con estados, órdenes de trabajo, tickets, notas, recepción, accesorios y garantía.
-- Vista previa de servicio al seleccionar una fila, sin entrar al detalle.
-- Estadísticas de flujo del negocio: estados del servicio, conversión, ticket promedio, tiempos de arreglo y comparación mensual.
-- Modo demo con colecciones separadas en MongoDB y seed controlado.
-- Login omitido para que la demo entre directo al dashboard.
+## Que problema resuelve
 
-## Stack
+Un servicio tecnico suele trabajar con informacion repartida entre WhatsApp, planillas, notas, tickets impresos, presupuestos y conversaciones sueltas. Eso hace dificil saber:
 
-- Frontend: React 18, React Router, CSS por componente, Chart.js/Recharts, React PDF.
-- Backend: Node.js, Express, MongoDB/Mongoose.
-- Seguridad: cookie httpOnly, CORS allowlist, rate limit de login, sanitización Mongo y variables de entorno.
-- Datos demo: seed propio para clientes, cotizaciones, servicios y usuario demo.
+- que equipos ingresaron,
+- que cliente esta esperando respuesta,
+- que presupuesto fue aceptado,
+- que servicios estan listos para retirar,
+- cuanto se esta facturando,
+- que fallas se repiten,
+- donde se traban las operaciones.
 
-## Estructura
+Esta demo propone una solucion: un sistema interno donde el equipo puede seguir todo el ciclo de vida del servicio desde una unica interfaz.
 
-```txt
-frontend/   App React pública y dashboard demo
-backend/    API Express, modelos Mongo, rutas, controladores y seed demo
-```
+---
 
-## Instalación local
+## Flujo principal del negocio
+
+1. **Solicitud o cotizacion**
+   El cliente consulta por una reparacion. La solicitud queda registrada como cotizacion.
+
+2. **Cliente**
+   El operador puede crear o seleccionar un cliente existente, revisar sus datos y ver su historial.
+
+3. **Ingreso del equipo**
+   Se crea un servicio tecnico con codigo automatico, equipo, marca, modelo, descripcion, sucursal y metodo de recepcion.
+
+4. **Recepcion y checklist**
+   Si el equipo queda recibido, el sistema solicita informacion de ingreso: estado del equipo, limpieza, accesorios y observaciones.
+
+5. **Orden de trabajo**
+   El equipo puede pasar por presupuesto, envio al cliente, aceptacion, rechazo o reparacion sin aprobacion.
+
+6. **Seguimiento por estados**
+   El servicio avanza por etapas: pendiente, recibido, en gestion, reparacion, listo para retirar, entregado, garantia, sin respuesta o bodega.
+
+7. **Ticket**
+   Al ingresar un equipo se genera un comprobante para el cliente.
+
+8. **Entrega y garantia**
+   El sistema registra entrega, conformidad, garantia y eventos posteriores.
+
+9. **Analisis**
+   El dashboard y las estadisticas muestran informacion clave para tomar decisiones operativas.
+
+---
+
+## Modulos incluidos
+
+### Dashboard
+
+Vista general del estado del negocio:
+
+- cotizaciones pendientes,
+- servicios activos,
+- facturacion,
+- conversion,
+- proximas acciones,
+- servicios con inactividad,
+- alertas operativas.
+
+### Servicios
+
+Panel central para gestionar reparaciones:
+
+- tabla responsive,
+- filtros por estado, sucursal, creador, equipo y mes,
+- seleccion de fila con preview,
+- detalle completo del servicio,
+- edicion,
+- cambio de estado,
+- orden de trabajo,
+- ticket,
+- WhatsApp rapido,
+- recepcion con checklist.
+
+### Clientes
+
+Gestion de clientes y su historial:
+
+- alta de clientes,
+- detalle editable,
+- servicios vinculados,
+- valor acumulado,
+- identificacion de clientes recurrentes.
+
+### Cotizaciones
+
+Seguimiento de solicitudes:
+
+- pendientes,
+- respondidas,
+- no respondidas,
+- contacto por WhatsApp,
+- filtros funcionales desde dashboard.
+
+### Estadisticas
+
+Panel de decision para entender el negocio:
+
+- facturacion mensual,
+- variacion mensual,
+- valor en cartera,
+- facturacion proyectada,
+- funnel de conversion,
+- ranking de fallas,
+- tiempo por etapa,
+- ticket promedio,
+- clientes nuevos y recurrentes,
+- garantias activas,
+- alertas operativas.
+
+### WhatsApp Operativo
+
+Rework de la seccion original del bot para convertirla en una bandeja de soporte:
+
+- conversaciones por estado,
+- mensajes guardados,
+- lectura de historial,
+- tomar conversacion,
+- finalizar conversacion,
+- responder desde el panel cuando la integracion lo permita,
+- respuestas rapidas,
+- contexto de API,
+- aviso de limitaciones de la ventana de atencion de WhatsApp.
+
+La demo soporta modo simulado. La arquitectura queda preparada para integrarse con WhatsApp Cloud API o con la integracion local existente.
+
+### Analitica de Demo
+
+Modulo pensado para portfolio publicado:
+
+- ingreso simple por email,
+- tracking de visitas,
+- eventos de uso,
+- paginas mas vistas,
+- acciones principales,
+- actividad agrupada por usuario,
+- emails enmascarados por privacidad.
+
+---
+
+## Como usar la demo
+
+1. Entrar a la aplicacion.
+2. Escribir un email para iniciar la demo.
+3. Ir al **Dashboard** para ver el estado general.
+4. Entrar a **Servicios** para crear o editar reparaciones.
+5. Crear un servicio nuevo:
+   - elegir cliente,
+   - equipo,
+   - marca/modelo,
+   - descripcion,
+   - sucursal,
+   - guardar.
+6. Si el equipo fue recibido, completar el checklist.
+7. Revisar el ticket generado.
+8. Volver a servicios para continuar el flujo.
+9. Usar **Estadisticas** para analizar el negocio.
+10. Usar **WhatsApp** para revisar conversaciones demo.
+11. Usar **Analitica** para ver como interactuan los visitantes con la demo.
+
+---
+
+## Datos demo
+
+La aplicacion trabaja con datos de prueba en MongoDB, separados de cualquier base real.
+
+Incluye:
+
+- 100 clientes,
+- 100 cotizaciones,
+- mas de 100 servicios,
+- conversaciones demo de WhatsApp,
+- usuario demo,
+- eventos de analitica.
+
+Esto permite mostrar la aplicacion con volumen realista, sin exponer informacion sensible.
+
+---
+
+## Publicacion y seguridad
+
+Este proyecto esta pensado para ser publicado como demo. Antes de desplegar:
+
+- usar una base de datos exclusiva para demo,
+- no subir archivos `.env`,
+- no incluir credenciales reales,
+- no usar datos reales de clientes,
+- mantener las colecciones demo separadas,
+- revisar CORS y variables de entorno,
+- rotar cualquier credencial que haya sido expuesta accidentalmente.
+
+---
+
+## Instalacion local
+
+Instalar dependencias:
 
 ```bash
 npm run install:all
 ```
 
-Crear los archivos de entorno desde los ejemplos:
+Crear variables de entorno desde los ejemplos:
 
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
 
-Valores importantes para correr la demo:
+Variables importantes:
 
 ```env
 DEMO_MODE=true
@@ -54,9 +228,12 @@ Frontend:
 ```env
 PORT=3001
 REACT_APP_DEV_API_URL=http://localhost:5000
+REACT_APP_DEMO_MODE=true
 ```
 
-## Correr la demo
+---
+
+## Correr en local
 
 Backend:
 
@@ -76,40 +253,50 @@ Abrir:
 http://localhost:3001
 ```
 
-## Datos demo
+---
 
-El backend puede poblar colecciones separadas para demo:
+## Cargar datos demo
+
+Insertar datos si las colecciones estan vacias:
 
 ```bash
 npm run seed:demo
 ```
 
-Para resetear y volver a cargar los datos:
+Resetear y volver a poblar:
 
 ```bash
 npm run seed:demo:reset
 ```
 
-Las colecciones demo se configuran desde `backend/src/utils/config.js` cuando `DEMO_MODE=true`.
+---
 
-## Scripts útiles
+## Stack utilizado
 
-```bash
-npm run build:frontend
-npm run test:frontend
-npm run start:backend
-```
+- React
+- React Router
+- CSS modular por componente
+- Chart.js
+- Node.js
+- Express
+- MongoDB / Mongoose
+- PDFKit
+- WhatsApp integration layer
 
-## Seguridad antes de publicar
+La demo prioriza experiencia de usuario, flujo de negocio y claridad operativa por encima de mostrar complejidad tecnica innecesaria.
 
-Este repositorio está pensado para portfolio. Antes de subir o desplegar:
+---
 
-- No commitear `.env`, logs, dumps de base, sesiones de WhatsApp, caches ni datos reales.
-- Usar siempre una base demo o datos mock.
-- Mantener fuera de este repo cualquier credencial real.
-- Rotar credenciales si alguna vez estuvieron en un repo público.
-- Revisar que las rutas administrativas sigan protegidas en backend.
+## Valor del proyecto
 
-## Estado del proyecto
+Electro-Demo demuestra la capacidad de construir un sistema interno realista para una operacion de servicio tecnico:
 
-Esta demo prioriza mostrar el flujo del negocio y la experiencia operativa. Algunas pantallas grandes todavía son candidatas a refactor por módulos y tests más finos, pero el circuito principal de clientes, cotizaciones, servicios, tickets, órdenes y estadísticas está preparado para una presentación de portfolio.
+- digitaliza procesos manuales,
+- mejora el seguimiento,
+- reduce perdida de informacion,
+- ordena la comunicacion con clientes,
+- muestra metricas accionables,
+- permite escalar hacia integraciones reales como WhatsApp Cloud API,
+- deja una base preparada para producto o SaaS interno.
+
+Es una demo, pero representa un producto funcional con una logica de negocio completa.

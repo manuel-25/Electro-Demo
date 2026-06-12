@@ -7,6 +7,7 @@ import clientModel from '../Mongo/models/client.model.js'
 import quoteModel from '../Mongo/models/quote.model.js'
 import ServiceModel from '../Mongo/models/service.model.js'
 import userModel from '../Mongo/models/user.model.js'
+import ConversationModel from '../Mongo/models/conversation.model.js'
 import { buildDemoData } from './demoData.js'
 
 const DEMO_PASSWORD = process.env.DEMO_PASSWORD || 'demo1234'
@@ -35,7 +36,8 @@ export async function seedDemoData({ reset = false } = {}) {
       clientModel.deleteMany({}),
       quoteModel.deleteMany({}),
       ServiceModel.deleteMany({}),
-      userModel.deleteMany({})
+      userModel.deleteMany({}),
+      ConversationModel.deleteMany({})
     ])
   }
 
@@ -43,7 +45,8 @@ export async function seedDemoData({ reset = false } = {}) {
     insertIfEmpty(userModel, users, config.COLLECTIONS.USERS),
     insertIfEmpty(clientModel, data.clients, config.COLLECTIONS.CLIENTS),
     insertIfEmpty(quoteModel, data.quotes, config.COLLECTIONS.QUOTES),
-    insertIfEmpty(ServiceModel, data.services, config.COLLECTIONS.SERVICES)
+    insertIfEmpty(ServiceModel, data.services, config.COLLECTIONS.SERVICES),
+    insertIfEmpty(ConversationModel, data.conversations || [], 'demo_conversations')
   ])
 
   await mongoose.connection.collection('demo_metadata').updateOne(

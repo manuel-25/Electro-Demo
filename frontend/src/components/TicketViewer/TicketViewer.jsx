@@ -3,7 +3,7 @@ import { getApiUrl } from '../../config'
 
 export default function TicketViewer() {
   const { publicId } = useParams()
-  const pdfUrl = `${getApiUrl()}/api/service/${publicId}/print-ticket`
+  const pdfUrl = `${getApiUrl()}/api/service/public/${publicId}/print-ticket`
 
   return (
     <iframe

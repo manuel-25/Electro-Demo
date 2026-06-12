@@ -1,32 +1,28 @@
-import React, { useEffect, useState, useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
-import { getApiUrl } from '../../config'
-import { AuthContext } from '../../Context/AuthContext'
-import ServiceStatusControl from '../ServiceStatusControl/ServiceStatusControl.jsx'
-import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
-import { timeSince } from '../../utils/formatDate.js'
-import { getStatusClass, normalizeStatus } from '../../utils/serviceStatusUtils.js'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPen, faPrint, faFileLines } from '@fortawesome/free-solid-svg-icons'
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
+import { getApiUrl } from '../../config'
+import { AuthContext } from '../../Context/AuthContext'
+import { timeSince } from '../../utils/formatDate.js'
+import { getStatusClass } from '../../utils/serviceStatusUtils.js'
+import ServiceStatusControl from '../ServiceStatusControl/ServiceStatusControl.jsx'
+import WorkOrderControl from '../WorkOrderControl/WorkOrderControl.jsx'
+import {
+  getDashboardMetrics,
+  getInactivityBadge,
+  getLastActivity,
+  getStatusFlow,
+  money
+} from './dashboardMetrics.js'
 import './Dashboard.css'
 
-const money = (value) =>
-  new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0
-  }).format(Number(value) || 0)
-
-const getInactivityBadge = (lastActivity) => {
-  const now = new Date()
-  const diffDays = (now - new Date(lastActivity)) / (1000 * 60 * 60 * 24)
-  const days = Math.floor(diffDays)
-
-  if (days >= 30) return { days, label: 'Critico' }
-  if (days >= 7) return { days, label: 'Atencion' }
-  return { days, label: '' }
+const updateServiceInList = (services, serviceId, updatedService) => {
+  return services.map(service =>
+    service._id === serviceId ? { ...service, ...updatedService } : service
+  )
 }
 
 const Dashboard = () => {
@@ -38,7 +34,6 @@ const Dashboard = () => {
 
   const { auth, loading: authLoading } = useContext(AuthContext)
   const token = auth?.token
-  const now = new Date()
 
   useEffect(() => {
     if (authLoading || !auth) return
@@ -50,9 +45,11 @@ const Dashboard = () => {
           axios.get(`${getApiUrl()}/api/client`, { withCredentials: true }),
           axios.get(`${getApiUrl()}/api/service`, { withCredentials: true })
         ])
+
         setQuotes(Array.isArray(quotesRes.data) ? quotesRes.data : [])
         setClients(Array.isArray(clientsRes.data) ? clientsRes.data : [])
         setServices(Array.isArray(servicesRes.data) ? servicesRes.data : [])
+        setError(null)
       } catch (err) {
         setError('Error al obtener datos')
       }
@@ -76,79 +73,13 @@ const Dashboard = () => {
     fetchFullUser()
   }, [auth, authLoading])
 
-  const getLastActivity = (service) => {
-    return new Date(
-      service.updatedAt ||
-      service.workOrderAnsweredAt ||
-      service.workOrderSentAt ||
-      service.createdAt
-    )
+  const metrics = getDashboardMetrics({ services, quotes, clients })
+  const statusFlow = getStatusFlow({ services, readyToPickup: metrics.readyToPickup })
+  const maxFlowValue = Math.max(...statusFlow.map(item => item.value), 1)
+
+  const handleServiceUpdate = (serviceId, updatedService) => {
+    setServices(prev => updateServiceInList(prev, serviceId, updatedService))
   }
-
-  const activeServices = services.filter(service => {
-    if (['Entregado', 'Entregado S/R', 'Retirado a bodega', 'Garantía'].includes(service.status)) return false
-
-    const last = getLastActivity(service)
-    const diffDays = (now - last) / (1000 * 60 * 60 * 24)
-
-    return diffDays >= 1 && diffDays <= 60
-  })
-
-  const sortedAlerts = [...activeServices].sort((a, b) =>
-    getLastActivity(a) - getLastActivity(b)
-  )
-
-  const thisMonth = now.getMonth()
-  const thisYear = now.getFullYear()
-
-  const servicesCreatedThisMonth = services.filter(service => {
-    const date = new Date(service.createdAt)
-    return date.getMonth() === thisMonth && date.getFullYear() === thisYear
-  })
-
-  const servicesDeliveredThisMonth = services.filter(service => {
-    const date = new Date(service.deliveredAt)
-    return service.status === 'Entregado' && date.getMonth() === thisMonth && date.getFullYear() === thisYear
-  })
-
-  const pendingQuotes = quotes.filter(quote => quote.status === 'Pendiente')
-  const activeRepairServices = services.filter(service =>
-    !['Entregado', 'Entregado S/R', 'Retirado a bodega'].includes(service.status)
-  )
-  const readyToPickup = services.filter(service =>
-    ['Listo para retirar', 'Listo para retirar Garantía', 'Listo para retiro S/R'].includes(service.status)
-  )
-  const monthlyRevenue = servicesDeliveredThisMonth.reduce((sum, service) => sum + (Number(service.finalValue) || 0), 0)
-  const conversionRate = quotes.length
-    ? Math.round((services.filter(service => service.quoteReference).length / quotes.length) * 100)
-    : 0
-
-  const statusFlow = [
-    { label: 'Pendientes', value: services.filter(service => service.status === 'Pendiente').length },
-    { label: 'En gestion', value: services.filter(service => service.status === 'En Gestión').length },
-    { label: 'Reparacion', value: services.filter(service => service.status === 'Reparación').length },
-    { label: 'Listos', value: readyToPickup.length },
-    { label: 'Entregados', value: services.filter(service => service.status === 'Entregado').length }
-  ]
-
-  const countStatus = (...statuses) => {
-    const normalized = statuses.map(normalizeStatus)
-    return services.filter(service => normalized.includes(normalizeStatus(service.status))).length
-  }
-  const flowValues = {
-    Pendientes: countStatus('Pendiente'),
-    'En gestion': countStatus('En Gestión'),
-    Reparacion: countStatus('Reparación'),
-    Listos: readyToPickup.length,
-    Entregados: countStatus('Entregado')
-  }
-  const flowColors = ['#f2b705', '#1976d2', '#8e9aa3', '#12b76a', '#027a48']
-  const coloredStatusFlow = statusFlow.map((item, index) => ({
-    ...item,
-    value: flowValues[item.label] ?? item.value,
-    color: flowColors[index] || '#027a48'
-  }))
-  const maxFlowValue = Math.max(...coloredStatusFlow.map(item => item.value), 1)
 
   return (
     <div className="main-content dashboard-wrapper">
@@ -166,7 +97,7 @@ const Dashboard = () => {
           <div className="user-greeting">
             <span>Sesion demo</span>
             <h2>{fullUser.firstName} {fullUser.lastName}</h2>
-          <p>{fullUser.role} - {fullUser.branch || 'Sin sucursal'}</p>
+            <p>{fullUser.role} - {fullUser.branch || 'Sin sucursal'}</p>
           </div>
         )}
       </section>
@@ -175,30 +106,30 @@ const Dashboard = () => {
         <div className="info-card blue">
           <p>Cotizaciones</p>
           <h3>{quotes.length}</h3>
-          <small>{pendingQuotes.length} pendientes</small>
+          <small>{metrics.pendingQuotes.length} pendientes</small>
         </div>
 
         <div className="info-card red">
           <p>Clientes</p>
-          <h3>{clients.length}</h3>
+          <h3>{metrics.clientCount}</h3>
           <small>Base demo editable</small>
         </div>
 
         <div className="info-card teal">
           <p>Servicios mes</p>
-          <h3>{servicesCreatedThisMonth.length}</h3>
-          <small>{activeRepairServices.length} en circuito</small>
+          <h3>{metrics.servicesCreatedThisMonth.length}</h3>
+          <small>{metrics.activeRepairServices.length} en circuito</small>
         </div>
 
         <div className="info-card purple">
           <p>Facturado mes</p>
-          <h3>{money(monthlyRevenue)}</h3>
-          <small>{servicesDeliveredThisMonth.length} entregados</small>
+          <h3>{money(metrics.monthlyRevenue)}</h3>
+          <small>{metrics.servicesDeliveredThisMonth.length} entregados</small>
         </div>
 
         <div className="info-card green">
           <p>Conversion</p>
-          <h3>{conversionRate}%</h3>
+          <h3>{metrics.conversionRate}%</h3>
           <small>cotizacion a servicio</small>
         </div>
       </div>
@@ -209,8 +140,9 @@ const Dashboard = () => {
             <span>Embudo operativo</span>
             <strong>{services.length} servicios</strong>
           </div>
+
           <div className="flow-list">
-            {coloredStatusFlow.map(item => (
+            {statusFlow.map(item => (
               <div className="flow-row" key={item.label}>
                 <div>
                   <span>{item.label}</span>
@@ -230,12 +162,19 @@ const Dashboard = () => {
         <div className="dashboard-panel">
           <div className="dashboard-panel-heading">
             <span>Proximas acciones</span>
-            <strong>{readyToPickup.length + pendingQuotes.length}</strong>
+            <strong>{metrics.readyToPickup.length + metrics.pendingQuotes.length}</strong>
           </div>
+
           <div className="action-stack">
-            <Link to="/cotizaciones?status=Pendiente">Responder {pendingQuotes.length} cotizaciones pendientes</Link>
-            <Link to="/servicios?scope=active">Gestionar {activeRepairServices.length} servicios activos</Link>
-            <Link to="/servicios?scope=ready">Coordinar retiro de {readyToPickup.length} equipos listos</Link>
+            <Link to="/cotizaciones?status=Pendiente">
+              Responder {metrics.pendingQuotes.length} cotizaciones pendientes
+            </Link>
+            <Link to="/servicios?scope=active">
+              Gestionar {metrics.activeRepairServices.length} servicios activos
+            </Link>
+            <Link to="/servicios?scope=ready">
+              Coordinar retiro de {metrics.readyToPickup.length} equipos listos
+            </Link>
             <Link to="/estadisticas">Ver rendimiento mensual</Link>
           </div>
         </div>
@@ -265,7 +204,7 @@ const Dashboard = () => {
           </thead>
 
           <tbody>
-            {sortedAlerts.slice(0, 50).map(service => {
+            {metrics.sortedAlerts.slice(0, 50).map(service => {
               const lastActivity = getLastActivity(service)
               const { days, label } = getInactivityBadge(lastActivity)
 
@@ -292,26 +231,14 @@ const Dashboard = () => {
                       userEmail={auth?.user?.email}
                       userBranch={auth?.user?.branch}
                       className={getStatusClass(service.status)}
-                      onUpdated={(updated) => {
-                        setServices(prev =>
-                          prev.map(item =>
-                            item._id === service._id ? { ...item, ...updated } : item
-                          )
-                        )
-                      }}
+                      onUpdated={(updated) => handleServiceUpdate(service._id, updated)}
                     />
                   </td>
 
                   <td className="col-workorder">
                     <WorkOrderControl
                       service={service}
-                      onUpdate={(updated) => {
-                        setServices(prev =>
-                          prev.map(item =>
-                            item._id === service._id ? { ...item, ...updated } : item
-                          )
-                        )
-                      }}
+                      onUpdate={(updated) => handleServiceUpdate(service._id, updated)}
                     />
                   </td>
 
@@ -339,6 +266,7 @@ const Dashboard = () => {
                     >
                       <FontAwesomeIcon icon={faPrint} />
                     </a>
+
                     <a
                       href={`/orden/${service.publicId}`}
                       target="_blank"
@@ -368,7 +296,7 @@ const Dashboard = () => {
         </table>
       </div>
 
-      {sortedAlerts.length === 0 && (
+      {metrics.sortedAlerts.length === 0 && (
         <div className="empty-dashboard-state">
           No hay servicios inactivos para revisar.
         </div>

@@ -14,6 +14,11 @@ class ConversationManager {
     return await Conversation.find().sort({ humanRequestedAt: 1 }).lean();
   }
 
+  async getMessages(phone) {
+    const conversation = await Conversation.findOne({ phone }).lean();
+    return conversation?.messages || [];
+  }
+
   async getByPhone(phone) {
     return await Conversation.findOne({ phone });
   }
@@ -95,6 +100,8 @@ class ConversationManager {
       conversation.lastCustomerMessageAt = new Date();
     } else if (message.sender === 'human') {
       conversation.unreadCount = 0;
+      conversation.lastOutboundAt = new Date();
+      conversation.channelProvider = message.provider || conversation.channelProvider;
     }
 
     await conversation.save();
@@ -115,6 +122,17 @@ class ConversationManager {
       },
       { new: true }
     );
+  }
+
+  async addHumanMessage(phone, text, meta = {}) {
+    return this.addMessage(phone, {
+      sender: 'human',
+      text,
+      provider: meta.provider || 'manual',
+      externalId: meta.externalId,
+      status: meta.status || 'sent',
+      error: meta.error
+    });
   }
 
   async getSidebarCount() {

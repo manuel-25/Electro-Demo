@@ -28,7 +28,9 @@ const config = {
       : nodeEnv === 'development'
         ? 'services_backup'
         : 'services',
-    USERS: process.env.DEMO_MODE === 'true' ? 'demo_users' : 'users'
+    USERS: process.env.DEMO_MODE === 'true' ? 'demo_users' : 'users',
+    DEMO_VISITORS: 'demo_visitors',
+    DEMO_EVENTS: 'demo_events'
   },
 
   APP_URL:

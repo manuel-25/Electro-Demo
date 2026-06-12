@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import './App.css'
 import './root.css'
 
@@ -21,6 +21,8 @@ import TicketViewer from './components/TicketViewer/TicketViewer.jsx'
 // Dashboard y autenticación
 import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute.jsx'
 import { AuthProvider } from './Context/AuthContext.jsx'
+import { AuthContext } from './Context/AuthContext.jsx'
+import Login from './components/Login/Login.jsx'
 
 // Vistas protegidas
 import Dashboard from './components/Dashboard/Dashboard.jsx'
@@ -36,11 +38,13 @@ import ServiceDetail from './components/ServiceDetail/ServiceDetail.jsx'
 import WorkOrderViewer from './components/WorkOrderViewer/WorkOrderViewer.jsx'
 import WhatsAppDashboard from './components/WhatsAppDashboard/WhatsAppDashboard.jsx'
 import Estadisticas from './components/Estadisticas/Estadisticas.jsx'
+import DemoAnalytics from './components/DemoAnalytics/DemoAnalytics.jsx'
 import { NotificationProvider } from './Context/NotificationContext.jsx'
 
 // Otros
 import NotFound from './components/NotFound/NotFound.jsx'
 import useGtagPageView from './utils/useGtagPageView.js'
+import { trackDemoPageView } from './utils/demoAnalytics.js'
 
 import {
   BrowserRouter as Router,
@@ -52,6 +56,7 @@ import {
 
 function AppContent() {
   const location = useLocation()
+  const { authenticated } = useContext(AuthContext)
   useGtagPageView()
   const businessRoutes = [
     '/dashboard',
@@ -61,9 +66,16 @@ function AppContent() {
     '/servicios',
     '/orden',
     '/estadisticas',
+    '/demo-analytics',
     '/whatsapp'
   ]
   const isBusinessRoute = businessRoutes.some(path => location.pathname.startsWith(path))
+
+  useEffect(() => {
+    if (process.env.REACT_APP_DEMO_MODE === 'true' && authenticated) {
+      trackDemoPageView(location.pathname + location.search)
+    }
+  }, [location.pathname, location.search, authenticated])
 
   return (
     <div className={`App ${isBusinessRoute ? 'App--dashboard' : ''}`}>
@@ -81,7 +93,7 @@ function AppContent() {
             <Route path="/confirmacion" element={<FormSubmissionStatus />} />
             <Route path="/terminos-condiciones" element={<TermsAndConditions />} />
             <Route path="/privacidad" element={<PrivacyPolicy />} />
-            <Route path="/manager" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/manager" element={<Login />} />
             <Route path="/ticket/:publicId" element={<TicketViewer />} />
 
             {/* 🔒 Rutas protegidas */}
@@ -178,6 +190,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <Estadisticas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/demo-analytics"
+              element={
+                <ProtectedRoute>
+                  <DashboardLayout><DemoAnalytics /></DashboardLayout>
                 </ProtectedRoute>
               }
             />

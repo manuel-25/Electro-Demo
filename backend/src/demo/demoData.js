@@ -8,6 +8,12 @@ const daysAgo = (days) => {
   return date
 }
 
+const minutesAgo = (minutes) => {
+  const date = new Date()
+  date.setMinutes(date.getMinutes() - minutes)
+  return date
+}
+
 const addDays = (date, days) => {
   const next = new Date(date)
   next.setDate(next.getDate() + days)
@@ -462,6 +468,157 @@ export function buildDemoData() {
 
   services.push(...extraServices)
 
+  const firstNames = [
+    'Agustin', 'Aldana', 'Bruno', 'Carolina', 'Daniel', 'Elena', 'Federico', 'Gabriela',
+    'Hernan', 'Iara', 'Joaquin', 'Karen', 'Lautaro', 'Milagros', 'Natalia', 'Oscar',
+    'Priscila', 'Ramiro', 'Sabrina', 'Tomas', 'Uma', 'Victor', 'Walter', 'Ximena',
+    'Yamila', 'Zoe'
+  ]
+  const lastNames = [
+    'Benitez', 'Castro', 'Dominguez', 'Escobar', 'Fernandez', 'Gimenez', 'Iglesias',
+    'Lopez', 'Molina', 'Navarro', 'Pereyra', 'Quiroga', 'Ruiz', 'Sosa', 'Torres',
+    'Vargas', 'Aguirre', 'Cabrera', 'Medina', 'Roldan'
+  ]
+  const demoDevices = [
+    { equipmentType: 'Notebook', brand: 'Lenovo', model: 'ThinkPad E14', fault: 'no enciende', value: 86000, accessory: 'Cargador' },
+    { equipmentType: 'Notebook', brand: 'HP', model: 'Pavilion 14', fault: 'pantalla sin imagen', value: 92000, accessory: 'Cargador' },
+    { equipmentType: 'TV', brand: 'Samsung', model: 'UN55AU7000', fault: 'sin backlight', value: 135000, accessory: 'Control remoto' },
+    { equipmentType: 'TV', brand: 'LG', model: '50UP7750', fault: 'reinicia solo', value: 118000, accessory: 'Control remoto' },
+    { equipmentType: 'Celular', brand: 'Motorola', model: 'Edge 30', fault: 'pin de carga dañado', value: 42000, accessory: 'Funda' },
+    { equipmentType: 'Celular', brand: 'Samsung', model: 'A34', fault: 'modulo golpeado', value: 76000, accessory: 'Chip' },
+    { equipmentType: 'Consola', brand: 'Sony', model: 'PlayStation 4', fault: 'sobrecalienta', value: 68000, accessory: 'Cable HDMI' },
+    { equipmentType: 'Consola', brand: 'Microsoft', model: 'Xbox One S', fault: 'no lee discos', value: 62000, accessory: 'Joystick' },
+    { equipmentType: 'Audio', brand: 'JBL', model: 'Flip 6', fault: 'bateria agotada', value: 39000, accessory: 'Cable USB' },
+    { equipmentType: 'Tablet', brand: 'Apple', model: 'iPad 8', fault: 'no carga', value: 58000, accessory: 'Cargador' }
+  ]
+  const quoteStatuses = ['Pendiente', 'Respondido', 'Respondido', 'No Respondido']
+  const serviceStatuses = [
+    'Pendiente',
+    'Recibido',
+    'En Gestión',
+    'Reparación',
+    'Listo para retirar',
+    'Entregado',
+    'Armado S/R',
+    'Listo para retiro S/R',
+    'Sin respuesta',
+    'Retirado a bodega',
+    'En Gestión Garantía',
+    'Reparación Garantía',
+    'Listo para retirar Garantía'
+  ]
+
+  for (let customerNumber = 1016; customerNumber <= 1100; customerNumber++) {
+    const index = customerNumber - 1016
+    const requestNumber = 7100 + customerNumber - 1000
+    const device = demoDevices[index % demoDevices.length]
+    const firstName = firstNames[index % firstNames.length]
+    const lastName = lastNames[index % lastNames.length]
+    const branch = index % 3 === 0 ? 'Barracas' : 'Quilmes'
+    const status = serviceStatuses[index % serviceStatuses.length]
+    const quoteStatus = quoteStatuses[index % quoteStatuses.length]
+    const prefix = branch === 'Barracas' ? 'B' : 'Q'
+    const age = 2 + (index % 75)
+    const delivered = ['Entregado', 'Entregado S/R'].includes(status)
+    const hasBudget = !['Pendiente', 'Recibido', 'Sin respuesta', 'Retirado a bodega'].includes(status)
+    const finalValue = hasBudget ? device.value + ((index % 7) * 4500) : 0
+    const workOrderStatus = delivered
+      ? 'Aceptada'
+      : status === 'Armado S/R' || status === 'Listo para retiro S/R'
+        ? 'Sin reparación'
+        : status === 'Sin respuesta'
+          ? 'Enviada'
+          : status === 'Retirado a bodega'
+            ? 'Rechazada'
+            : hasBudget
+              ? (index % 2 ? 'Aceptada' : 'Lista para enviar')
+              : 'Sin presupuesto'
+
+    const client = {
+      firstName,
+      lastName,
+      dniOrCuit: String(31000000 + index * 137),
+      email: `${firstName}.${lastName}.${customerNumber}@demo.electrosafe.app`.toLowerCase(),
+      phone: `11${String(60000000 + index * 831).slice(0, 8)}`,
+      domicilio: `Demo ${240 + index}`,
+      province: branch === 'Barracas' ? 'CABA' : 'Buenos Aires',
+      municipio: branch,
+      customerNumber,
+      serviceRequestNumbers: [requestNumber]
+    }
+
+    clients.push(client)
+    quotes.push({
+      serviceRequestNumber: requestNumber,
+      customerNumber,
+      date: daysAgo(age + 1),
+      category: { id: 100 + index, name: device.equipmentType },
+      brand: device.brand,
+      model: device.model,
+      faults: [device.fault],
+      details: `Solicitud demo generada para ${device.equipmentType}: ${device.fault}.`,
+      userData: { ...client, additionalDetails: 'Carga automatica para demo Electrosafe.' },
+      branch,
+      status: quoteStatus
+    })
+
+    services.push({
+      ...serviceBase,
+      customerNumber,
+      quoteReference: requestNumber,
+      code: `${prefix}${customerNumber}`,
+      publicId: `DEMO${prefix}${customerNumber}`,
+      userData: client,
+      equipmentType: device.equipmentType,
+      description: `${device.equipmentType} ${device.brand} ${device.model}: ${device.fault}.`,
+      userDescription: `Cliente informa que el equipo presenta ${device.fault}.`,
+      brand: device.brand,
+      model: device.model,
+      approximateValue: '$35.000 - $160.000',
+      finalValue,
+      repuestos: finalValue ? Math.round(finalValue * 0.38) : 0,
+      status,
+      workOrderStatus,
+      workOrderSentAt: hasBudget ? daysAgo(Math.max(age - 4, 1)) : null,
+      workOrderSentBy: hasBudget ? demoUserEmail : null,
+      workOrderAnsweredAt: workOrderStatus === 'Aceptada' ? daysAgo(Math.max(age - 3, 1)) : null,
+      workOrderAnsweredBy: workOrderStatus === 'Aceptada' ? demoUserEmail : null,
+      receivedAtBranch: status === 'Pendiente' ? 'No recibido' : branch,
+      receivedAt: status === 'Pendiente' ? null : daysAgo(age),
+      receivedBy: status === 'Pendiente' ? null : demoUserEmail,
+      deliveredAt: delivered ? daysAgo(Math.max(age - 8, 1)) : null,
+      warrantyUntil: delivered ? addDays(daysAgo(Math.max(age - 8, 1)), 30) : null,
+      isSatisfied: delivered ? index % 5 !== 0 : null,
+      activeWarrantyEventId: status.includes('Garantía') ? new mongoose.Types.ObjectId() : null,
+      budgetItems: finalValue
+        ? [
+            { cantidad: 1, descripcion: 'Repuesto principal demo', precioUnitario: Math.round(finalValue * 0.38) },
+            { cantidad: 1, descripcion: 'Mano de obra tecnica', precioUnitario: Math.round(finalValue * 0.62) }
+          ]
+        : [],
+      diagnosticoTecnico: hasBudget ? `Diagnostico demo: ${device.fault}.` : '',
+      notes: index % 4 === 0 ? 'Cliente solicita aviso por WhatsApp antes de avanzar.' : 'Servicio demo editable desde el panel.',
+      receptionChecklist: {
+        wasRepairedBefore: index % 6 === 0,
+        isClean: index % 5 !== 0,
+        hasAccessories: true,
+        accessories: [{ name: device.accessory, label: device.accessory }],
+        accessoriesNotes: '',
+        completedAt: status === 'Pendiente' ? null : daysAgo(age),
+        completedBy: status === 'Pendiente' ? null : demoUserEmail
+      },
+      createdAt: daysAgo(age + 1),
+      updatedAt: daysAgo(Math.max(age - 2, 1)),
+      lastActivityAt: daysAgo(Math.max(age - (index % 10), 1)),
+      statusHistory: [
+        { status: 'Pendiente', changedBy: demoUserEmail, changedAt: daysAgo(age + 1) },
+        ...(status === 'Pendiente'
+          ? []
+          : [{ status, changedBy: demoUserEmail, changedAt: daysAgo(Math.max(age - 2, 1)), receivedAtBranch: branch }])
+      ]
+    })
+  }
+
   const users = [
     {
       _id: DEMO_USER_ID,
@@ -477,5 +634,79 @@ export function buildDemoData() {
     }
   ]
 
-  return { clients, quotes, services, users }
+  const conversations = [
+    {
+      phone: '5491121842237@c.us',
+      contactName: 'Mariana Rivas',
+      status: 'priority',
+      humanRequestedAt: minutesAgo(95),
+      lastMessage: 'Necesito hablar con alguien por el presupuesto.',
+      lastMessageAt: minutesAgo(22),
+      lastCustomerMessage: 'Necesito hablar con alguien por el presupuesto.',
+      lastCustomerMessageAt: minutesAgo(22),
+      unreadCount: 3,
+      messages: [
+        { sender: 'user', text: 'Hola, tengo una notebook Lenovo que no enciende.', createdAt: minutesAgo(130), provider: 'demo' },
+        { sender: 'bot', text: 'Hola, soy el asistente de Electrosafe. Puedo ayudarte con estado de servicio, ubicacion o derivarte a un asesor.', createdAt: minutesAgo(128), provider: 'demo' },
+        { sender: 'user', text: 'Necesito hablar con alguien por el presupuesto.', createdAt: minutesAgo(22), provider: 'demo' }
+      ]
+    },
+    {
+      phone: '5491136106124@c.us',
+      contactName: 'Lucas Ferrer',
+      status: 'waiting',
+      humanRequestedAt: minutesAgo(34),
+      lastMessage: 'Quiero autorizar la reparacion del TV.',
+      lastMessageAt: minutesAgo(18),
+      lastCustomerMessage: 'Quiero autorizar la reparacion del TV.',
+      lastCustomerMessageAt: minutesAgo(18),
+      unreadCount: 1,
+      messages: [
+        { sender: 'user', text: 'Buenas, ya vi el presupuesto.', createdAt: minutesAgo(40), provider: 'demo' },
+        { sender: 'bot', text: 'Si queres, puedo derivarte con un asesor para continuar.', createdAt: minutesAgo(39), provider: 'demo' },
+        { sender: 'user', text: 'Quiero autorizar la reparacion del TV.', createdAt: minutesAgo(18), provider: 'demo' }
+      ]
+    },
+    {
+      phone: '5491178967720@c.us',
+      contactName: 'Sofia Campos',
+      status: 'in_progress',
+      humanRequestedAt: minutesAgo(210),
+      assignedTo: demoUserEmail,
+      lastAssignedTo: demoUserEmail,
+      firstResponseAt: minutesAgo(180),
+      inProgressAt: minutesAgo(180),
+      lastOutboundAt: minutesAgo(12),
+      lastMessage: 'Te confirmo apenas salga de pruebas.',
+      lastMessageAt: minutesAgo(12),
+      lastCustomerMessage: 'Me avisan cuando este listo?',
+      lastCustomerMessageAt: minutesAgo(16),
+      unreadCount: 0,
+      messages: [
+        { sender: 'user', text: 'Me avisan cuando este listo?', createdAt: minutesAgo(16), provider: 'demo' },
+        { sender: 'human', text: 'Si, te confirmo apenas salga de pruebas.', createdAt: minutesAgo(12), provider: 'demo' }
+      ]
+    },
+    {
+      phone: '5491162458890@c.us',
+      contactName: 'Diego Paz',
+      status: 'resolved',
+      humanRequestedAt: minutesAgo(1440),
+      lastAssignedTo: demoUserEmail,
+      firstResponseAt: minutesAgo(1380),
+      lastOutboundAt: minutesAgo(1320),
+      lastMessage: 'Gracias, paso a retirar manana.',
+      lastMessageAt: minutesAgo(1310),
+      lastCustomerMessage: 'Gracias, paso a retirar manana.',
+      lastCustomerMessageAt: minutesAgo(1310),
+      unreadCount: 0,
+      messages: [
+        { sender: 'user', text: 'Esta listo para retirar?', createdAt: minutesAgo(1400), provider: 'demo' },
+        { sender: 'human', text: 'Si, ya podes pasar por Quilmes con tu ticket.', createdAt: minutesAgo(1320), provider: 'demo' },
+        { sender: 'user', text: 'Gracias, paso a retirar manana.', createdAt: minutesAgo(1310), provider: 'demo' }
+      ]
+    }
+  ]
+
+  return { clients, quotes, services, users, conversations }
 }

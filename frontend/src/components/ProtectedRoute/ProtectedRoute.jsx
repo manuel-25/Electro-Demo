@@ -6,11 +6,6 @@ import Loading from '../Loading/Loading.jsx'
 const ProtectedRoute = ({ children }) => {
   const { auth, loading, authenticated } = useContext(AuthContext)
   const location = useLocation()
-  const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true'
-
-  if (isDemoMode) {
-    return children
-  }
 
   if (loading) {
     return <Loading />

@@ -8,7 +8,7 @@ const authenticateJWT = (req, res, next) => {
     if (config.DEMO_MODE) {
       req.user = {
         _id: DEMO_USER_ID,
-        email: 'demo@electrofix.app',
+        email: req.headers['x-demo-user-email'] || 'demo@electrosafe.app',
         role: 'admin'
       }
       return next()

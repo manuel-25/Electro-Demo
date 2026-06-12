@@ -122,6 +122,14 @@ const NuevoServicio = () => {
     setFormData(prev => ({ ...prev, codePrefix: prefix, code: '' }))
   }
 
+  const finishServiceCreation = (createdService) => {
+    const publicId = createdService?.publicId
+    if (publicId) {
+      window.open(`/ticket/${publicId}`, '_blank', 'noopener,noreferrer')
+    }
+    navigate('/servicios')
+  }
+
   const handleSubmit = async e => {
   e.preventDefault()
   setError(null)
@@ -176,8 +184,7 @@ const NuevoServicio = () => {
     // si no, enviamos directo
     try {
       const created = await axios.post(`${getApiUrl()}/api/service`, finalData, { withCredentials: true })
-      const publicId = created.data?.publicId
-      navigate(publicId ? `/ticket/${publicId}` : '/servicios')
+      finishServiceCreation(created.data)
     } catch (err) {
       setError(err.response?.data?.error || 'Error al crear el servicio.')
       logError(`Error creando servicio: ${err} | user: ${auth.user.email}`)
@@ -388,8 +395,7 @@ const NuevoServicio = () => {
                 receptionChecklist: checklist
               }, { withCredentials: true })
 
-              const publicId = created.data?.publicId
-              navigate(publicId ? `/ticket/${publicId}` : '/servicios')
+              finishServiceCreation(created.data)
             } catch (err) {
               const msg = err.response?.data?.error || err.message
               logError(`Error creando servicio con checklist: ${msg} | user: ${auth.user.email}`)

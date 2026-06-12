@@ -1,10 +1,11 @@
 import './Login.css'
-import React, { useContext, useState, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { AuthContext } from '../../Context/AuthContext.jsx'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 
 const Login = () => {
+    const isDemoMode = process.env.REACT_APP_DEMO_MODE === 'true'
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
@@ -14,14 +15,11 @@ const Login = () => {
     const { login, loading, error } = useContext(AuthContext)
     const navigate = useNavigate()
 
-    // ⏱ Timer bloqueo (solo UI)
     useEffect(() => {
         if (!lockUntil) return
 
         const interval = setInterval(() => {
-            if (Date.now() > lockUntil) {
-                setLockUntil(null)
-            }
+            if (Date.now() > lockUntil) setLockUntil(null)
         }, 1000)
 
         return () => clearInterval(interval)
@@ -29,19 +27,16 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault()
-
         if (lockUntil && Date.now() < lockUntil) return
 
         const result = await login(email, password, remember)
 
-        // ✅ LOGIN OK
         if (result.success) {
             setLockUntil(null)
             navigate('/dashboard')
             return
         }
 
-        // 🔒 bloqueo del backend
         if (result.lockUntil) {
             setLockUntil(new Date(result.lockUntil).getTime())
         }
@@ -54,7 +49,13 @@ const Login = () => {
     return (
         <div className="login-container">
             <form className="login-form" onSubmit={handleLogin} autoComplete="on">
-                <h2>Iniciar Sesión</h2>
+                <span className="login-kicker">Electrosafe Demo</span>
+                <h2>{isDemoMode ? 'Ingresar a la demo' : 'Iniciar sesion'}</h2>
+                {isDemoMode && (
+                    <p className="login-copy">
+                        Escribi tu email para probar el flujo operativo. No requiere validacion.
+                    </p>
+                )}
 
                 <div className="input-group">
                     <input
@@ -68,44 +69,45 @@ const Login = () => {
                     />
                 </div>
 
-                <div className="input-group password-group">
-                    <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Contraseña"
-                        autoComplete="current-password"
-                        required
-                        disabled={loading || secondsLeft > 0}
-                    />
-                    <span
-                        className="toggle-password"
-                        onClick={() => setShowPassword(v => !v)}
-                    >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </span>
-                </div>
-
-                <div className="login-options">
-                    <label className="remember-label">
+                {!isDemoMode && (
+                    <div className="input-group password-group">
                         <input
-                            type="checkbox"
-                            checked={remember}
-                            onChange={() => setRemember(v => !v)}
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            placeholder="Contrasena"
+                            autoComplete="current-password"
+                            required
                             disabled={loading || secondsLeft > 0}
                         />
-                        Mantener sesión iniciada (4 horas)
-                    </label>
-                </div>
+                        <span
+                            className="toggle-password"
+                            onClick={() => setShowPassword(v => !v)}
+                        >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        </span>
+                    </div>
+                )}
+
+                {!isDemoMode && (
+                    <div className="login-options">
+                        <label className="remember-label">
+                            <input
+                                type="checkbox"
+                                checked={remember}
+                                onChange={() => setRemember(v => !v)}
+                                disabled={loading || secondsLeft > 0}
+                            />
+                            Mantener sesion iniciada (4 horas)
+                        </label>
+                    </div>
+                )}
 
                 {error && <div className="error-message">{error}</div>}
 
-                {/* 🔒 bloqueo real */}
                 {secondsLeft > 0 && (
                     <div className="login-locked">
-                        <span>
-                            Demasiados intentos fallidos. Esperá {secondsLeft}s para volver a intentar.
-                        </span>
+                        <span>Demasiados intentos fallidos. Espera {secondsLeft}s para volver a intentar.</span>
                     </div>
                 )}
 
@@ -113,8 +115,8 @@ const Login = () => {
                     {loading
                         ? 'Ingresando...'
                         : secondsLeft > 0
-                        ? 'Bloqueado'
-                        : 'Iniciar Sesión'}
+                            ? 'Bloqueado'
+                            : isDemoMode ? 'Entrar a la demo' : 'Iniciar sesion'}
                 </button>
             </form>
         </div>
