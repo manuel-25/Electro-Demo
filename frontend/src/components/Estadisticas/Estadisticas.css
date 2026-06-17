@@ -52,6 +52,8 @@ CARDS
 
 .estadisticas-page .info-card {
   position: relative;
+  container-type: inline-size;
+  min-width: 0;
   background: #ffffff;
   border-radius: 8px;
   border: 1px solid #dfe4ea;
@@ -69,6 +71,7 @@ CARDS
 }
 
 .estadisticas-page .info-card p {
+  min-height: 28px;
   font-size: 11px;
   letter-spacing: 0;
   color: #6b7280;
@@ -85,6 +88,8 @@ CARDS
   color: #667085;
   font-size: 12px;
   font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .metric-trend {
@@ -211,7 +216,9 @@ CARDS
 .insight-panel h3 {
   margin: 0;
   color: #111827;
-  font-size: 26px;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.08;
+  overflow-wrap: anywhere;
 }
 
 .insight-panel small {
@@ -275,9 +282,19 @@ CARDS
 }
 
 .estadisticas-page .info-card h3 {
-  font-size: 23px;
+  display: block;
+  max-width: 100%;
+  min-height: 28px;
+  margin: 0;
+  padding: 0 2px;
+  font-size: clamp(11px, calc(((100cqw - 18px) / var(--value-length, 8)) * 1.9), 23px);
+  line-height: 1.08;
   font-weight: 800;
   color: #111827;
+  font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 

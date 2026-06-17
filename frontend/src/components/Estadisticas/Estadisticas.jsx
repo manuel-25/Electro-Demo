@@ -111,6 +111,8 @@ const TrendIcon = ({ direction }) => (
   </svg>
 )
 
+const getMetricValueLength = (value) => String(value ?? '').replace(/\s/g, '').length || 1
+
 const getDefaultStartDate = () => {
   const date = new Date()
   date.setDate(date.getDate() - 30)
@@ -512,9 +514,18 @@ const Estadisticas = () => {
 
         <div className="card-container">
           {decisionCards.map(card => (
-            <div key={card.label} className={`info-card ${card.tone} ${card.trend ? 'has-trend' : ''}`}>
+            <div
+              key={card.label}
+              className={`info-card ${card.tone} ${card.trend ? 'has-trend' : ''} ${String(card.value).length > 10 ? 'long-value' : ''}`}
+            >
               <p>{card.label}</p>
-              <h3>{card.value}</h3>
+              <h3
+                className="metric-value"
+                title={String(card.value)}
+                style={{ '--value-length': getMetricValueLength(card.value) }}
+              >
+                {card.value}
+              </h3>
               <small>{card.detail}</small>
               {card.trend && (
                 <em

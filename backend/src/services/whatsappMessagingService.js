@@ -114,12 +114,16 @@ export async function sendWhatsappMessage({ phone, text, conversation }) {
 export function getWhatsappCapabilities(conversation) {
   const provider = getConfiguredProvider()
   const freeFormAvailable = provider !== PROVIDERS.CLOUD || canUseFreeFormReply(conversation)
+  const limitation = provider === PROVIDERS.DEMO
+    ? 'Modo demo: mensajes y respuestas simuladas, sin usar conversaciones reales ni enviar WhatsApp.'
+    : provider === PROVIDERS.CLOUD
+      ? 'Cloud API permite respuestas libres dentro de la ventana de atencion. Fuera de esa ventana se debe usar plantilla aprobada.'
+      : 'Integracion local con whatsapp-web.js. Para produccion conviene migrar a Cloud API.'
+
   return {
     provider,
     freeFormAvailable,
     requiresTemplate: provider === PROVIDERS.CLOUD && !freeFormAvailable,
-    limitation: provider === PROVIDERS.CLOUD
-      ? 'Cloud API permite respuestas libres dentro de la ventana de atencion. Fuera de esa ventana se debe usar plantilla aprobada.'
-      : 'Integracion local con whatsapp-web.js. Para produccion conviene migrar a Cloud API.'
+    limitation
   }
 }
